@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Link } from 'react-router-dom';
 import { mockCampaigns } from '@/data/mockData';
-import { FiPlus, FiUsers, FiDollarSign, FiTrendingUp, FiTarget } from 'react-icons/fi';
+import { FiPlus, FiUsers, FiDollarSign, FiTrendingUp, FiTarget, FiClock, FiCheckCircle } from 'react-icons/fi';
 
 const Dashboard = () => {
   const activeCampaigns = mockCampaigns.filter(c => c.status === 'active').length;
@@ -20,65 +20,86 @@ const Dashboard = () => {
     }
   };
 
+  const aiSuggestions = [
+    {
+      icon: FiClock,
+      message: "3 creators haven't responded. Follow up?",
+      action: "Send Follow-up",
+      color: "text-orange-600"
+    },
+    {
+      icon: FiCheckCircle,
+      message: "Campaign 'Tech Product Launch' is 80% complete. Ready to wrap up?",
+      action: "Review Campaign",
+      color: "text-green-600"
+    },
+    {
+      icon: FiTrendingUp,
+      message: "Performance metrics are trending up 25%. Consider scaling budget.",
+      action: "View Analytics",
+      color: "text-blue-600"
+    }
+  ];
+
   return (
     <div className="p-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600">Welcome back! Here's what's happening with your campaigns.</p>
+        <p className="text-muted-foreground">Welcome back! Here's what's happening with your campaigns.</p>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <Card className="rounded-2xl shadow-md">
+        <Card className="rounded-2xl shadow-sm">
           <CardContent className="p-6">
             <div className="flex items-center">
               <div className="p-2 bg-purple-100 rounded-lg">
                 <FiTarget className="h-6 w-6 text-purple-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Active Campaigns</p>
+                <p className="text-sm font-medium text-muted-foreground">Active Campaigns</p>
                 <p className="text-2xl font-bold text-gray-900">{activeCampaigns}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="rounded-2xl shadow-md">
+        <Card className="rounded-2xl shadow-sm">
           <CardContent className="p-6">
             <div className="flex items-center">
               <div className="p-2 bg-green-100 rounded-lg">
                 <FiDollarSign className="h-6 w-6 text-green-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Budget</p>
+                <p className="text-sm font-medium text-muted-foreground">Total Budget</p>
                 <p className="text-2xl font-bold text-gray-900">${totalBudget.toLocaleString()}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="rounded-2xl shadow-md">
+        <Card className="rounded-2xl shadow-sm">
           <CardContent className="p-6">
             <div className="flex items-center">
               <div className="p-2 bg-blue-100 rounded-lg">
                 <FiUsers className="h-6 w-6 text-blue-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Creators Connected</p>
+                <p className="text-sm font-medium text-muted-foreground">Creators Connected</p>
                 <p className="text-2xl font-bold text-gray-900">12</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="rounded-2xl shadow-md">
+        <Card className="rounded-2xl shadow-sm">
           <CardContent className="p-6">
             <div className="flex items-center">
               <div className="p-2 bg-orange-100 rounded-lg">
                 <FiTrendingUp className="h-6 w-6 text-orange-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Avg. ROI</p>
+                <p className="text-sm font-medium text-muted-foreground">Avg. ROI</p>
                 <p className="text-2xl font-bold text-gray-900">285%</p>
               </div>
             </div>
@@ -89,7 +110,7 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Recent Campaigns */}
         <div className="lg:col-span-2">
-          <Card className="rounded-2xl shadow-md">
+          <Card className="rounded-2xl shadow-sm">
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -109,7 +130,7 @@ const Dashboard = () => {
                 {mockCampaigns.map((campaign) => (
                   <div
                     key={campaign.id}
-                    className="flex items-center justify-between p-4 border rounded-xl hover:bg-gray-50 transition-colors"
+                    className="flex items-center justify-between p-6 border rounded-2xl hover:bg-gray-50 transition-colors"
                   >
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
@@ -118,8 +139,8 @@ const Dashboard = () => {
                           {campaign.status}
                         </Badge>
                       </div>
-                      <p className="text-sm text-gray-600 mb-2">{campaign.description}</p>
-                      <div className="flex items-center gap-4 text-sm text-gray-500">
+                      <p className="text-sm text-muted-foreground mb-2">{campaign.description}</p>
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
                         <span>Budget: ${campaign.budget.toLocaleString()}</span>
                         <span>End: {new Date(campaign.endDate).toLocaleDateString()}</span>
                       </div>
@@ -138,61 +159,58 @@ const Dashboard = () => {
           </Card>
         </div>
 
-        {/* Quick Actions & Performance */}
+        {/* AI Assistant & Performance */}
         <div className="space-y-6">
-          {/* Quick Actions */}
-          <Card className="rounded-2xl shadow-md">
+          {/* AI Assistant Suggestions */}
+          <Card className="rounded-2xl shadow-sm bg-muted/30">
             <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
+              <CardTitle className="text-lg">AI Assistant Suggestions</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
-              <Link to="/discovery" className="block">
-                <Button variant="outline" className="w-full justify-start">
-                  <FiUsers className="mr-2 h-4 w-4" />
-                  Discover Creators
-                </Button>
-              </Link>
-              <Link to="/outreach" className="block">
-                <Button variant="outline" className="w-full justify-start">
-                  <FiTarget className="mr-2 h-4 w-4" />
-                  Manage Outreach
-                </Button>
-              </Link>
-              <Link to="/performance" className="block">
-                <Button variant="outline" className="w-full justify-start">
-                  <FiTrendingUp className="mr-2 h-4 w-4" />
-                  View Analytics
-                </Button>
-              </Link>
+            <CardContent className="space-y-4">
+              {aiSuggestions.map((suggestion, index) => (
+                <div key={index} className="p-4 bg-white rounded-xl border border-border/50">
+                  <div className="flex items-start gap-3">
+                    <div className={`p-1.5 rounded-lg bg-gray-100 ${suggestion.color}`}>
+                      <suggestion.icon className="h-4 w-4" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-900 mb-2">{suggestion.message}</p>
+                      <Button variant="outline" size="sm" className="text-xs">
+                        {suggestion.action}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </CardContent>
           </Card>
 
           {/* Performance Overview */}
-          <Card className="rounded-2xl shadow-md">
+          <Card className="rounded-2xl shadow-sm">
             <CardHeader>
-              <CardTitle>Performance Overview</CardTitle>
+              <CardTitle className="text-lg">Performance Overview</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <div className="flex justify-between text-sm mb-2">
-                  <span>Campaign Progress</span>
-                  <span>75%</span>
+            <CardContent className="space-y-6">
+              <div className="bg-muted/30 p-4 rounded-xl">
+                <div className="flex justify-between items-center text-sm mb-3">
+                  <span className="font-medium text-gray-900">Campaign Progress</span>
+                  <span className="text-muted-foreground">75%</span>
                 </div>
-                <Progress value={75} className="h-2" />
+                <Progress value={75} className="h-1.5" />
               </div>
-              <div>
-                <div className="flex justify-between text-sm mb-2">
-                  <span>Budget Utilization</span>
-                  <span>60%</span>
+              <div className="bg-muted/30 p-4 rounded-xl">
+                <div className="flex justify-between items-center text-sm mb-3">
+                  <span className="font-medium text-gray-900">Budget Utilization</span>
+                  <span className="text-muted-foreground">60%</span>
                 </div>
-                <Progress value={60} className="h-2" />
+                <Progress value={60} className="h-1.5" />
               </div>
-              <div>
-                <div className="flex justify-between text-sm mb-2">
-                  <span>Creator Response Rate</span>
-                  <span>85%</span>
+              <div className="bg-muted/30 p-4 rounded-xl">
+                <div className="flex justify-between items-center text-sm mb-3">
+                  <span className="font-medium text-gray-900">Creator Response Rate</span>
+                  <span className="text-muted-foreground">85%</span>
                 </div>
-                <Progress value={85} className="h-2" />
+                <Progress value={85} className="h-1.5" />
               </div>
             </CardContent>
           </Card>
