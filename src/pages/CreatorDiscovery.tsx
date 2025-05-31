@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,7 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { mockCreators } from '@/data/mockData';
 import { toast } from '@/hooks/use-toast';
 import { FiInstagram, FiYoutube, FiFilter, FiUsers, FiDollarSign, FiMapPin } from 'react-icons/fi';
-import { SiTiktok, SiTwitter, SiLinkedin } from 'react-icons/si';
+import { SiTiktok, SiX, SiLinkedin } from 'react-icons/si';
 
 const CreatorDiscovery = () => {
   const [filters, setFilters] = useState({
@@ -29,7 +28,7 @@ const CreatorDiscovery = () => {
       case 'instagram': return <FiInstagram className="h-4 w-4" />;
       case 'youtube': return <FiYoutube className="h-4 w-4" />;
       case 'tiktok': return <SiTiktok className="h-4 w-4" />;
-      case 'twitter': return <SiTwitter className="h-4 w-4" />;
+      case 'twitter': return <SiX className="h-4 w-4" />;
       case 'linkedin': return <SiLinkedin className="h-4 w-4" />;
       default: return <FiUsers className="h-4 w-4" />;
     }

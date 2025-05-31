@@ -1,4 +1,3 @@
-
 import { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -8,7 +7,7 @@ import {
   FiTarget, 
   FiMessageSquare, 
   FiDollarSign, 
-  FiBarChart3,
+  FiBarChart,
   FiSettings,
   FiLogOut
 } from 'react-icons/fi';
@@ -26,7 +25,7 @@ const Layout = ({ children }: LayoutProps) => {
     { name: 'Discover', href: '/discovery', icon: FiUsers },
     { name: 'Outreach', href: '/outreach', icon: FiMessageSquare },
     { name: 'Negotiations', href: '/negotiations', icon: FiDollarSign },
-    { name: 'Performance', href: '/performance', icon: FiBarChart3 },
+    { name: 'Performance', href: '/performance', icon: FiBarChart },
   ];
 
   const isActive = (path: string) => location.pathname === path;
