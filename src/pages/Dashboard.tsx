@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Link } from 'react-router-dom';
 import { mockCampaigns } from '@/data/mockData';
-import { FiPlus, FiUsers, FiDollarSign, FiTrendingUp, FiTarget, FiClock, FiCheckCircle } from 'react-icons/fi';
+import { FiPlus, FiUsers, FiDollarSign, FiTrendingUp, FiTarget, FiClock, FiFileText, FiEdit3 } from 'react-icons/fi';
 
 const Dashboard = () => {
   const activeCampaigns = mockCampaigns.filter(c => c.status === 'active').length;
@@ -20,24 +20,24 @@ const Dashboard = () => {
     }
   };
 
-  const aiSuggestions = [
+  const campaignInsights = [
     {
-      icon: FiClock,
-      message: "3 creators haven't responded. Follow up?",
-      action: "Send Follow-up",
+      icon: FiUsers,
+      number: "4",
+      description: "Creators Awaiting Response",
       color: "text-orange-600"
     },
     {
-      icon: FiCheckCircle,
-      message: "Campaign 'Tech Product Launch' is 80% complete. Ready to wrap up?",
-      action: "Review Campaign",
-      color: "text-green-600"
+      icon: FiFileText,
+      number: "2",
+      description: "Deliverables Due This Week",
+      color: "text-blue-600"
     },
     {
-      icon: FiTrendingUp,
-      message: "Performance metrics are trending up 25%. Consider scaling budget.",
-      action: "View Analytics",
-      color: "text-blue-600"
+      icon: FiEdit3,
+      number: "3",
+      description: "Contracts Awaiting Signature",
+      color: "text-purple-600"
     }
   ];
 
@@ -159,26 +159,29 @@ const Dashboard = () => {
           </Card>
         </div>
 
-        {/* AI Assistant & Performance */}
-        <div className="space-y-6">
-          {/* AI Assistant Suggestions */}
-          <Card className="rounded-2xl shadow-sm bg-muted/30">
-            <CardHeader>
-              <CardTitle className="text-lg">AI Assistant Suggestions</CardTitle>
+        {/* Campaign Insights & Performance */}
+        <div className="space-y-8">
+          {/* Campaign Insights */}
+          <Card className="rounded-2xl shadow-sm">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg">Campaign Insights</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {aiSuggestions.map((suggestion, index) => (
-                <div key={index} className="p-4 bg-white rounded-xl border border-border/50">
-                  <div className="flex items-start gap-3">
-                    <div className={`p-1.5 rounded-lg bg-gray-100 ${suggestion.color}`}>
-                      <suggestion.icon className="h-4 w-4" />
+              {campaignInsights.map((insight, index) => (
+                <div key={index} className="p-6 bg-muted rounded-2xl">
+                  <div className="flex items-center gap-3">
+                    <div className={`p-1.5 rounded-lg bg-white ${insight.color}`}>
+                      <insight.icon className="h-4 w-4" />
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm text-gray-900 mb-2">{suggestion.message}</p>
-                      <Button variant="outline" size="sm" className="text-xs">
-                        {suggestion.action}
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <span className="text-2xl font-semibold text-gray-900">{insight.number}</span>
+                        <span className="text-sm text-muted-foreground">{insight.description}</span>
+                      </div>
                     </div>
+                    <Button variant="outline" size="sm" className="text-xs">
+                      View
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -187,7 +190,7 @@ const Dashboard = () => {
 
           {/* Performance Overview */}
           <Card className="rounded-2xl shadow-sm">
-            <CardHeader>
+            <CardHeader className="pb-4">
               <CardTitle className="text-lg">Performance Overview</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
