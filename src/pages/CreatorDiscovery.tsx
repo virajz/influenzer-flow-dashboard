@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,8 +15,8 @@ import { SiTiktok, SiX, SiLinkedin } from 'react-icons/si';
 
 const CreatorDiscovery = () => {
   const [filters, setFilters] = useState({
-    category: '',
-    platform: '',
+    category: 'all',
+    platform: 'all',
     minFollowers: [0],
     maxBudget: [10000],
     searchTerm: ''
@@ -41,8 +42,8 @@ const CreatorDiscovery = () => {
   };
 
   const filteredCreators = mockCreators.filter(creator => {
-    if (filters.category && creator.category !== filters.category) return false;
-    if (filters.platform && !creator.platforms.includes(filters.platform)) return false;
+    if (filters.category !== 'all' && creator.category !== filters.category) return false;
+    if (filters.platform !== 'all' && !creator.platforms.includes(filters.platform)) return false;
     if (creator.followers < filters.minFollowers[0]) return false;
     if (creator.baseRate > filters.maxBudget[0]) return false;
     if (filters.searchTerm && !creator.name.toLowerCase().includes(filters.searchTerm.toLowerCase()) &&
@@ -102,7 +103,7 @@ const CreatorDiscovery = () => {
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Categories</SelectItem>
+                  <SelectItem value="all">All Categories</SelectItem>
                   <SelectItem value="Lifestyle">Lifestyle</SelectItem>
                   <SelectItem value="Tech">Tech</SelectItem>
                   <SelectItem value="Fitness">Fitness</SelectItem>
@@ -120,7 +121,7 @@ const CreatorDiscovery = () => {
                   <SelectValue placeholder="All Platforms" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Platforms</SelectItem>
+                  <SelectItem value="all">All Platforms</SelectItem>
                   <SelectItem value="Instagram">Instagram</SelectItem>
                   <SelectItem value="YouTube">YouTube</SelectItem>
                   <SelectItem value="TikTok">TikTok</SelectItem>
@@ -154,8 +155,8 @@ const CreatorDiscovery = () => {
 
             <Button 
               onClick={() => setFilters({
-                category: '',
-                platform: '',
+                category: 'all',
+                platform: 'all',
                 minFollowers: [0],
                 maxBudget: [10000],
                 searchTerm: ''
