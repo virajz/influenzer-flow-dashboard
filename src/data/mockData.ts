@@ -45,7 +45,7 @@ export const mockCreators: Creator[] = [
     id: '1',
     name: 'Sarah Johnson',
     handle: '@sarahjohnson',
-    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400',
+    avatar: 'https://images.unsplash.com/photo-1516008161955-41230438b66f?w=400',
     followers: 250000,
     category: 'Lifestyle',
     platforms: ['Instagram', 'TikTok'],
