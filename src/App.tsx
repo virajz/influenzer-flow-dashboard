@@ -1,9 +1,18 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Layout from "./components/Layout";
 import Index from "./pages/Index";
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import CampaignCreate from "./pages/CampaignCreate";
+import CreatorDiscovery from "./pages/CreatorDiscovery";
+import OutreachConsole from "./pages/OutreachConsole";
+import NegotiationTracker from "./pages/NegotiationTracker";
+import PerformanceOverview from "./pages/PerformanceOverview";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -16,6 +25,13 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
+          <Route path="/campaigns/new" element={<Layout><CampaignCreate /></Layout>} />
+          <Route path="/discovery" element={<Layout><CreatorDiscovery /></Layout>} />
+          <Route path="/outreach" element={<Layout><OutreachConsole /></Layout>} />
+          <Route path="/negotiations" element={<Layout><NegotiationTracker /></Layout>} />
+          <Route path="/performance" element={<Layout><PerformanceOverview /></Layout>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
