@@ -1,3 +1,4 @@
+
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -331,12 +332,12 @@ const CampaignView = () => {
         </div>
       </div>
 
-      {showAssignmentModal && campaign && (
+      {showAssignmentModal && (
         <CampaignAssignmentModal
-          isOpen={showAssignmentModal}
-          onClose={() => setShowAssignmentModal(false)}
-          campaign={campaign}
-          onCreatorAssigned={handleCreatorAssigned}
+          open={showAssignmentModal}
+          onOpenChange={setShowAssignmentModal}
+          selectedCreatorIds={[]}
+          onAssignmentComplete={handleCreatorAssigned}
         />
       )}
     </div>
