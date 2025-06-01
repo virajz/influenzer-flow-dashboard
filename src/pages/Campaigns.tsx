@@ -193,7 +193,7 @@ const Campaigns = () => {
                   <TableCell>
                     <div className="flex items-center">
                       <DollarSign className="mr-1 h-4 w-4 text-gray-400" />
-                      ${campaign.budget.toLocaleString()}
+                      {campaign.budget.toLocaleString()}
                     </div>
                   </TableCell>
                   <TableCell>
