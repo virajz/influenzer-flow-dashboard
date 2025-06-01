@@ -1,6 +1,6 @@
-
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,6 +17,7 @@ import { CampaignAssignmentModal } from '@/components/campaigns/CampaignAssignme
 import { CreatorDetailModal } from '@/components/creators/CreatorDetailModal';
 
 const CreatorDiscovery = () => {
+  const navigate = useNavigate();
   const [filters, setFilters] = useState({
     category: 'all',
     platform: 'all',
@@ -74,8 +75,7 @@ const CreatorDiscovery = () => {
   };
 
   const handleViewCreator = (creator: any) => {
-    setSelectedCreatorForDetail(creator);
-    setShowDetailModal(true);
+    navigate(`/creators/${creator.id}`);
   };
 
   const handleAssignmentComplete = () => {

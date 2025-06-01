@@ -1,4 +1,3 @@
-
 import { ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -28,7 +27,6 @@ const Layout = ({ children }: LayoutProps) => {
     { name: 'Dashboard', href: '/dashboard', icon: FiHome },
     { name: 'Campaigns', href: '/campaigns', icon: FiTarget },
     { name: 'Discover', href: '/discovery', icon: FiUsers },
-    { name: 'Outreach', href: '/outreach', icon: FiMessageSquare },
     { name: 'Negotiations', href: '/negotiations', icon: FiDollarSign },
     { name: 'Performance', href: '/performance', icon: FiBarChart },
   ];

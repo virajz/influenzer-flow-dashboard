@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -15,10 +14,10 @@ import Campaigns from "./pages/Campaigns";
 import CampaignCreate from "./pages/CampaignCreate";
 import CampaignEdit from "./pages/CampaignEdit";
 import CreatorDiscovery from "./pages/CreatorDiscovery";
-import OutreachConsole from "./pages/OutreachConsole";
 import NegotiationTracker from "./pages/NegotiationTracker";
 import PerformanceOverview from "./pages/PerformanceOverview";
 import NotFound from "./pages/NotFound";
+import CreatorProfile from "./pages/CreatorProfile";
 
 const queryClient = new QueryClient();
 
@@ -58,9 +57,9 @@ const App = () => (
                 <Layout><CreatorDiscovery /></Layout>
               </ProtectedRoute>
             } />
-            <Route path="/outreach" element={
+            <Route path="/creators/:creatorId" element={
               <ProtectedRoute>
-                <Layout><OutreachConsole /></Layout>
+                <Layout><CreatorProfile /></Layout>
               </ProtectedRoute>
             } />
             <Route path="/negotiations" element={
