@@ -73,7 +73,6 @@ const Onboarding = () => {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          // uid: currentUser.uid,
           brandName: formData.brandName,
           description: formData.description,
           email: currentUser.email,
