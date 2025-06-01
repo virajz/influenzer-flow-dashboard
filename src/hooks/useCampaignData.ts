@@ -12,6 +12,7 @@ export const useCampaignData = (campaignId: string | undefined) => {
   // Debug user information
   console.log('useCampaignData - Current user:', currentUser);
   console.log('useCampaignData - Current user UID:', currentUser?.uid);
+  console.log('useCampaignData - Campaign ID:', campaignId);
 
   // Fetch campaign details
   const { data: campaign, isLoading: campaignLoading } = useQuery({
@@ -26,12 +27,13 @@ export const useCampaignData = (campaignId: string | undefined) => {
     refetchOnWindowFocus: false,
   });
 
-  // Fetch negotiations for this campaign first
+  // Fetch negotiations for this campaign (for metrics and other purposes)
   const { data: negotiations = [], isLoading: negotiationsLoading } = useQuery({
     queryKey: ['negotiations', campaignId],
     queryFn: async () => {
       if (!campaignId) return [];
       const negotiationsData = await negotiationsService.getNegotiationsByCampaign(campaignId);
+      console.log('useCampaignData - Negotiations for campaign:', negotiationsData);
       return negotiationsData;
     },
     enabled: !!campaignId,
@@ -39,52 +41,22 @@ export const useCampaignData = (campaignId: string | undefined) => {
     refetchOnWindowFocus: false,
   });
 
-  // Sync missing creator assignments from negotiations
-  const syncAssignments = async () => {
-    if (!currentUser?.uid || !campaignId || negotiations.length === 0) return;
-    
-    console.log('useCampaignData - Syncing assignments from negotiations');
-    
-    for (const negotiation of negotiations) {
-      try {
-        const isAssigned = await creatorAssignmentsService.isCreatorAssigned(
-          currentUser.uid, 
-          negotiation.creatorId, 
-          campaignId
-        );
-        
-        if (!isAssigned) {
-          console.log(`useCampaignData - Creating missing assignment for creator ${negotiation.creatorId}`);
-          await creatorAssignmentsService.createOrUpdateAssignment(
-            currentUser.uid,
-            negotiation.creatorId,
-            campaignId
-          );
-        }
-      } catch (error) {
-        console.error('useCampaignData - Error syncing assignment:', error);
-      }
-    }
-  };
-
-  // Fetch creator assignments for current user (after potential sync)
+  // Fetch creator assignments for current user
   const { data: creatorAssignments = [], isLoading: assignmentsLoading, refetch: refetchAssignments } = useQuery({
-    queryKey: ['creatorAssignments', currentUser?.uid, campaignId],
+    queryKey: ['creatorAssignments', currentUser?.uid],
     queryFn: async () => {
       if (!currentUser?.uid) {
         console.log('useCampaignData - No current user UID, returning empty assignments');
         return [];
       }
       
-      // First sync any missing assignments from negotiations
-      await syncAssignments();
-      
       console.log('useCampaignData - Fetching assignments for user:', currentUser.uid);
       const assignments = await creatorAssignmentsService.getAssignmentsByUser(currentUser.uid);
       console.log('useCampaignData - Raw assignments from service:', assignments);
+      console.log('useCampaignData - Number of assignments returned:', assignments.length);
       return assignments;
     },
-    enabled: !!currentUser?.uid && !!campaignId,
+    enabled: !!currentUser?.uid,
     staleTime: 2 * 60 * 1000, // 2 minutes
     refetchOnWindowFocus: false,
   });
@@ -100,29 +72,21 @@ export const useCampaignData = (campaignId: string | undefined) => {
     refetchOnWindowFocus: false,
   });
 
-  // Get creators assigned to THIS SPECIFIC CAMPAIGN from creatorAssignments
-  const assignedCreatorIds = creatorAssignments
-    .filter(assignment => assignment.campaignIds.includes(campaignId || ''))
-    .map(assignment => assignment.creatorId);
+  // Filter creator assignments for THIS SPECIFIC CAMPAIGN
+  const campaignAssignments = creatorAssignments.filter(assignment => 
+    assignment.campaignIds.includes(campaignId || '')
+  );
 
-  // Get creators who have negotiations for this campaign
-  const negotiationCreatorIds = negotiations.map(n => n.creatorId);
-
-  // Combine both sets of creator IDs for THIS CAMPAIGN ONLY (unique) - for contacted creators list
-  const allContactedCreatorIds = [...new Set([...assignedCreatorIds, ...negotiationCreatorIds])];
-
-  // For the CreatorSelectionModal, we exclude ALL contacted creators (assignments + negotiations)
-  const existingCreatorIds = allContactedCreatorIds;
-
-  console.log('useCampaignData - Campaign ID:', campaignId);
   console.log('useCampaignData - All creator assignments:', creatorAssignments.length);
-  console.log('useCampaignData - Creator assignments details:', creatorAssignments);
-  console.log('useCampaignData - Assignments for this campaign:', assignedCreatorIds);
-  console.log('useCampaignData - Negotiations for this campaign:', negotiationCreatorIds);
-  console.log('useCampaignData - All contacted creator IDs (assignments + negotiations):', allContactedCreatorIds);
-  console.log('useCampaignData - Existing creator IDs (for exclusion in modal - ALL CONTACTED):', existingCreatorIds);
+  console.log('useCampaignData - Campaign assignments (filtered):', campaignAssignments.length);
+  console.log('useCampaignData - Campaign assignments details:', campaignAssignments);
 
-  // Build contacted creators list from assignedCreatorIds (which should now include all creators with negotiations after sync)
+  // Get creator IDs assigned to THIS SPECIFIC CAMPAIGN
+  const assignedCreatorIds = campaignAssignments.map(assignment => assignment.creatorId);
+  
+  console.log('useCampaignData - Assigned creator IDs for this campaign:', assignedCreatorIds);
+
+  // Build contacted creators list ONLY from creator assignments for this campaign
   const contactedCreators = assignedCreatorIds.map(creatorId => {
     const creator = allCreators.find(c => c.creatorId === creatorId);
     const negotiation = negotiations.find(n => n.creatorId === creatorId);
@@ -165,6 +129,11 @@ export const useCampaignData = (campaignId: string | undefined) => {
   console.log('useCampaignData - Contacted creators count:', contactedCreators.length);
   console.log('useCampaignData - Contacted creators:', contactedCreators.map(c => c?.creator.displayName));
 
+  // For the CreatorSelectionModal, exclude creators who are already assigned to this campaign
+  const existingCreatorIds = assignedCreatorIds;
+
+  console.log('useCampaignData - Existing creator IDs (for exclusion in modal):', existingCreatorIds);
+
   const isLoading = campaignLoading || negotiationsLoading || assignmentsLoading;
 
   return {
@@ -173,8 +142,8 @@ export const useCampaignData = (campaignId: string | undefined) => {
     negotiations,
     allCreators,
     contactedCreators,
-    allContactedCreatorIds,
-    existingCreatorIds, // This now contains ALL contacted creators (assignments + negotiations)
+    allContactedCreatorIds: assignedCreatorIds, // Only assigned creators for this campaign
+    existingCreatorIds, // Only assigned creators for this campaign
     refetchAssignments,
     isLoading
   };
