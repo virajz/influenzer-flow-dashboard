@@ -54,7 +54,7 @@ export const useCreatorProfile = () => {
   const allCampaignIds = [...new Set([...negotiationCampaignIds, ...assignmentCampaignIds])];
 
   // Filter campaigns to show those where this creator has negotiations or assignments
-  const allCampaigns = brandCampaigns.filter(campaign => 
+  const allCampaigns = brandCampaigns.filter(campaign =>
     allCampaignIds.includes(campaign.campaignId)
   );
 
@@ -67,7 +67,7 @@ export const useCreatorProfile = () => {
 
     try {
       let negotiation = negotiations.find(n => n.campaignId === campaignId);
-      
+
       if (!negotiation) {
         const campaign = brandCampaigns.find(c => c.campaignId === campaignId);
         if (!campaign) return;
@@ -98,15 +98,17 @@ export const useCreatorProfile = () => {
           escalationCount: 0
         });
 
-        await apiService.startNegotiation(negotiationId);
+        const token = await currentUser.getIdToken();
+        await apiService.startNegotiation(negotiationId, token);
       } else {
         await negotiationsService.updateNegotiation(negotiation.negotiationId, {
           status: 'email_sent'
         });
 
-        await apiService.startNegotiation(negotiation.negotiationId);
+        const token = await currentUser.getIdToken();
+        await apiService.startNegotiation(negotiation.negotiationId, token);
       }
-      
+
       toast({
         title: "Email Sent!",
         description: "Auto email has been sent to the creator.",
@@ -126,7 +128,7 @@ export const useCreatorProfile = () => {
 
     try {
       let negotiation = negotiations.find(n => n.campaignId === campaignId);
-      
+
       if (!negotiation && campaignId) {
         const campaign = brandCampaigns.find(c => c.campaignId === campaignId);
         if (!campaign) return;
@@ -157,7 +159,7 @@ export const useCreatorProfile = () => {
           voiceCallCompleted: true
         });
       }
-      
+
       toast({
         title: "Agent Call Initiated!",
         description: "AI agent is calling the creator.",
@@ -174,7 +176,7 @@ export const useCreatorProfile = () => {
 
   const handleAssignmentComplete = () => {
     setShowAssignmentModal(false);
-    
+
     // Invalidate relevant caches to ensure immediate updates
     if (currentUser?.uid && creatorId) {
       queryClient.invalidateQueries({
@@ -187,7 +189,7 @@ export const useCreatorProfile = () => {
         queryKey: ['campaigns', currentUser.uid]
       });
     }
-    
+
     toast({
       title: "Success!",
       description: "Creator has been assigned to the selected campaign.",

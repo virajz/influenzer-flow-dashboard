@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -63,14 +62,14 @@ const Dashboard = () => {
   ];
 
   const budgetKPIs = [
-    { label: 'Total Budget', value: '$80,000', icon: FiDollarSign },
-    { label: 'Total Spent', value: '$40,950', icon: FiTrendingUp },
-    { label: 'Forecasted Spend', value: '$72,000', icon: FiUsers },
+    { label: 'Total Budget', value: '₹80,000', icon: FiDollarSign },
+    { label: 'Total Spent', value: '₹40,950', icon: FiTrendingUp },
+    { label: 'Forecasted Spend', value: '₹72,000', icon: FiUsers },
     { label: 'Burn Rate', value: '18%/week', icon: FiClock }
   ];
 
   const creatorActivity = [
-    { creator: '@sarahjohnson', action: 'responded with rate $2,750', time: '2 hours ago' },
+    { creator: '@sarahjohnson', action: 'responded with rate ₹2,750', time: '2 hours ago' },
     { creator: '@mikechentech', action: 'accepted contract', time: '4 hours ago' },
     { creator: '@emmafit', action: 'declined offer', time: '6 hours ago' },
     { creator: '@davidcooks', action: 'submitted deliverable', time: '1 day ago' }
@@ -131,22 +130,22 @@ const Dashboard = () => {
                       {campaign.status}
                     </Badge>
                   </div>
-                  
+
                   <div className="space-y-3">
                     <div>
                       <div className="flex justify-between text-sm mb-1">
                         <span className="text-muted-foreground">Budget vs. Spent</span>
-                        <span className="font-medium">${campaign.spent.toLocaleString()} / ${campaign.budget.toLocaleString()}</span>
+                        <span className="font-medium">₹{campaign.spent.toLocaleString()} / ₹{campaign.budget.toLocaleString()}</span>
                       </div>
                       <Progress value={campaign.spentPercentage} className="h-2" />
                     </div>
-                    
+
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Engagement Rate</span>
                       <span className="text-sm font-medium">{campaign.engagementRate}%</span>
                     </div>
                   </div>
-                  
+
                   <Button variant="outline" size="sm" className="w-full">
                     <FiEye className="mr-2 h-4 w-4" />
                     View Campaign

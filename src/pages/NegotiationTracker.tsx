@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -32,7 +31,7 @@ const mockNegotiations = [
 const NegotiationTracker = () => {
   const { currentUser } = useAuth();
   const [negotiations] = useState(mockNegotiations);
-  const [counterOffer, setCounterOffer] = useState<{[key: string]: string}>({});
+  const [counterOffer, setCounterOffer] = useState<{ [key: string]: string }>({});
 
   // Fetch campaigns to get campaign names
   const { data: campaigns = [] } = useQuery({
@@ -76,9 +75,9 @@ const NegotiationTracker = () => {
     if (amount) {
       toast({
         title: "Counter Offer Sent",
-        description: `Counter offer of $${amount} sent successfully.`,
+        description: `Counter offer of ₹${amount} sent successfully.`,
       });
-      setCounterOffer({...counterOffer, [negotiationId]: ''});
+      setCounterOffer({ ...counterOffer, [negotiationId]: '' });
     }
   };
 
@@ -159,7 +158,7 @@ const NegotiationTracker = () => {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Avg. Final Rate</p>
-                <p className="text-2xl font-bold text-gray-900">$2,750</p>
+                <p className="text-2xl font-bold text-gray-900">₹2,750</p>
               </div>
             </div>
           </CardContent>
@@ -209,7 +208,7 @@ const NegotiationTracker = () => {
                       Proposed Rate
                     </h4>
                     <p className="text-2xl font-bold text-blue-600">
-                      ${negotiation.proposedRate.toLocaleString()}
+                      ₹{negotiation.proposedRate.toLocaleString()}
                     </p>
                   </div>
 
@@ -217,7 +216,7 @@ const NegotiationTracker = () => {
                     <div className="space-y-2">
                       <h4 className="font-medium">Counter Rate</h4>
                       <p className="text-2xl font-bold text-orange-600">
-                        ${negotiation.counterRate.toLocaleString()}
+                        ₹{negotiation.counterRate.toLocaleString()}
                       </p>
                     </div>
                   )}
@@ -226,7 +225,7 @@ const NegotiationTracker = () => {
                     <div className="space-y-2">
                       <h4 className="font-medium">Final Rate</h4>
                       <p className="text-2xl font-bold text-green-600">
-                        ${negotiation.finalRate.toLocaleString()}
+                        ₹{negotiation.finalRate.toLocaleString()}
                       </p>
                     </div>
                   )}
@@ -270,7 +269,7 @@ const NegotiationTracker = () => {
                         })}
                         className="w-40"
                       />
-                      <Button 
+                      <Button
                         onClick={() => handleCounterOffer(negotiation.id)}
                         variant="outline"
                       >
@@ -285,7 +284,7 @@ const NegotiationTracker = () => {
                         Send Contract
                       </Button>
                       {negotiation.paymentStatus === 'pending' && (
-                        <Button 
+                        <Button
                           onClick={() => markAsPaid(negotiation.id)}
                           variant="outline"
                         >

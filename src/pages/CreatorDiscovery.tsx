@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -54,20 +53,20 @@ const CreatorDiscovery = () => {
 
   const filteredCreators = allCreators.filter(creator => {
     if (filters.category !== 'all' && creator.category !== filters.category) return false;
-    if (filters.platform !== 'all' && 
-        !((creator.instagramHandle && filters.platform === 'Instagram') || 
-          (creator.youtubeHandle && filters.platform === 'YouTube'))) return false;
+    if (filters.platform !== 'all' &&
+      !((creator.instagramHandle && filters.platform === 'Instagram') ||
+        (creator.youtubeHandle && filters.platform === 'YouTube'))) return false;
     if (creator.instagramFollowers < filters.minFollowers[0]) return false;
     if (creator.baseRate > filters.maxBudget[0]) return false;
-    if (filters.searchTerm && 
-        !creator.displayName.toLowerCase().includes(filters.searchTerm.toLowerCase()) &&
-        !creator.instagramHandle.toLowerCase().includes(filters.searchTerm.toLowerCase())) return false;
+    if (filters.searchTerm &&
+      !creator.displayName.toLowerCase().includes(filters.searchTerm.toLowerCase()) &&
+      !creator.instagramHandle.toLowerCase().includes(filters.searchTerm.toLowerCase())) return false;
     return true;
   });
 
   const toggleCreatorSelection = (creatorId: string) => {
-    setSelectedCreators(prev => 
-      prev.includes(creatorId) 
+    setSelectedCreators(prev =>
+      prev.includes(creatorId)
         ? prev.filter(id => id !== creatorId)
         : [...prev, creatorId]
     );
@@ -121,13 +120,13 @@ const CreatorDiscovery = () => {
                 id="search"
                 placeholder="Search creators..."
                 value={filters.searchTerm}
-                onChange={(e) => setFilters({...filters, searchTerm: e.target.value})}
+                onChange={(e) => setFilters({ ...filters, searchTerm: e.target.value })}
               />
             </div>
 
             <div>
               <Label>Category</Label>
-              <Select value={filters.category} onValueChange={(value) => setFilters({...filters, category: value})}>
+              <Select value={filters.category} onValueChange={(value) => setFilters({ ...filters, category: value })}>
                 <SelectTrigger>
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
@@ -145,7 +144,7 @@ const CreatorDiscovery = () => {
 
             <div>
               <Label>Platform</Label>
-              <Select value={filters.platform} onValueChange={(value) => setFilters({...filters, platform: value})}>
+              <Select value={filters.platform} onValueChange={(value) => setFilters({ ...filters, platform: value })}>
                 <SelectTrigger>
                   <SelectValue placeholder="All Platforms" />
                 </SelectTrigger>
@@ -162,7 +161,7 @@ const CreatorDiscovery = () => {
               <Label>Min Followers: {filters.minFollowers[0].toLocaleString()}</Label>
               <Slider
                 value={filters.minFollowers}
-                onValueChange={(value) => setFilters({...filters, minFollowers: value})}
+                onValueChange={(value) => setFilters({ ...filters, minFollowers: value })}
                 max={1000000}
                 min={0}
                 step={10000}
@@ -171,10 +170,10 @@ const CreatorDiscovery = () => {
             </div>
 
             <div>
-              <Label>Max Budget: ${filters.maxBudget[0].toLocaleString()}</Label>
+              <Label>Max Budget: ₹{filters.maxBudget[0].toLocaleString()}</Label>
               <Slider
                 value={filters.maxBudget}
-                onValueChange={(value) => setFilters({...filters, maxBudget: value})}
+                onValueChange={(value) => setFilters({ ...filters, maxBudget: value })}
                 max={10000}
                 min={500}
                 step={100}
@@ -182,7 +181,7 @@ const CreatorDiscovery = () => {
               />
             </div>
 
-            <Button 
+            <Button
               onClick={() => setFilters({
                 category: 'all',
                 platform: 'all',
@@ -203,8 +202,8 @@ const CreatorDiscovery = () => {
           <div className="flex justify-between items-center mb-6">
             <p className="text-gray-600">{filteredCreators.length} creators found</p>
             {selectedCreators.length > 0 && (
-              <Button 
-                onClick={() => setShowAssignmentModal(true)} 
+              <Button
+                onClick={() => setShowAssignmentModal(true)}
                 className="bg-purple-600 hover:bg-purple-700"
               >
                 Add {selectedCreators.length} to Campaign
@@ -271,7 +270,7 @@ const CreatorDiscovery = () => {
                           <div className="flex items-center gap-4 text-sm">
                             <div className="flex items-center gap-1">
                               <FiDollarSign className="h-4 w-4 text-green-600" />
-                              <span className="font-medium">${creator.baseRate.toLocaleString()}</span>
+                              <span className="font-medium">₹{creator.baseRate.toLocaleString()}</span>
                             </div>
                             <span className="text-gray-500">{creator.averageEngagementRate}% engagement</span>
                           </div>
