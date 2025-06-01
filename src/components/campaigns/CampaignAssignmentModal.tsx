@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -66,7 +65,7 @@ export const CampaignAssignmentModal = ({
 
     setIsAssigning(true);
     try {
-      // Check for existing assignments and create new ones
+      // Check for existing assignments and create/update them
       let assignedCount = 0;
       let alreadyAssignedCount = 0;
 
@@ -80,12 +79,11 @@ export const CampaignAssignmentModal = ({
         if (isAlreadyAssigned) {
           alreadyAssignedCount++;
         } else {
-          await creatorAssignmentsService.createAssignment({
-            userId: currentUser.uid,
+          await creatorAssignmentsService.createOrUpdateAssignment(
+            currentUser.uid,
             creatorId,
-            campaignId: selectedCampaignId,
-            phoneDiscovered: false
-          });
+            selectedCampaignId
+          );
           assignedCount++;
         }
       }
