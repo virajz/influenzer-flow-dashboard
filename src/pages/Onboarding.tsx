@@ -68,6 +68,7 @@ const Onboarding = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': currentUser.getIdToken()
         },
         body: JSON.stringify({
           // uid: currentUser.uid,
