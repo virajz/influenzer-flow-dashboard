@@ -137,9 +137,10 @@ const CampaignView = () => {
 
   console.log('Final contacted creators:', contactedCreators.length);
 
-  // Get selected creator data
+  // Get selected creator data and assignment
   const selectedCreator = selectedCreatorId ? allCreators.find(c => c.creatorId === selectedCreatorId) : null;
-  const hasPhone = selectedCreator?.phoneDiscovered !== false;
+  const selectedCreatorAssignment = selectedCreatorId ? creatorAssignments.find(a => a.creatorId === selectedCreatorId) : null;
+  const hasPhone = selectedCreatorAssignment?.phoneDiscovered !== false;
 
   const handleAutoEmail = async (creatorId: string) => {
     if (!currentUser?.uid || !campaignId) return;
