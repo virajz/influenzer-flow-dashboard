@@ -1,4 +1,3 @@
-
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -16,12 +15,17 @@ const CampaignView = () => {
   const { currentUser } = useAuth();
   const [selectedCreatorId, setSelectedCreatorId] = useState<string | null>(null);
 
+  console.log('CampaignView - campaignId:', campaignId);
+  console.log('CampaignView - currentUser:', currentUser?.uid);
+
   // Fetch campaign details
   const { data: campaign, isLoading: campaignLoading } = useQuery({
     queryKey: ['campaign', campaignId],
     queryFn: async () => {
       if (!campaignId) throw new Error('Campaign ID is required');
-      return await campaignsService.getCampaignById(campaignId);
+      const campaignData = await campaignsService.getCampaignById(campaignId);
+      console.log('Campaign data fetched:', campaignData);
+      return campaignData;
     },
     enabled: !!campaignId,
   });
@@ -31,7 +35,9 @@ const CampaignView = () => {
     queryKey: ['negotiations', campaignId],
     queryFn: async () => {
       if (!campaignId) return [];
-      return await negotiationsService.getNegotiationsByCampaign(campaignId);
+      const negotiationsData = await negotiationsService.getNegotiationsByCampaign(campaignId);
+      console.log('Negotiations fetched for campaign:', campaignId, negotiationsData);
+      return negotiationsData;
     },
     enabled: !!campaignId,
   });
@@ -39,7 +45,11 @@ const CampaignView = () => {
   // Fetch all creators to get creator details
   const { data: allCreators = [] } = useQuery({
     queryKey: ['creators'],
-    queryFn: creatorsService.getAllCreators,
+    queryFn: async () => {
+      const creatorsData = await creatorsService.getAllCreators();
+      console.log('All creators fetched:', creatorsData.length);
+      return creatorsData;
+    },
   });
 
   // Fetch communications for selected negotiation
@@ -56,11 +66,14 @@ const CampaignView = () => {
   // Get contacted creators (those with negotiations)
   const contactedCreators = negotiations.map(negotiation => {
     const creator = allCreators.find(c => c.creatorId === negotiation.creatorId);
+    console.log('Looking for creator with ID:', negotiation.creatorId, 'Found:', !!creator);
     return {
       creator,
       negotiation,
     };
   }).filter(item => item.creator);
+
+  console.log('Final contacted creators:', contactedCreators);
 
   if (campaignLoading || negotiationsLoading) {
     return (
@@ -153,6 +166,9 @@ const CampaignView = () => {
               {contactedCreators.length === 0 ? (
                 <div className="text-center py-8">
                   <p className="text-gray-600">No creators contacted yet</p>
+                  <p className="text-xs text-gray-500 mt-2">
+                    Debug: Found {negotiations.length} negotiations, {allCreators.length} total creators
+                  </p>
                 </div>
               ) : (
                 <div className="space-y-2">
