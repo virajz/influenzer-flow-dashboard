@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -8,9 +7,11 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Onboarding = () => {
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const [formData, setFormData] = useState({
     brandName: 'Tech Startup Inc.', // Prefilled example
     description: '',
@@ -51,18 +52,55 @@ const Onboarding = () => {
       return;
     }
 
+    if (!currentUser) {
+      toast({
+        title: "Authentication Error",
+        description: "Please log in to continue.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    try {
+      const response = await fetch('https://creator-server-173826602269.us-central1.run.app/api/brands', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          uid: currentUser.uid,
+          brandName: formData.brandName,
+          description: formData.description,
+          email: currentUser.email,
+          phone: formData.phoneNumber,
+          website: formData.website || null,
+          industry: formData.industry,
+          companySize: formData.companySize,
+        }),
+      });
 
-    toast({
-      title: "Profile created successfully!",
-      description: "Welcome to InfluencerFlow AI. Let's get started with your campaigns.",
-    });
+      if (!response.ok) {
+        throw new Error('Failed to create brand profile');
+      }
 
-    setIsSubmitting(false);
-    navigate('/dashboard');
+      toast({
+        title: "Profile created successfully!",
+        description: "Welcome to InfluencerFlow AI. Let's get started with your campaigns.",
+      });
+
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Error creating brand profile:', error);
+      toast({
+        title: "Error creating profile",
+        description: "There was an error creating your brand profile. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const industryOptions = [
