@@ -1,6 +1,5 @@
 
 import { useParams } from 'react-router-dom';
-import { useState } from 'react';
 import { CampaignViewHeader } from '@/components/campaigns/CampaignViewHeader';
 import { CampaignMetrics } from '@/components/campaigns/CampaignMetrics';
 import { CampaignMainContent } from '@/components/campaigns/CampaignMainContent';
@@ -9,7 +8,6 @@ import { useCampaignActions } from '@/hooks/useCampaignActions';
 
 const CampaignView = () => {
   const { campaignId } = useParams<{ campaignId: string }>();
-  const [showCreatorSelectionModal, setShowCreatorSelectionModal] = useState(false);
 
   const {
     campaign,
@@ -58,7 +56,7 @@ const CampaignView = () => {
     <div className="p-8 h-screen flex flex-col">
       <CampaignViewHeader 
         campaign={campaign} 
-        onAddCreator={() => setShowCreatorSelectionModal(true)}
+        onAddCreator={() => {}}
       />
       
       <CampaignMetrics campaign={campaign} />
