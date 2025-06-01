@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { creatorsService } from '@/services/creatorsService';
 import { campaignsService } from '@/services/campaignsService';
@@ -14,6 +14,7 @@ import { toast } from '@/hooks/use-toast';
 export const useCreatorProfile = () => {
   const { creatorId } = useParams<{ creatorId: string }>();
   const { currentUser } = useAuth();
+  const queryClient = useQueryClient();
   const [showAssignmentModal, setShowAssignmentModal] = useState(false);
 
   // Fetch creator data
@@ -173,6 +174,20 @@ export const useCreatorProfile = () => {
 
   const handleAssignmentComplete = () => {
     setShowAssignmentModal(false);
+    
+    // Invalidate relevant caches to ensure immediate updates
+    if (currentUser?.uid && creatorId) {
+      queryClient.invalidateQueries({
+        queryKey: ['creatorAssignments', currentUser.uid, creatorId]
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['creatorAssignments', currentUser.uid]
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['campaigns', currentUser.uid]
+      });
+    }
+    
     toast({
       title: "Success!",
       description: "Creator has been assigned to the selected campaign.",

@@ -1,5 +1,6 @@
+
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -25,6 +26,7 @@ export const CampaignAssignmentModal = ({
   onAssignmentComplete 
 }: CampaignAssignmentModalProps) => {
   const { currentUser } = useAuth();
+  const queryClient = useQueryClient();
   const [selectedCampaignId, setSelectedCampaignId] = useState<string>('');
   const [isAssigning, setIsAssigning] = useState(false);
 
@@ -86,7 +88,17 @@ export const CampaignAssignmentModal = ({
           );
           assignedCount++;
         }
+
+        // Invalidate caches for each creator
+        queryClient.invalidateQueries({
+          queryKey: ['creatorAssignments', currentUser.uid, creatorId]
+        });
       }
+
+      // Invalidate broader assignment queries
+      queryClient.invalidateQueries({
+        queryKey: ['creatorAssignments', currentUser.uid]
+      });
 
       // Show appropriate toast message
       if (assignedCount > 0) {
