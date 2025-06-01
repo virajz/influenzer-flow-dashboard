@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -11,7 +10,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { creatorsService } from '@/services/creatorsService';
 import { creatorAssignmentsService } from '@/services/creatorAssignmentsService';
 import { campaignsService } from '@/services/campaignsService';
+import { negotiationsService, Negotiation } from '@/services/negotiationsService';
+import { communicationHistoryService, CommunicationRecord } from '@/services/communicationHistoryService';
 import { CampaignAssignmentModal } from '@/components/campaigns/CampaignAssignmentModal';
+import { OutreachActions } from '@/components/outreach/OutreachActions';
+import { EmailComposerModal, EmailData } from '@/components/outreach/EmailComposerModal';
 import { toast } from '@/hooks/use-toast';
 import { FiUsers, FiDollarSign, FiMapPin, FiMail, FiPhone, FiMessageSquare, FiCalendar } from 'react-icons/fi';
 
@@ -19,6 +22,7 @@ const CreatorProfile = () => {
   const { creatorId } = useParams<{ creatorId: string }>();
   const { currentUser } = useAuth();
   const [showAssignmentModal, setShowAssignmentModal] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
 
   // Fetch creator data
   const { data: allCreators = [], isLoading: creatorsLoading } = useQuery({
@@ -28,17 +32,17 @@ const CreatorProfile = () => {
 
   const creator = allCreators.find(c => c.id === creatorId);
 
-  // Fetch creator assignments
-  const { data: assignment } = useQuery({
-    queryKey: ['creator-assignment', currentUser?.uid, creatorId],
+  // Fetch negotiations for this creator
+  const { data: negotiations = [], refetch: refetchNegotiations } = useQuery({
+    queryKey: ['negotiations', creatorId],
     queryFn: async () => {
-      if (!currentUser?.uid || !creatorId) return null;
-      return await creatorAssignmentsService.getCreatorAssignment(currentUser.uid, creatorId);
+      if (!creatorId) return [];
+      return await negotiationsService.getNegotiationsByCreator(creatorId);
     },
-    enabled: !!currentUser?.uid && !!creatorId,
+    enabled: !!creatorId,
   });
 
-  // Fetch campaigns for this creator
+  // Fetch campaigns
   const { data: allCampaigns = [] } = useQuery({
     queryKey: ['campaigns', currentUser?.uid],
     queryFn: async () => {
@@ -48,55 +52,191 @@ const CreatorProfile = () => {
     enabled: !!currentUser?.uid,
   });
 
-  // Filter campaigns based on assignment
-  const assignedCampaigns = allCampaigns.filter(campaign => 
-    assignment?.campaignIds.includes(campaign.campaignId)
-  );
-
-  const currentCampaigns = assignedCampaigns.filter(campaign => {
-    const endDate = new Date(campaign.endDate);
-    const today = new Date();
-    return campaign.status === 'active' || campaign.status === 'draft' || endDate >= today;
+  // Fetch communication history
+  const { data: communicationHistory = [], refetch: refetchHistory } = useQuery({
+    queryKey: ['communication-history', creatorId, currentUser?.uid],
+    queryFn: async () => {
+      if (!creatorId || !currentUser?.uid) return [];
+      return await communicationHistoryService.getCommunicationHistory(creatorId, currentUser.uid);
+    },
+    enabled: !!creatorId && !!currentUser?.uid,
   });
 
-  const pastCampaigns = assignedCampaigns.filter(campaign => {
-    const endDate = new Date(campaign.endDate);
-    const today = new Date();
-    return endDate < today || campaign.status === 'completed' || campaign.status === 'cancelled';
+  // Get campaigns with negotiations
+  const campaignsWithNegotiations = allCampaigns.map(campaign => {
+    const negotiation = negotiations.find(n => n.campaignId === campaign.campaignId);
+    return { campaign, negotiation };
   });
 
-  // Mock communication history
-  const communicationHistory = [
-    {
-      id: '1',
-      type: 'email',
-      timestamp: '2024-05-30 10:30 AM',
-      subject: 'Campaign Invitation - Summer Collection',
-      status: 'sent',
-      details: 'Initial outreach email sent regarding summer campaign collaboration.'
-    },
-    {
-      id: '2',
-      type: 'call',
-      timestamp: '2024-05-28 02:15 PM',
-      subject: 'Follow-up call',
-      status: 'completed',
-      details: 'Discussed campaign details and deliverables. Duration: 15 minutes.',
-      hasAudio: true,
-      hasTranscript: true
-    },
-    {
-      id: '3',
-      type: 'dm',
-      timestamp: '2024-05-25 09:45 AM',
-      subject: 'Instagram DM',
-      status: 'delivered',
-      details: 'Initial contact via Instagram direct message.'
+  const currentCampaigns = campaignsWithNegotiations.filter(({ campaign, negotiation }) => {
+    const endDate = new Date(campaign.endDate);
+    const today = new Date();
+    return (campaign.status === 'active' || campaign.status === 'draft' || endDate >= today) && 
+           (!negotiation || !['rejected', 'cancelled'].includes(negotiation.status));
+  });
+
+  const pastCampaigns = campaignsWithNegotiations.filter(({ campaign, negotiation }) => {
+    const endDate = new Date(campaign.endDate);
+    const today = new Date();
+    return endDate < today || campaign.status === 'completed' || campaign.status === 'cancelled' ||
+           (negotiation && ['rejected', 'cancelled', 'accepted'].includes(negotiation.status));
+  });
+
+  const handleManualEmail = () => {
+    setShowEmailModal(true);
+  };
+
+  const handleAutoEmail = async (campaignId: string) => {
+    if (!currentUser?.uid || !creatorId) return;
+
+    try {
+      // Create or update negotiation
+      let negotiation = negotiations.find(n => n.campaignId === campaignId);
+      
+      if (!negotiation) {
+        const campaign = allCampaigns.find(c => c.campaignId === campaignId);
+        if (!campaign) return;
+
+        const negotiationId = await negotiationsService.createNegotiation({
+          campaignId,
+          brandId: currentUser.uid,
+          creatorId,
+          status: 'email_sent',
+          proposedRate: creator?.baseRate || 0,
+          counterRate: 0,
+          finalRate: 0,
+          maxBudget: campaign.budget,
+          deliverables: [],
+          aiAgentNotes: '',
+          creatorAvailability: 'unknown',
+          initialContactMethod: 'email',
+          phoneContactAttempted: false,
+          voiceCallCompleted: false,
+          escalationCount: 0
+        });
+      } else {
+        await negotiationsService.updateNegotiation(negotiation.negotiationId, {
+          status: 'email_sent'
+        });
+      }
+
+      // Add communication record
+      await communicationHistoryService.addCommunicationRecord({
+        creatorId,
+        brandId: currentUser.uid,
+        campaignId,
+        negotiationId: negotiation?.negotiationId,
+        type: 'email',
+        method: 'auto',
+        subject: 'Collaboration Opportunity',
+        status: 'sent',
+        details: 'Auto-generated email sent with campaign details',
+        timestamp: new Date().toISOString()
+      });
+
+      refetchNegotiations();
+      refetchHistory();
+      
+      toast({
+        title: "Email Sent!",
+        description: "Auto email has been sent to the creator.",
+      });
+    } catch (error) {
+      console.error('Error sending auto email:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send email. Please try again.",
+        variant: "destructive"
+      });
     }
-  ];
+  };
+
+  const handleEmailSend = async (emailData: EmailData) => {
+    if (!currentUser?.uid || !creatorId) return;
+
+    try {
+      // Add communication record
+      await communicationHistoryService.addCommunicationRecord({
+        creatorId,
+        brandId: currentUser.uid,
+        type: 'email',
+        method: 'manual',
+        subject: emailData.subject,
+        content: emailData.content,
+        status: 'sent',
+        details: `Manual email sent: ${emailData.subject}`,
+        timestamp: new Date().toISOString()
+      });
+
+      refetchHistory();
+      
+      toast({
+        title: "Email Sent!",
+        description: "Your email has been sent to the creator.",
+      });
+    } catch (error) {
+      console.error('Error sending email:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send email. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleAgentCall = async (campaignId?: string) => {
+    if (!currentUser?.uid || !creatorId) return;
+
+    try {
+      // Add communication record
+      await communicationHistoryService.addCommunicationRecord({
+        creatorId,
+        brandId: currentUser.uid,
+        campaignId,
+        type: 'agent_call',
+        method: 'ai_agent',
+        subject: 'AI Agent Call',
+        status: 'completed',
+        details: 'AI agent call initiated',
+        timestamp: new Date().toISOString(),
+        metadata: {
+          hasAudio: true,
+          hasTranscript: true,
+          duration: 0
+        }
+      });
+
+      // Update negotiation if exists
+      if (campaignId) {
+        const negotiation = negotiations.find(n => n.campaignId === campaignId);
+        if (negotiation) {
+          await negotiationsService.updateNegotiation(negotiation.negotiationId, {
+            status: 'phone_contacted',
+            phoneContactAttempted: true
+          });
+          refetchNegotiations();
+        }
+      }
+
+      refetchHistory();
+      
+      toast({
+        title: "Agent Call Initiated!",
+        description: "AI agent is calling the creator.",
+      });
+    } catch (error) {
+      console.error('Error initiating agent call:', error);
+      toast({
+        title: "Error",
+        description: "Failed to initiate call. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
 
   const handleAssignmentComplete = () => {
     setShowAssignmentModal(false);
+    refetchNegotiations();
     toast({
       title: "Success!",
       description: "Creator has been assigned to the selected campaign.",
@@ -127,6 +267,7 @@ const CreatorProfile = () => {
       case 'email':
         return <FiMail className="h-4 w-4" />;
       case 'call':
+      case 'agent_call':
         return <FiPhone className="h-4 w-4" />;
       case 'dm':
         return <FiMessageSquare className="h-4 w-4" />;
@@ -237,7 +378,7 @@ const CreatorProfile = () => {
           <Card className="rounded-2xl shadow-md">
             <CardHeader>
               <CardTitle>Current Campaigns</CardTitle>
-              <CardDescription>Active campaigns this creator is involved in</CardDescription>
+              <CardDescription>Active campaigns and outreach status</CardDescription>
             </CardHeader>
             <CardContent>
               {currentCampaigns.length === 0 ? (
@@ -251,26 +392,32 @@ const CreatorProfile = () => {
                   </Button>
                 </div>
               ) : (
-                <div className="space-y-4">
-                  {currentCampaigns.map((campaign) => (
-                    <div key={campaign.campaignId} className="p-4 border rounded-xl">
-                      <div className="flex items-center justify-between mb-2">
+                <div className="space-y-6">
+                  {currentCampaigns.map(({ campaign, negotiation }) => (
+                    <div key={campaign.campaignId} className="p-6 border rounded-xl">
+                      <div className="flex items-center justify-between mb-4">
                         <h3 className="font-semibold text-gray-900">{campaign.campaignName}</h3>
-                        <Badge className={getStatusColor(campaign.status)}>
-                          {campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1)}
-                        </Badge>
-                      </div>
-                      <p className="text-gray-600 mb-3">{campaign.description}</p>
-                      <div className="flex items-center gap-4 text-sm text-gray-500">
-                        <div className="flex items-center gap-1">
-                          <FiCalendar className="h-4 w-4" />
-                          {formatDate(campaign.startDate)} - {formatDate(campaign.endDate)}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <FiDollarSign className="h-4 w-4" />
-                          ${campaign.budget.toLocaleString()}
+                        <div className="flex items-center gap-4 text-sm text-gray-500">
+                          <div className="flex items-center gap-1">
+                            <FiCalendar className="h-4 w-4" />
+                            {formatDate(campaign.startDate)} - {formatDate(campaign.endDate)}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <FiDollarSign className="h-4 w-4" />
+                            ${campaign.budget.toLocaleString()}
+                          </div>
                         </div>
                       </div>
+                      
+                      <p className="text-gray-600 mb-4">{campaign.description}</p>
+
+                      <OutreachActions
+                        negotiation={negotiation}
+                        creatorPhone={creator.phone}
+                        onManualEmail={handleManualEmail}
+                        onAutoEmail={() => handleAutoEmail(campaign.campaignId)}
+                        onAgentCall={() => handleAgentCall(campaign.campaignId)}
+                      />
                     </div>
                   ))}
                 </div>
@@ -293,13 +440,20 @@ const CreatorProfile = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {pastCampaigns.map((campaign) => (
+                  {pastCampaigns.map(({ campaign, negotiation }) => (
                     <div key={campaign.campaignId} className="p-4 border rounded-xl">
                       <div className="flex items-center justify-between mb-2">
                         <h3 className="font-semibold text-gray-900">{campaign.campaignName}</h3>
-                        <Badge className={getStatusColor(campaign.status)}>
-                          {campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1)}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                          {negotiation && (
+                            <Badge className={`bg-${negotiation.status === 'accepted' ? 'green' : negotiation.status === 'rejected' ? 'red' : 'gray'}-100 text-${negotiation.status === 'accepted' ? 'green' : negotiation.status === 'rejected' ? 'red' : 'gray'}-800`}>
+                              {negotiation.status.replace('_', ' ').toUpperCase()}
+                            </Badge>
+                          )}
+                          <Badge className={getStatusColor(campaign.status)}>
+                            {campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1)}
+                          </Badge>
+                        </div>
                       </div>
                       <p className="text-gray-600 mb-3">{campaign.description}</p>
                       <div className="flex items-center gap-4 text-sm text-gray-500">
@@ -311,6 +465,11 @@ const CreatorProfile = () => {
                           <FiDollarSign className="h-4 w-4" />
                           ${campaign.budget.toLocaleString()}
                         </div>
+                        {negotiation?.finalRate && (
+                          <div className="flex items-center gap-1">
+                            <span>Final Rate: ${negotiation.finalRate.toLocaleString()}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -343,20 +502,23 @@ const CreatorProfile = () => {
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-2">
                             <h4 className="font-medium text-gray-900">{item.subject}</h4>
-                            <span className="text-sm text-gray-500">{item.timestamp}</span>
+                            <span className="text-sm text-gray-500">
+                              {new Date(item.timestamp).toLocaleDateString()} {new Date(item.timestamp).toLocaleTimeString()}
+                            </span>
                           </div>
                           <p className="text-gray-600 mb-2">{item.details}</p>
                           <div className="flex items-center gap-2">
                             <Badge variant="outline">{item.type}</Badge>
+                            <Badge variant="outline">{item.method}</Badge>
                             <Badge className={getStatusColor(item.status)}>
                               {item.status}
                             </Badge>
-                            {item.hasAudio && (
+                            {item.metadata?.hasAudio && (
                               <Badge variant="outline" className="text-blue-600">
                                 Audio Available
                               </Badge>
                             )}
-                            {item.hasTranscript && (
+                            {item.metadata?.hasTranscript && (
                               <Badge variant="outline" className="text-green-600">
                                 Transcript Available
                               </Badge>
@@ -373,12 +535,20 @@ const CreatorProfile = () => {
         </TabsContent>
       </Tabs>
 
-      {/* Campaign Assignment Modal */}
+      {/* Modals */}
       <CampaignAssignmentModal
         open={showAssignmentModal}
         onOpenChange={setShowAssignmentModal}
         selectedCreatorIds={creatorId ? [creatorId] : []}
         onAssignmentComplete={handleAssignmentComplete}
+      />
+
+      <EmailComposerModal
+        open={showEmailModal}
+        onOpenChange={setShowEmailModal}
+        creatorName={creator.name}
+        creatorEmail={creator.email}
+        onSend={handleEmailSend}
       />
     </div>
   );
