@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { campaignsService } from '@/services/campaignsService';
 import { negotiationsService } from '@/services/negotiationsService';
 import { creatorsService } from '@/services/creatorsService';
+import { creatorAssignmentsService } from '@/services/creatorAssignmentsService';
 import { communicationsService } from '@/services/communicationsService';
 import { CommunicationHistoryTab } from '@/components/creators/CommunicationHistoryTab';
 import { CampaignViewHeader } from '@/components/campaigns/CampaignViewHeader';
@@ -31,6 +32,19 @@ const CampaignView = () => {
       return campaignData;
     },
     enabled: !!campaignId,
+  });
+
+  // Fetch creator assignments for current user
+  const { data: creatorAssignments = [], isLoading: assignmentsLoading } = useQuery({
+    queryKey: ['creatorAssignments', currentUser?.uid],
+    queryFn: async () => {
+      if (!currentUser?.uid) return [];
+      console.log('Fetching creator assignments for user:', currentUser.uid);
+      const assignments = await creatorAssignmentsService.getAssignmentsByUser(currentUser.uid);
+      console.log('Creator assignments fetched:', assignments.length);
+      return assignments;
+    },
+    enabled: !!currentUser?.uid,
   });
 
   // Fetch ALL negotiations for debugging
@@ -78,18 +92,58 @@ const CampaignView = () => {
     enabled: !!selectedNegotiation?.negotiationId,
   });
 
-  // Get contacted creators (those with negotiations)
-  const contactedCreators = negotiations.map(negotiation => {
-    const creator = allCreators.find(c => c.creatorId === negotiation.creatorId);
+  // Get creators assigned to this campaign from creatorAssignments
+  const assignedCreatorIds = creatorAssignments
+    .filter(assignment => assignment.campaignIds.includes(campaignId || ''))
+    .map(assignment => assignment.creatorId);
+
+  console.log('Creators assigned to this campaign:', assignedCreatorIds.length);
+
+  // Get creators who have negotiations for this campaign
+  const negotiationCreatorIds = negotiations.map(n => n.creatorId);
+
+  // Combine both sets of creator IDs (unique)
+  const allContactedCreatorIds = [...new Set([...assignedCreatorIds, ...negotiationCreatorIds])];
+
+  console.log('Total contacted creators (assignments + negotiations):', allContactedCreatorIds.length);
+
+  // Get contacted creators with their data
+  const contactedCreators = allContactedCreatorIds.map(creatorId => {
+    const creator = allCreators.find(c => c.creatorId === creatorId);
+    const negotiation = negotiations.find(n => n.creatorId === creatorId);
+    
+    // If no negotiation exists, create a default one showing assignment status
+    const defaultNegotiation = negotiation || {
+      negotiationId: '',
+      campaignId: campaignId || '',
+      brandId: currentUser?.uid || '',
+      creatorId,
+      status: 'initiated' as const,
+      proposedRate: 0,
+      counterRate: 0,
+      finalRate: 0,
+      maxBudget: 0,
+      deliverables: [],
+      aiAgentNotes: '',
+      creatorAvailability: 'unknown' as const,
+      initialContactMethod: 'email' as const,
+      phoneContactAttempted: false,
+      voiceCallCompleted: false,
+      paymentStatus: 'pending' as const,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      escalationCount: 0
+    };
+
     return {
       creator,
-      negotiation,
+      negotiation: defaultNegotiation,
     };
   }).filter(item => item.creator);
 
   console.log('Final contacted creators:', contactedCreators.length);
 
-  if (campaignLoading || negotiationsLoading) {
+  if (campaignLoading || negotiationsLoading || assignmentsLoading) {
     return (
       <div className="p-8">
         <div className="flex justify-center items-center min-h-[400px]">
