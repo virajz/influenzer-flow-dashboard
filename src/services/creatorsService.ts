@@ -32,10 +32,12 @@ export const creatorsService = {
       const q = query(creatorsCollection, orderBy('createdAt', 'desc'));
       const querySnapshot = await getDocs(q);
 
-
       const creators: Creator[] = [];
       querySnapshot.forEach((doc) => {
-        const creatorData = doc.data() as Creator;
+        const creatorData = {
+          ...doc.data(),
+          creatorId: doc.id
+        } as Creator;
         creators.push(creatorData);
       });
 
