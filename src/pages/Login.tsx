@@ -13,7 +13,7 @@ import { db } from '@/lib/firebase';
 
 const Login = () => {
   const navigate = useNavigate();
-  const { loginWithGoogle } = useAuth();
+  const { loginWithGoogle, currentUser } = useAuth();
   const [formData, setFormData] = useState({
     role: '',
     brandName: '',
@@ -21,10 +21,10 @@ const Login = () => {
   });
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
-  const checkBrandAndRedirect = async (user: any) => {
+  const checkBrandAndRedirect = async (userId: string) => {
     try {
-      console.log('Login: Checking brand for user:', user.uid);
-      const brandRef = doc(db, 'brands', user.uid);
+      console.log('Login: Checking brand for user:', userId);
+      const brandRef = doc(db, 'brands', userId);
       const brandSnap = await getDoc(brandRef);
 
       if (brandSnap.exists()) {
@@ -43,18 +43,20 @@ const Login = () => {
   const handleGoogleLogin = async () => {
     setIsGoogleLoading(true);
     try {
-      const result = await loginWithGoogle();
-      if (result && result.user) {
-        toast({
-          title: "Welcome to InfluencerFlow AI!",
-          description: "Your Google account has been connected successfully.",
-        });
-        
-        // Check if user has brand data and redirect accordingly
-        await checkBrandAndRedirect(result.user);
-      } else {
-        navigate('/onboarding');
-      }
+      await loginWithGoogle();
+      toast({
+        title: "Welcome to InfluencerFlow AI!",
+        description: "Your Google account has been connected successfully.",
+      });
+      
+      // Wait a moment for auth state to update, then check currentUser
+      setTimeout(() => {
+        if (currentUser) {
+          checkBrandAndRedirect(currentUser.uid);
+        } else {
+          navigate('/onboarding');
+        }
+      }, 100);
     } catch (error) {
       console.error('Google login error:', error);
       toast({
