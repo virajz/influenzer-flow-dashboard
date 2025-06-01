@@ -4,15 +4,15 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
-// Your Firebase configuration
-// Replace these with your actual Firebase project credentials
+// Firebase configuration
 const firebaseConfig = {
-  apiKey: "your-api-key",
-  authDomain: "your-project.firebaseapp.com",
-  projectId: "your-project-id",
-  storageBucket: "your-project.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "your-app-id"
+  apiKey: "AIzaSyBzJrd87n3CqK72m18VPZ_KCDyZ6ESrDrA",
+  authDomain: "creator-platform-461506.firebaseapp.com",
+  projectId: "creator-platform-461506",
+  storageBucket: "creator-platform-461506.firebasestorage.app",
+  messagingSenderId: "173826602269",
+  appId: "1:173826602269:web:96e4ccf34adaf656869df4",
+  measurementId: "G-XZF1WGVL1C"
 };
 
 // Initialize Firebase
