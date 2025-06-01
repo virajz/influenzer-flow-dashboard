@@ -26,7 +26,7 @@ export const EmailComposerModal = ({
   open, 
   onOpenChange, 
   creatorName, 
-  creatorEmail = '', 
+  creatorEmail = creatorEmail || '', 
   onSend 
 }: EmailComposerModalProps) => {
   const [emailData, setEmailData] = useState<EmailData>({
