@@ -2,8 +2,9 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Mail, PhoneCall } from 'lucide-react';
-import { CommunicationHistoryTab } from '@/components/creators/CommunicationHistoryTab';
+import { TabbedCommunicationHistory } from './TabbedCommunicationHistory';
 import { Communication } from '@/services/communicationsService';
+import { useRealTimeVoiceCommunications } from '@/hooks/useRealTimeVoiceCommunications';
 
 interface CommunicationPanelProps {
   selectedCreatorId: string | null;
@@ -14,6 +15,7 @@ interface CommunicationPanelProps {
   isCallLoading: boolean;
   onAutoEmail: (creatorId: string) => void;
   onAgentCall: (creatorId: string) => void;
+  negotiationIds: string[];
 }
 
 export const CommunicationPanel = ({
@@ -24,8 +26,12 @@ export const CommunicationPanel = ({
   isEmailLoading,
   isCallLoading,
   onAutoEmail,
-  onAgentCall
+  onAgentCall,
+  negotiationIds
 }: CommunicationPanelProps) => {
+  // Get voice communications for selected creator
+  const { voiceCommunications, isLoading: voiceLoading } = useRealTimeVoiceCommunications(negotiationIds);
+
   if (!selectedCreatorId) {
     return (
       <Card className="rounded-2xl shadow-md flex-1">
@@ -38,7 +44,7 @@ export const CommunicationPanel = ({
     );
   }
 
-  if (communicationsLoading) {
+  if (communicationsLoading || voiceLoading) {
     return (
       <Card className="rounded-2xl shadow-md flex-1">
         <CardContent className="p-12">
@@ -51,13 +57,11 @@ export const CommunicationPanel = ({
     );
   }
 
-  if (communications.length > 0) {
+  if (communications.length > 0 || voiceCommunications.length > 0) {
     return (
-      <CommunicationHistoryTab 
+      <TabbedCommunicationHistory 
         communications={communications}
-        hasPhone={hasPhone}
-        onAgentCall={() => selectedCreatorId && onAgentCall(selectedCreatorId)}
-        isCallLoading={isCallLoading}
+        voiceCommunications={voiceCommunications}
       />
     );
   }

@@ -83,6 +83,7 @@ export const CampaignMainContent = ({
             isCallLoading={isCallLoading}
             onAutoEmail={onAutoEmail}
             onAgentCall={onAgentCall}
+            negotiationIds={selectedNegotiationIds}
           />
         </div>
       </div>

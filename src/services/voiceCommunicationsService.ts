@@ -1,0 +1,40 @@
+
+import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+
+export interface VoiceCommunication {
+  voiceCommunicationId: string;
+  negotiationId: string;
+  creatorId: string;
+  conversationId: string;
+  audioUrl: string;
+  transcript: ConversationTurn[];
+  phone: string;
+  duration: number;
+  status: 'completed' | 'failed' | 'in_progress';
+  createdAt: string;
+}
+
+export interface ConversationTurn {
+  speaker: 'agent' | 'creator';
+  message: string;
+  timestamp: string;
+}
+
+const VOICE_COMMUNICATIONS_COLLECTION = 'voiceCommunications';
+
+export const voiceCommunicationsService = {
+  async getVoiceCommunicationsByNegotiation(negotiationId: string): Promise<VoiceCommunication[]> {
+    const q = query(
+      collection(db, VOICE_COMMUNICATIONS_COLLECTION),
+      where('negotiationId', '==', negotiationId),
+      orderBy('createdAt', 'desc')
+    );
+    
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({
+      ...doc.data(),
+      voiceCommunicationId: doc.id
+    } as VoiceCommunication));
+  }
+};
