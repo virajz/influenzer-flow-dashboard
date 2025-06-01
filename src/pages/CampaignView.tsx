@@ -1,4 +1,3 @@
-
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -41,17 +40,35 @@ const CampaignView = () => {
     },
   });
 
-  // Fetch negotiations for this campaign
-  const { data: negotiations = [], isLoading: negotiationsLoading } = useQuery({
+  // Fetch negotiations for this campaign with enhanced error handling
+  const { data: negotiations = [], isLoading: negotiationsLoading, error: negotiationsError } = useQuery({
     queryKey: ['negotiations', campaignId],
     queryFn: async () => {
       if (!campaignId) return [];
-      const negotiationsData = await negotiationsService.getNegotiationsByCampaign(campaignId);
-      console.log('Negotiations fetched for campaign:', campaignId, negotiationsData);
-      return negotiationsData;
+      console.log('=== STARTING NEGOTIATION QUERY ===');
+      console.log('Query campaignId:', campaignId);
+      console.log('Query campaignId type:', typeof campaignId);
+      
+      try {
+        const negotiationsData = await negotiationsService.getNegotiationsByCampaign(campaignId);
+        console.log('=== NEGOTIATION QUERY SUCCESSFUL ===');
+        console.log('Negotiations fetched for campaign:', campaignId, negotiationsData);
+        console.log('Number of negotiations:', negotiationsData.length);
+        return negotiationsData;
+      } catch (error) {
+        console.error('=== NEGOTIATION QUERY FAILED ===');
+        console.error('Error:', error);
+        throw error;
+      }
     },
     enabled: !!campaignId,
+    retry: false, // Don't retry on failure so we can see the exact error
   });
+
+  // Log any query errors
+  if (negotiationsError) {
+    console.error('React Query negotiationsError:', negotiationsError);
+  }
 
   // Fetch all creators to get creator details
   const { data: allCreators = [] } = useQuery({

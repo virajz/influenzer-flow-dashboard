@@ -1,4 +1,3 @@
-
 import { collection, doc, addDoc, updateDoc, getDocs, getDoc, query, where, orderBy } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
@@ -83,17 +82,42 @@ export const negotiationsService = {
     },
 
     async getNegotiationsByCampaign(campaignId: string): Promise<Negotiation[]> {
-        const q = query(
-            collection(db, NEGOTIATIONS_COLLECTION),
-            where('campaignId', '==', campaignId),
-            orderBy('createdAt', 'desc')
-        );
+        try {
+            console.log('Querying negotiations for campaignId:', campaignId);
+            
+            // First, try without orderBy to test if the where clause works
+            const q = query(
+                collection(db, NEGOTIATIONS_COLLECTION),
+                where('campaignId', '==', campaignId)
+                // Temporarily removed orderBy to test index issue
+                // orderBy('createdAt', 'desc')
+            );
 
-        const querySnapshot = await getDocs(q);
-        return querySnapshot.docs.map(doc => ({
-            ...doc.data(),
-            negotiationId: doc.id
-        } as Negotiation));
+            const querySnapshot = await getDocs(q);
+            console.log('Query snapshot size:', querySnapshot.size);
+            
+            const negotiations = querySnapshot.docs.map(doc => {
+                const data = { ...doc.data(), negotiationId: doc.id } as Negotiation;
+                console.log('Found negotiation:', data.negotiationId, 'for campaign:', data.campaignId);
+                return data;
+            });
+            
+            console.log('Total negotiations found for campaign:', negotiations.length);
+            
+            // Sort manually for now (since we removed orderBy)
+            negotiations.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+            
+            return negotiations;
+        } catch (error) {
+            console.error("Firestore query failed for getNegotiationsByCampaign:", error);
+            console.error("Campaign ID:", campaignId);
+            console.error("Error details:", {
+                code: (error as any)?.code,
+                message: (error as any)?.message,
+                stack: (error as any)?.stack
+            });
+            throw error;
+        }
     },
 
     async getAllNegotiations(): Promise<Negotiation[]> {
