@@ -1,5 +1,3 @@
-
-
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -17,14 +15,14 @@ import { CommunicationHistoryTab } from '@/components/creators/CommunicationHist
 import { CampaignViewHeader } from '@/components/campaigns/CampaignViewHeader';
 import { CampaignMetrics } from '@/components/campaigns/CampaignMetrics';
 import { ContactedCreatorsList } from '@/components/campaigns/ContactedCreatorsList';
-import { CampaignAssignmentModal } from '@/components/campaigns/CampaignAssignmentModal';
+import { CreatorSelectionModal } from '@/components/campaigns/CreatorSelectionModal';
 import { toast } from '@/hooks/use-toast';
 
 const CampaignView = () => {
   const { campaignId } = useParams<{ campaignId: string }>();
   const { currentUser } = useAuth();
   const [selectedCreatorId, setSelectedCreatorId] = useState<string | null>(null);
-  const [showAssignmentModal, setShowAssignmentModal] = useState(false);
+  const [showCreatorSelectionModal, setShowCreatorSelectionModal] = useState(false);
 
   console.log('CampaignView - campaignId:', campaignId);
 
@@ -255,7 +253,7 @@ const CampaignView = () => {
 
   const handleCreatorAssigned = () => {
     refetchAssignments();
-    setShowAssignmentModal(false);
+    setShowCreatorSelectionModal(false);
   };
 
   if (campaignLoading || negotiationsLoading || assignmentsLoading) {
@@ -286,7 +284,7 @@ const CampaignView = () => {
     <div className="p-8">
       <CampaignViewHeader 
         campaign={campaign} 
-        onAddCreator={() => setShowAssignmentModal(true)}
+        onAddCreator={() => setShowCreatorSelectionModal(true)}
       />
       
       <CampaignMetrics campaign={campaign} />
@@ -303,8 +301,6 @@ const CampaignView = () => {
             allNegotiationsCount={0}
             creatorAssignments={creatorAssignments}
             communications={communications}
-            onAutoEmail={handleAutoEmail}
-            onAgentCall={handleAgentCall}
           />
         </div>
 
@@ -316,9 +312,28 @@ const CampaignView = () => {
             ) : (
               <Card className="rounded-2xl shadow-md">
                 <CardContent className="p-12">
-                  <div className="text-center">
+                  <div className="text-center space-y-4">
                     <p className="text-gray-600 mb-4">No communication history found</p>
-                    <p className="text-sm text-gray-500">Start outreach using the buttons in the creator panel</p>
+                    <p className="text-sm text-gray-500 mb-6">Start outreach using the buttons below</p>
+                    
+                    <div className="flex justify-center gap-4">
+                      <Button
+                        onClick={() => handleAutoEmail(selectedCreatorId)}
+                        variant="outline"
+                        className="flex items-center gap-2"
+                      >
+                        <Mail className="h-4 w-4" />
+                        Auto Email
+                      </Button>
+                      <Button
+                        onClick={() => handleAgentCall(selectedCreatorId)}
+                        variant="outline"
+                        className="flex items-center gap-2"
+                      >
+                        <PhoneCall className="h-4 w-4" />
+                        Agent Call
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -335,12 +350,12 @@ const CampaignView = () => {
         </div>
       </div>
 
-      {showAssignmentModal && (
-        <CampaignAssignmentModal
-          open={showAssignmentModal}
-          onOpenChange={setShowAssignmentModal}
-          selectedCreatorIds={[]}
-          onAssignmentComplete={handleCreatorAssigned}
+      {showCreatorSelectionModal && (
+        <CreatorSelectionModal
+          open={showCreatorSelectionModal}
+          onOpenChange={setShowCreatorSelectionModal}
+          campaignId={campaignId || ''}
+          onCreatorAssigned={handleCreatorAssigned}
         />
       )}
     </div>
