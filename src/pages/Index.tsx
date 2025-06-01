@@ -12,29 +12,35 @@ const Index = () => {
 
   useEffect(() => {
     const checkUserAndBrand = async () => {
+      console.log('Index: Starting auth check, loading:', loading, 'currentUser:', currentUser?.uid);
+      
       if (loading) return;
 
       if (!currentUser) {
-        // User is not logged in, redirect to login
+        console.log('Index: No user found, redirecting to login');
         navigate('/login');
         return;
       }
 
       try {
-        // User is logged in, now check if they have a brand profile
+        console.log('Index: User found, checking brand for UID:', currentUser.uid);
         const brandRef = doc(db, 'brands', currentUser.uid);
         const brandSnap = await getDoc(brandRef);
 
+        console.log('Index: Brand document exists:', brandSnap.exists());
         if (brandSnap.exists()) {
-          // User has brand profile, redirect to dashboard
+          console.log('Index: Brand data:', brandSnap.data());
+        }
+
+        if (brandSnap.exists()) {
+          console.log('Index: User has brand profile, redirecting to dashboard');
           navigate('/dashboard');
         } else {
-          // User doesn't have brand profile, redirect to onboarding
+          console.log('Index: User has no brand profile, redirecting to onboarding');
           navigate('/onboarding');
         }
       } catch (error) {
-        console.error('Error checking brand status:', error);
-        // On error, redirect to login for safety
+        console.error('Index: Error checking brand status:', error);
         navigate('/login');
       } finally {
         setIsChecking(false);

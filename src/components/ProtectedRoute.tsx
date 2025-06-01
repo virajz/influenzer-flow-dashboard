@@ -18,23 +18,29 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   useEffect(() => {
     const checkAuthAndBrand = async () => {
-      console.log('Checking auth and brand status...');
+      console.log('ProtectedRoute: Checking auth and brand status for user:', currentUser?.uid);
       
       if (!currentUser) {
-        console.log('No user found, redirecting to login');
+        console.log('ProtectedRoute: No user found, redirecting to login');
         navigate('/login');
         return;
       }
 
       try {
+        console.log('ProtectedRoute: Checking brand document for UID:', currentUser.uid);
         const brandRef = doc(db, 'brands', currentUser.uid);
         const brandSnap = await getDoc(brandRef);
 
+        console.log('ProtectedRoute: Brand document exists:', brandSnap.exists());
         if (brandSnap.exists()) {
-          console.log('User has brand, allowing access');
+          console.log('ProtectedRoute: Brand data found:', brandSnap.data());
+        }
+
+        if (brandSnap.exists()) {
+          console.log('ProtectedRoute: User has brand, allowing access');
           setHasBrand(true);
         } else {
-          console.log('User has no brand, redirecting to onboarding');
+          console.log('ProtectedRoute: User has no brand, redirecting to onboarding');
           toast({
             title: "Complete your profile",
             description: "Please complete your brand profile to continue.",
@@ -42,7 +48,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
           navigate('/onboarding');
         }
       } catch (error) {
-        console.error('Error checking brand status:', error);
+        console.error('ProtectedRoute: Error checking brand status:', error);
         toast({
           title: "Error",
           description: "There was an error checking your profile. Please try again.",
