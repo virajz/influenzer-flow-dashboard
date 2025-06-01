@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { OutreachActions } from '@/components/outreach/OutreachActions';
 import { FiCalendar, FiDollarSign } from 'react-icons/fi';
+import { Plus } from 'lucide-react';
 import { Campaign } from '@/services/campaignsService';
 import { Negotiation } from '@/services/negotiationsService';
 import { Creator } from '@/services/creatorsService';
@@ -28,20 +29,26 @@ export const CurrentCampaignsTab = ({
 
   return (
     <Card className="rounded-2xl shadow-md">
-      <CardHeader>
-        <CardTitle>Current Campaigns</CardTitle>
-        <CardDescription>Active campaigns and outreach status</CardDescription>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <div>
+          <CardTitle>Current Campaigns</CardTitle>
+          <CardDescription>Active campaigns and outreach status</CardDescription>
+        </div>
+        <Button 
+          onClick={onAssignToCampaign}
+          className="bg-purple-600 hover:bg-purple-700"
+        >
+          <Plus className="mr-2 h-4 w-4" />
+          Assign to Campaign
+        </Button>
       </CardHeader>
       <CardContent>
         {currentCampaigns.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-600 mb-4">No current campaigns assigned</p>
-            <Button 
-              onClick={onAssignToCampaign}
-              className="bg-purple-600 hover:bg-purple-700"
-            >
-              Add to Campaign
-            </Button>
+            <p className="text-sm text-gray-500">
+              Use the "Assign to Campaign" button above to add this creator to a campaign.
+            </p>
           </div>
         ) : (
           <div className="space-y-6">

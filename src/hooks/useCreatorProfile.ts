@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -6,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { creatorsService } from '@/services/creatorsService';
 import { campaignsService } from '@/services/campaignsService';
 import { negotiationsService } from '@/services/negotiationsService';
+import { creatorAssignmentsService } from '@/services/creatorAssignmentsService';
 import { apiService } from '@/services/apiService';
 import { useRealTimeNegotiations } from '@/hooks/useRealTimeNegotiations';
 import { useRealTimeCommunications } from '@/hooks/useRealTimeCommunications';
@@ -27,6 +27,16 @@ export const useCreatorProfile = () => {
   // Use real-time negotiations hook
   const { negotiations, isLoading: negotiationsLoading } = useRealTimeNegotiations(creatorId);
 
+  // Fetch creator assignments
+  const { data: creatorAssignment } = useQuery({
+    queryKey: ['creatorAssignments', currentUser?.uid, creatorId],
+    queryFn: async () => {
+      if (!currentUser?.uid || !creatorId) return null;
+      return await creatorAssignmentsService.getCreatorAssignment(currentUser.uid, creatorId);
+    },
+    enabled: !!currentUser?.uid && !!creatorId,
+  });
+
   // Fetch ALL campaigns for the brand
   const { data: brandCampaigns = [] } = useQuery({
     queryKey: ['campaigns', currentUser?.uid],
@@ -37,10 +47,14 @@ export const useCreatorProfile = () => {
     enabled: !!currentUser?.uid,
   });
 
-  // Filter campaigns to only show those where this creator has negotiations/assignments
-  const creatorCampaignIds = negotiations.map(n => n.campaignId);
+  // Combine campaign IDs from negotiations and assignments
+  const negotiationCampaignIds = negotiations.map(n => n.campaignId);
+  const assignmentCampaignIds = creatorAssignment?.campaignIds || [];
+  const allCampaignIds = [...new Set([...negotiationCampaignIds, ...assignmentCampaignIds])];
+
+  // Filter campaigns to show those where this creator has negotiations or assignments
   const allCampaigns = brandCampaigns.filter(campaign => 
-    creatorCampaignIds.includes(campaign.campaignId)
+    allCampaignIds.includes(campaign.campaignId)
   );
 
   // Use real-time communications hook
