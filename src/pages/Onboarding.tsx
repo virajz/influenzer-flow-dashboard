@@ -64,11 +64,13 @@ const Onboarding = () => {
     setIsSubmitting(true);
 
     try {
+      const token = await currentUser.getIdToken();
+      
       const response = await fetch('https://creator-server-173826602269.us-central1.run.app/api/brands', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': currentUser.getIdToken()
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           // uid: currentUser.uid,
