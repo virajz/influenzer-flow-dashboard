@@ -9,12 +9,11 @@ interface Campaign {
 
 interface CampaignMetricsProps {
   campaign: Campaign;
-  contactedCreatorsCount: number;
 }
 
-export const CampaignMetrics = ({ campaign, contactedCreatorsCount }: CampaignMetricsProps) => {
+export const CampaignMetrics = ({ campaign }: CampaignMetricsProps) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
       <Card>
         <CardContent className="p-4">
           <div className="text-sm text-gray-500">Budget</div>
@@ -27,12 +26,6 @@ export const CampaignMetrics = ({ campaign, contactedCreatorsCount }: CampaignMe
           <div className="text-lg font-semibold">
             {new Date(campaign.startDate).toLocaleDateString()} - {new Date(campaign.endDate).toLocaleDateString()}
           </div>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardContent className="p-4">
-          <div className="text-sm text-gray-500">Contacted Creators</div>
-          <div className="text-2xl font-bold">{contactedCreatorsCount}</div>
         </CardContent>
       </Card>
     </div>

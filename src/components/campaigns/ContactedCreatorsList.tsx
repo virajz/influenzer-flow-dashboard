@@ -101,11 +101,6 @@ export const ContactedCreatorsList = ({
                 ? "No creators contacted yet" 
                 : "No creators match your filters"}
             </p>
-            {contactedCreators.length === 0 && (
-              <p className="text-xs text-gray-500 mt-2">
-                Debug: Found {negotiationsCount} negotiations for this campaign, {allNegotiationsCount} total negotiations
-              </p>
-            )}
           </div>
         ) : (
           <div className="space-y-3">
@@ -144,11 +139,6 @@ export const ContactedCreatorsList = ({
                         >
                           {negotiation.status.replace('_', ' ')}
                         </Badge>
-                        {creator.instagramFollowers && (
-                          <span className="text-xs text-gray-400">
-                            {(creator.instagramFollowers / 1000).toFixed(1)}K followers
-                          </span>
-                        )}
                       </div>
                     </div>
                   </div>

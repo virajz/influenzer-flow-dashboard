@@ -13,13 +13,14 @@ import { CommunicationHistoryTab } from '@/components/creators/CommunicationHist
 import { CampaignViewHeader } from '@/components/campaigns/CampaignViewHeader';
 import { CampaignMetrics } from '@/components/campaigns/CampaignMetrics';
 import { ContactedCreatorsList } from '@/components/campaigns/ContactedCreatorsList';
-import { CampaignDebugSection } from '@/components/campaigns/CampaignDebugSection';
+import { CampaignAssignmentModal } from '@/components/campaigns/CampaignAssignmentModal';
 import { toast } from '@/hooks/use-toast';
 
 const CampaignView = () => {
   const { campaignId } = useParams<{ campaignId: string }>();
   const { currentUser } = useAuth();
   const [selectedCreatorId, setSelectedCreatorId] = useState<string | null>(null);
+  const [showAssignmentModal, setShowAssignmentModal] = useState(false);
 
   console.log('CampaignView - campaignId:', campaignId);
 
@@ -36,7 +37,7 @@ const CampaignView = () => {
   });
 
   // Fetch creator assignments for current user
-  const { data: creatorAssignments = [], isLoading: assignmentsLoading } = useQuery({
+  const { data: creatorAssignments = [], isLoading: assignmentsLoading, refetch: refetchAssignments } = useQuery({
     queryKey: ['creatorAssignments', currentUser?.uid],
     queryFn: async () => {
       if (!currentUser?.uid) return [];
@@ -46,16 +47,6 @@ const CampaignView = () => {
       return assignments;
     },
     enabled: !!currentUser?.uid,
-  });
-
-  // Fetch ALL negotiations for debugging
-  const { data: allNegotiations = [] } = useQuery({
-    queryKey: ['all-negotiations'],
-    queryFn: async () => {
-      const negotiationsData = await negotiationsService.getAllNegotiations();
-      console.log('ALL negotiations fetched:', negotiationsData.length);
-      return negotiationsData;
-    },
   });
 
   // Fetch negotiations for this campaign
@@ -258,6 +249,11 @@ const CampaignView = () => {
     }
   };
 
+  const handleCreatorAssigned = () => {
+    refetchAssignments();
+    setShowAssignmentModal(false);
+  };
+
   if (campaignLoading || negotiationsLoading || assignmentsLoading) {
     return (
       <div className="p-8">
@@ -284,18 +280,12 @@ const CampaignView = () => {
 
   return (
     <div className="p-8">
-      <CampaignDebugSection 
-        campaignId={campaignId}
-        allNegotiations={allNegotiations}
-        negotiations={negotiations}
+      <CampaignViewHeader 
+        campaign={campaign} 
+        onAddCreator={() => setShowAssignmentModal(true)}
       />
-
-      <CampaignViewHeader campaign={campaign} />
       
-      <CampaignMetrics 
-        campaign={campaign}
-        contactedCreatorsCount={contactedCreators.length}
-      />
+      <CampaignMetrics campaign={campaign} />
 
       {/* Main Content */}
       <div className="flex gap-6">
@@ -306,7 +296,7 @@ const CampaignView = () => {
             selectedCreatorId={selectedCreatorId}
             onCreatorSelect={setSelectedCreatorId}
             negotiationsCount={negotiations.length}
-            allNegotiationsCount={allNegotiations.length}
+            allNegotiationsCount={0}
             creatorAssignments={creatorAssignments}
             communications={communications}
             onAutoEmail={handleAutoEmail}
@@ -317,7 +307,18 @@ const CampaignView = () => {
         {/* Right Content - Communication History */}
         <div className="flex-1">
           {selectedCreatorId ? (
-            <CommunicationHistoryTab communications={communications} />
+            communications.length > 0 ? (
+              <CommunicationHistoryTab communications={communications} />
+            ) : (
+              <Card className="rounded-2xl shadow-md">
+                <CardContent className="p-12">
+                  <div className="text-center">
+                    <p className="text-gray-600 mb-4">No communication history found</p>
+                    <p className="text-sm text-gray-500">Start outreach using the buttons in the creator panel</p>
+                  </div>
+                </CardContent>
+              </Card>
+            )
           ) : (
             <Card className="rounded-2xl shadow-md">
               <CardContent className="p-12">
@@ -329,6 +330,15 @@ const CampaignView = () => {
           )}
         </div>
       </div>
+
+      {showAssignmentModal && campaign && (
+        <CampaignAssignmentModal
+          isOpen={showAssignmentModal}
+          onClose={() => setShowAssignmentModal(false)}
+          campaign={campaign}
+          onCreatorAssigned={handleCreatorAssigned}
+        />
+      )}
     </div>
   );
 };
