@@ -1,3 +1,4 @@
+
 import { collection, doc, addDoc, updateDoc, getDocs, getDoc, query, where, orderBy } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
@@ -85,12 +86,10 @@ export const negotiationsService = {
         try {
             console.log('Querying negotiations for campaignId:', campaignId);
             
-            // First, try without orderBy to test if the where clause works
             const q = query(
                 collection(db, NEGOTIATIONS_COLLECTION),
-                where('campaignId', '==', campaignId)
-                // Temporarily removed orderBy to test index issue
-                // orderBy('createdAt', 'desc')
+                where('campaignId', '==', campaignId),
+                orderBy('createdAt', 'desc')
             );
 
             const querySnapshot = await getDocs(q);
@@ -103,10 +102,6 @@ export const negotiationsService = {
             });
             
             console.log('Total negotiations found for campaign:', negotiations.length);
-            
-            // Sort manually for now (since we removed orderBy)
-            negotiations.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-            
             return negotiations;
         } catch (error) {
             console.error("Firestore query failed for getNegotiationsByCampaign:", error);

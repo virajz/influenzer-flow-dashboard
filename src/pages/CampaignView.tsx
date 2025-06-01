@@ -20,7 +20,6 @@ const CampaignView = () => {
   const [selectedCreatorId, setSelectedCreatorId] = useState<string | null>(null);
 
   console.log('CampaignView - campaignId:', campaignId);
-  console.log('CampaignView - currentUser:', currentUser?.uid);
 
   // Fetch campaign details
   const { data: campaign, isLoading: campaignLoading } = useQuery({
@@ -39,40 +38,24 @@ const CampaignView = () => {
     queryKey: ['all-negotiations'],
     queryFn: async () => {
       const negotiationsData = await negotiationsService.getAllNegotiations();
-      console.log('ALL negotiations fetched:', negotiationsData);
+      console.log('ALL negotiations fetched:', negotiationsData.length);
       return negotiationsData;
     },
   });
 
-  // Fetch negotiations for this campaign with enhanced error handling
-  const { data: negotiations = [], isLoading: negotiationsLoading, error: negotiationsError } = useQuery({
+  // Fetch negotiations for this campaign
+  const { data: negotiations = [], isLoading: negotiationsLoading } = useQuery({
     queryKey: ['negotiations', campaignId],
     queryFn: async () => {
       if (!campaignId) return [];
-      console.log('=== STARTING NEGOTIATION QUERY ===');
-      console.log('Query campaignId:', campaignId);
-      console.log('Query campaignId type:', typeof campaignId);
+      console.log('Fetching negotiations for campaign:', campaignId);
       
-      try {
-        const negotiationsData = await negotiationsService.getNegotiationsByCampaign(campaignId);
-        console.log('=== NEGOTIATION QUERY SUCCESSFUL ===');
-        console.log('Negotiations fetched for campaign:', campaignId, negotiationsData);
-        console.log('Number of negotiations:', negotiationsData.length);
-        return negotiationsData;
-      } catch (error) {
-        console.error('=== NEGOTIATION QUERY FAILED ===');
-        console.error('Error:', error);
-        throw error;
-      }
+      const negotiationsData = await negotiationsService.getNegotiationsByCampaign(campaignId);
+      console.log('Negotiations fetched for campaign:', negotiationsData.length);
+      return negotiationsData;
     },
     enabled: !!campaignId,
-    retry: false, // Don't retry on failure so we can see the exact error
   });
-
-  // Log any query errors
-  if (negotiationsError) {
-    console.error('React Query negotiationsError:', negotiationsError);
-  }
 
   // Fetch all creators to get creator details
   const { data: allCreators = [] } = useQuery({
@@ -80,7 +63,6 @@ const CampaignView = () => {
     queryFn: async () => {
       const creatorsData = await creatorsService.getAllCreators();
       console.log('All creators fetched:', creatorsData.length);
-      console.log('Creator IDs available:', creatorsData.map(c => c.creatorId));
       return creatorsData;
     },
   });
@@ -98,25 +80,14 @@ const CampaignView = () => {
 
   // Get contacted creators (those with negotiations)
   const contactedCreators = negotiations.map(negotiation => {
-    console.log('Processing negotiation with creatorId:', negotiation.creatorId);
-    const creator = allCreators.find(c => {
-      console.log(`Comparing negotiation.creatorId "${negotiation.creatorId}" with creator.creatorId "${c.creatorId}"`);
-      return c.creatorId === negotiation.creatorId;
-    });
-    console.log('Looking for creator with ID:', negotiation.creatorId, 'Found:', !!creator);
-    if (creator) {
-      console.log('Found creator:', creator.displayName, creator.email);
-    } else {
-      console.log('No creator found for negotiation creatorId:', negotiation.creatorId);
-      console.log('Available creator IDs:', allCreators.map(c => c.creatorId));
-    }
+    const creator = allCreators.find(c => c.creatorId === negotiation.creatorId);
     return {
       creator,
       negotiation,
     };
   }).filter(item => item.creator);
 
-  console.log('Final contacted creators:', contactedCreators);
+  console.log('Final contacted creators:', contactedCreators.length);
 
   if (campaignLoading || negotiationsLoading) {
     return (
@@ -160,7 +131,7 @@ const CampaignView = () => {
       {/* Main Content */}
       <div className="flex gap-6">
         {/* Left Sidebar - Contacted Creators */}
-        <div className="w-1/4">
+        <div className="w-1/3">
           <ContactedCreatorsList
             contactedCreators={contactedCreators}
             selectedCreatorId={selectedCreatorId}
