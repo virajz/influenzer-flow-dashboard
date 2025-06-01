@@ -104,6 +104,7 @@ const Onboarding = () => {
     try {
       const brandData = {
         uid: currentUser.uid,
+        brandId: currentUser.uid,
         brandName: formData.brandName,
         description: formData.description,
         email: currentUser.email,
