@@ -1,4 +1,3 @@
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { CampaignAssignmentModal } from '@/components/campaigns/CampaignAssignmentModal';
@@ -10,7 +9,7 @@ import { Creator } from '@/services/creatorsService';
 import { Campaign } from '@/services/campaignsService';
 import { Negotiation } from '@/services/negotiationsService';
 import { Communication } from '@/services/communicationsService';
-import { Target, FiPlus } from 'lucide-react';
+import { Target, Plus } from 'lucide-react';
 
 interface CreatorProfileContentProps {
   creator: Creator;
@@ -51,7 +50,7 @@ export const CreatorProfileContent = ({
             This creator hasn't been assigned to any campaigns yet. Assign them to a campaign to start collaborating.
           </p>
           <Button onClick={() => onAssignmentModalChange(true)} className="bg-purple-600 hover:bg-purple-700">
-            <FiPlus className="mr-2 h-4 w-4" />
+            <Plus className="mr-2 h-4 w-4" />
             Assign to Campaign
           </Button>
         </div>
