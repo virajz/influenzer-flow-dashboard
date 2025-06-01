@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { campaignsService } from '@/services/campaignsService';
@@ -80,8 +79,8 @@ export const useCampaignData = (campaignId: string | undefined) => {
   console.log('useCampaignData - All contacted creator IDs (assignments + negotiations):', allContactedCreatorIds);
   console.log('useCampaignData - Existing creator IDs (for exclusion in modal - ALL CONTACTED):', existingCreatorIds);
 
-  // Get contacted creators with their data - ensure ALL contacted creators are included
-  const contactedCreators = allContactedCreatorIds.map(creatorId => {
+  // Build contacted creators list from ALL ASSIGNED creators (not just those with negotiations)
+  const contactedCreators = assignedCreatorIds.map(creatorId => {
     const creator = allCreators.find(c => c.creatorId === creatorId);
     const negotiation = negotiations.find(n => n.creatorId === creatorId);
     
