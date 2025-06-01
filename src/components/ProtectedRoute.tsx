@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -25,26 +27,19 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
       }
 
       try {
-        const token = await currentUser.getIdToken();
-        const response = await fetch('https://creator-server-173826602269.us-central1.run.app/api/brands', {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
+        const brandRef = doc(db, 'brands', currentUser.uid);
+        const brandSnap = await getDoc(brandRef);
 
-        if (response.ok) {
+        if (brandSnap.exists()) {
           console.log('User has brand, allowing access');
           setHasBrand(true);
-        } else if (response.status === 404) {
+        } else {
           console.log('User has no brand, redirecting to onboarding');
           toast({
             title: "Complete your profile",
             description: "Please complete your brand profile to continue.",
           });
           navigate('/onboarding');
-        } else {
-          throw new Error('Failed to check brand status');
         }
       } catch (error) {
         console.error('Error checking brand status:', error);

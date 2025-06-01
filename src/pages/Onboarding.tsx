@@ -8,6 +8,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { doc, setDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 const Onboarding = () => {
   const navigate = useNavigate();
@@ -64,29 +66,21 @@ const Onboarding = () => {
     setIsSubmitting(true);
 
     try {
-      const token = await currentUser.getIdToken();
-      
-      const response = await fetch('https://creator-server-173826602269.us-central1.run.app/api/brands', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          uid: currentUser.uid,
-          brandName: formData.brandName,
-          description: formData.description,
-          email: currentUser.email,
-          phone: formData.phoneNumber,
-          website: formData.website || null,
-          industry: formData.industry,
-          companySize: formData.companySize,
-        }),
-      });
+      const brandData = {
+        uid: currentUser.uid,
+        brandName: formData.brandName,
+        description: formData.description,
+        email: currentUser.email,
+        phone: formData.phoneNumber,
+        website: formData.website || null,
+        industry: formData.industry,
+        companySize: formData.companySize,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
 
-      if (!response.ok) {
-        throw new Error('Failed to create brand profile');
-      }
+      const brandRef = doc(db, 'brands', currentUser.uid);
+      await setDoc(brandRef, brandData);
 
       toast({
         title: "Profile created successfully!",

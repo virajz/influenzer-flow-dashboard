@@ -36,31 +36,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const loginWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
-    const result = await signInWithPopup(auth, provider);
-    
-    // Create brand in your backend after successful Google login
-    if (result.user) {
-      try {
-        const response = await fetch('https://creator-server-173826602269.us-central1.run.app/api/brand', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            uid: result.user.uid,
-            email: result.user.email,
-            displayName: result.user.displayName,
-            photoURL: result.user.photoURL,
-          }),
-        });
-        
-        if (!response.ok) {
-          console.error('Failed to create brand in backend');
-        }
-      } catch (error) {
-        console.error('Error creating brand:', error);
-      }
-    }
+    await signInWithPopup(auth, provider);
   };
 
   const logout = async () => {
