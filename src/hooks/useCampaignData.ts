@@ -59,7 +59,7 @@ export const useCampaignData = (campaignId: string | undefined) => {
     refetchOnWindowFocus: false,
   });
 
-  // Get creators assigned to this campaign from creatorAssignments
+  // Get creators assigned to THIS SPECIFIC CAMPAIGN from creatorAssignments
   const assignedCreatorIds = creatorAssignments
     .filter(assignment => assignment.campaignIds.includes(campaignId || ''))
     .map(assignment => assignment.creatorId);
@@ -67,8 +67,14 @@ export const useCampaignData = (campaignId: string | undefined) => {
   // Get creators who have negotiations for this campaign
   const negotiationCreatorIds = negotiations.map(n => n.creatorId);
 
-  // Combine both sets of creator IDs (unique)
+  // Combine both sets of creator IDs for THIS CAMPAIGN ONLY (unique)
   const allContactedCreatorIds = [...new Set([...assignedCreatorIds, ...negotiationCreatorIds])];
+
+  console.log('useCampaignData - Campaign ID:', campaignId);
+  console.log('useCampaignData - All creator assignments:', creatorAssignments.length);
+  console.log('useCampaignData - Assignments for this campaign:', assignedCreatorIds);
+  console.log('useCampaignData - Negotiations for this campaign:', negotiationCreatorIds);
+  console.log('useCampaignData - Final contacted creator IDs for this campaign:', allContactedCreatorIds);
 
   // Get contacted creators with their data
   const contactedCreators = allContactedCreatorIds.map(creatorId => {
