@@ -1,4 +1,3 @@
-
 import { useParams } from 'react-router-dom';
 import { CampaignViewHeader } from '@/components/campaigns/CampaignViewHeader';
 import { CampaignMetrics } from '@/components/campaigns/CampaignMetrics';
@@ -56,11 +55,11 @@ const CampaignView = () => {
 
   return (
     <div className="p-8 h-screen flex flex-col">
-      <CampaignViewHeader 
-        campaign={campaign} 
+      <CampaignViewHeader
+        campaign={campaign}
         onAddCreator={() => setShowCreatorSelectionModal(true)}
       />
-      
+
       <CampaignMetrics campaign={campaign} />
 
       <CampaignMainContent

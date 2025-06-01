@@ -87,8 +87,8 @@ export const useCampaignActions = (
     try {
       let negotiation = negotiations.find(n => n.creatorId === creatorId);
 
+      const creator = allCreators.find(c => c.creatorId === creatorId);
       if (!negotiation) {
-        const creator = allCreators.find(c => c.creatorId === creatorId);
         if (!creator) return;
 
         const negotiationId = await negotiationsService.createNegotiation({
@@ -117,13 +117,16 @@ export const useCampaignActions = (
           phoneContactAttempted: true,
           voiceCallCompleted: true
         });
+        await apiService.initiateAgentCall(negotiation.negotiationId, creator.phone);
       }
+
 
       toast({
         title: "Agent Call Initiated!",
         description: "AI agent is calling the creator.",
       });
     } catch (error) {
+      console.error('Error initiating agent call:', error);
       toast({
         title: "Error",
         description: "Failed to initiate call. Please try again.",

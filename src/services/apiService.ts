@@ -15,4 +15,22 @@ export const apiService = {
       throw new Error(`Failed to start negotiation: ${response.statusText}`);
     }
   },
+
+  async initiateAgentCall(negotiationId: string, phone: string): Promise<any> {
+    const response = await fetch(
+      'http://creator-server-173826602269.us-central1.run.app/api/initiateCall/start',
+      {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ negotiationId, phone }),
+      }
+    );
+    if (!response.ok) {
+      throw new Error('Failed to initiate call');
+    }
+    return response.json();
+  },
 };
