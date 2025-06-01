@@ -54,7 +54,10 @@ export const CommunicationPanel = ({
   if (communications.length > 0) {
     return (
       <CommunicationHistoryTab 
-        communications={communications} 
+        communications={communications}
+        hasPhone={hasPhone}
+        onAgentCall={() => selectedCreatorId && onAgentCall(selectedCreatorId)}
+        isCallLoading={isCallLoading}
       />
     );
   }

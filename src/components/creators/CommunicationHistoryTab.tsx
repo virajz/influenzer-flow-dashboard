@@ -9,10 +9,16 @@ import { Communication } from '@/services/communicationsService';
 
 interface CommunicationHistoryTabProps {
   communications: Communication[];
+  hasPhone?: boolean;
+  onAgentCall?: () => void;
+  isCallLoading?: boolean;
 }
 
 export const CommunicationHistoryTab = ({ 
-  communications
+  communications,
+  hasPhone = false,
+  onAgentCall,
+  isCallLoading = false
 }: CommunicationHistoryTabProps) => {
   const getCommunicationIcon = (type: string) => {
     switch (type) {
@@ -62,13 +68,15 @@ export const CommunicationHistoryTab = ({
           </div>
           <div className="flex items-center gap-2">
             <Button
-              disabled={true}
+              onClick={onAgentCall}
+              disabled={!hasPhone || isCallLoading}
               variant="outline"
               size="sm"
               className="flex items-center gap-2"
             >
               <PhoneCall className="h-4 w-4" />
-              Agent Call
+              {isCallLoading ? 'Calling...' : 'Agent Call'}
+              {!hasPhone && <span className="text-xs ml-1">(No Phone)</span>}
             </Button>
           </div>
         </div>
