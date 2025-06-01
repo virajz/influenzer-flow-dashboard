@@ -11,7 +11,6 @@ import { toast } from '@/hooks/use-toast';
 import { CampaignFilters } from '@/components/campaigns/CampaignFilters';
 import { CampaignTable } from '@/components/campaigns/CampaignTable';
 import { EmptyState } from '@/components/campaigns/EmptyState';
-import { DebugInfo } from '@/components/campaigns/DebugInfo';
 
 const Campaigns = () => {
   const navigate = useNavigate();
@@ -19,35 +18,29 @@ const Campaigns = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
-  console.log('Current user:', currentUser);
-  console.log('Current user ID:', currentUser?.uid);
-
   // Fetch campaigns using React Query
   const { data: campaigns = [], isLoading, error, isError } = useQuery({
     queryKey: ['campaigns', currentUser?.uid],
     queryFn: async () => {
-      console.log('Query function called with user ID:', currentUser?.uid);
       if (!currentUser?.uid) {
-        console.error('User not authenticated');
         throw new Error('User not authenticated');
       }
       try {
         const result = await campaignsService.getCampaignsByBrand(currentUser.uid);
-        console.log('Campaigns fetched successfully:', result);
         return result;
       } catch (error) {
-        console.error('Error in query function:', error);
+        // If it's an index error, log the URL for easy access
+        if (error instanceof Error && error.message.includes('index')) {
+          console.log('🔗 Create index at:', error.message.match(/https:\/\/[^\s]+/)?.[0]);
+        }
         throw error;
       }
     },
     enabled: !!currentUser?.uid,
   });
 
-  console.log('Query state:', { campaigns, isLoading, error, isError });
-
   useEffect(() => {
     if (isError && error) {
-      console.error('Error loading campaigns:', error);
       toast({
         title: "Error loading campaigns",
         description: error instanceof Error ? error.message : "There was an error loading your campaigns. Please try again.",
@@ -78,12 +71,6 @@ const Campaigns = () => {
 
   return (
     <div className="p-8">
-      <DebugInfo 
-        campaignsCount={campaigns.length} 
-        isError={isError} 
-        error={error} 
-      />
-
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Campaigns</h1>

@@ -13,6 +13,7 @@ import Onboarding from "./pages/Onboarding";
 import Dashboard from "./pages/Dashboard";
 import Campaigns from "./pages/Campaigns";
 import CampaignCreate from "./pages/CampaignCreate";
+import CampaignEdit from "./pages/CampaignEdit";
 import CreatorDiscovery from "./pages/CreatorDiscovery";
 import OutreachConsole from "./pages/OutreachConsole";
 import NegotiationTracker from "./pages/NegotiationTracker";
@@ -45,6 +46,11 @@ const App = () => (
             <Route path="/campaigns/new" element={
               <ProtectedRoute>
                 <Layout><CampaignCreate /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/campaigns/:campaignId/edit" element={
+              <ProtectedRoute>
+                <Layout><CampaignEdit /></Layout>
               </ProtectedRoute>
             } />
             <Route path="/discovery" element={

@@ -1,38 +1,54 @@
 
-import { useNavigate } from 'react-router-dom';
-import { format } from 'date-fns';
-import { Calendar, DollarSign } from 'lucide-react';
+import { TableCell, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { TableCell, TableRow } from '@/components/ui/table';
+import { Edit, Eye } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Campaign } from '@/services/campaignsService';
 
 interface CampaignTableRowProps {
   campaign: Campaign;
 }
 
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'active':
+      return 'bg-green-100 text-green-800';
+    case 'draft':
+      return 'bg-gray-100 text-gray-800';
+    case 'negotiating':
+      return 'bg-yellow-100 text-yellow-800';
+    case 'completed':
+      return 'bg-blue-100 text-blue-800';
+    case 'cancelled':
+      return 'bg-red-100 text-red-800';
+    default:
+      return 'bg-gray-100 text-gray-800';
+  }
+};
+
 export const CampaignTableRow = ({ campaign }: CampaignTableRowProps) => {
   const navigate = useNavigate();
 
-  const getStatusColor = (status: Campaign['status']) => {
-    switch (status) {
-      case 'active':
-        return 'bg-green-100 text-green-800';
-      case 'draft':
-        return 'bg-gray-100 text-gray-800';
-      case 'negotiating':
-        return 'bg-blue-100 text-blue-800';
-      case 'completed':
-        return 'bg-purple-100 text-purple-800';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString();
+  };
+
+  const getDuration = () => {
+    const start = new Date(campaign.startDate);
+    const end = new Date(campaign.endDate);
+    const diffTime = Math.abs(end.getTime() - start.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return `${diffDays} days`;
+  };
+
+  const getPlatforms = () => {
+    const platforms = campaign.requiredPlatforms?.map(p => p.platform) || [];
+    return platforms.slice(0, 2).join(', ') + (platforms.length > 2 ? '...' : '');
   };
 
   return (
-    <TableRow key={campaign.campaignId}>
+    <TableRow>
       <TableCell>
         <div>
           <div className="font-medium">{campaign.campaignName}</div>
@@ -46,32 +62,14 @@ export const CampaignTableRow = ({ campaign }: CampaignTableRowProps) => {
           {campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1)}
         </Badge>
       </TableCell>
+      <TableCell>${campaign.budget.toLocaleString()}</TableCell>
       <TableCell>
-        <div className="flex items-center">
-          <DollarSign className="mr-1 h-4 w-4 text-gray-400" />
-          {campaign.budget.toLocaleString()}
+        <div className="text-sm">
+          <div>{formatDate(campaign.startDate)} - {formatDate(campaign.endDate)}</div>
+          <div className="text-gray-500">{getDuration()}</div>
         </div>
       </TableCell>
-      <TableCell>
-        <div className="flex items-center text-sm">
-          <Calendar className="mr-1 h-4 w-4 text-gray-400" />
-          {format(new Date(campaign.startDate), 'MMM d')} - {format(new Date(campaign.endDate), 'MMM d, yyyy')}
-        </div>
-      </TableCell>
-      <TableCell>
-        <div className="flex flex-wrap gap-1">
-          {campaign.requiredPlatforms.slice(0, 2).map((platform, index) => (
-            <Badge key={index} variant="outline" className="text-xs">
-              {platform.platform}
-            </Badge>
-          ))}
-          {campaign.requiredPlatforms.length > 2 && (
-            <Badge variant="outline" className="text-xs">
-              +{campaign.requiredPlatforms.length - 2}
-            </Badge>
-          )}
-        </div>
-      </TableCell>
+      <TableCell>{getPlatforms()}</TableCell>
       <TableCell>
         <div className="flex gap-2">
           <Button
@@ -79,17 +77,15 @@ export const CampaignTableRow = ({ campaign }: CampaignTableRowProps) => {
             size="sm"
             onClick={() => navigate(`/campaigns/${campaign.campaignId}`)}
           >
-            View
+            <Eye className="h-4 w-4" />
           </Button>
-          {campaign.status === 'draft' && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate(`/campaigns/${campaign.campaignId}/edit`)}
-            >
-              Edit
-            </Button>
-          )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate(`/campaigns/${campaign.campaignId}/edit`)}
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
         </div>
       </TableCell>
     </TableRow>
