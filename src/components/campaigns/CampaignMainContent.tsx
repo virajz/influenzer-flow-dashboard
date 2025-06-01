@@ -16,6 +16,8 @@ interface CampaignMainContentProps {
   isEmailLoading: boolean;
   isCallLoading: boolean;
   onCreatorAssigned: () => void;
+  showCreatorSelectionModal: boolean;
+  setShowCreatorSelectionModal: (show: boolean) => void;
 }
 
 export const CampaignMainContent = ({
@@ -28,10 +30,11 @@ export const CampaignMainContent = ({
   onAgentCall,
   isEmailLoading,
   isCallLoading,
-  onCreatorAssigned
+  onCreatorAssigned,
+  showCreatorSelectionModal,
+  setShowCreatorSelectionModal
 }: CampaignMainContentProps) => {
   const [selectedCreatorId, setSelectedCreatorId] = useState<string | null>(null);
-  const [showCreatorSelectionModal, setShowCreatorSelectionModal] = useState(false);
 
   // Get negotiation IDs for selected creator for real-time communications
   const selectedNegotiationIds = selectedCreatorId 

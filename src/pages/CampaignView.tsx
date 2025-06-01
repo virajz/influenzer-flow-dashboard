@@ -5,9 +5,11 @@ import { CampaignMetrics } from '@/components/campaigns/CampaignMetrics';
 import { CampaignMainContent } from '@/components/campaigns/CampaignMainContent';
 import { useCampaignData } from '@/hooks/useCampaignData';
 import { useCampaignActions } from '@/hooks/useCampaignActions';
+import { useState } from 'react';
 
 const CampaignView = () => {
   const { campaignId } = useParams<{ campaignId: string }>();
+  const [showCreatorSelectionModal, setShowCreatorSelectionModal] = useState(false);
 
   const {
     campaign,
@@ -55,7 +57,7 @@ const CampaignView = () => {
     <div className="p-8 h-screen flex flex-col">
       <CampaignViewHeader 
         campaign={campaign} 
-        onAddCreator={() => {}}
+        onAddCreator={() => setShowCreatorSelectionModal(true)}
       />
       
       <CampaignMetrics campaign={campaign} />
@@ -71,6 +73,8 @@ const CampaignView = () => {
         isEmailLoading={isEmailLoading}
         isCallLoading={isCallLoading}
         onCreatorAssigned={refetchAssignments}
+        showCreatorSelectionModal={showCreatorSelectionModal}
+        setShowCreatorSelectionModal={setShowCreatorSelectionModal}
       />
     </div>
   );
