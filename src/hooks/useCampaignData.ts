@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { campaignsService } from '@/services/campaignsService';
@@ -79,10 +80,16 @@ export const useCampaignData = (campaignId: string | undefined) => {
   console.log('useCampaignData - All contacted creator IDs (assignments + negotiations):', allContactedCreatorIds);
   console.log('useCampaignData - Existing creator IDs (for exclusion in modal - ALL CONTACTED):', existingCreatorIds);
 
-  // Get contacted creators with their data
+  // Get contacted creators with their data - ensure ALL contacted creators are included
   const contactedCreators = allContactedCreatorIds.map(creatorId => {
     const creator = allCreators.find(c => c.creatorId === creatorId);
     const negotiation = negotiations.find(n => n.creatorId === creatorId);
+    
+    // If creator doesn't exist in allCreators, skip this entry
+    if (!creator) {
+      console.log(`useCampaignData - Creator ${creatorId} not found in allCreators`);
+      return null;
+    }
     
     // If no negotiation exists, create a default one showing assignment status
     const defaultNegotiation = negotiation || {
@@ -111,7 +118,10 @@ export const useCampaignData = (campaignId: string | undefined) => {
       creator,
       negotiation: defaultNegotiation,
     };
-  }).filter(item => item.creator);
+  }).filter(item => item !== null);
+
+  console.log('useCampaignData - Contacted creators count:', contactedCreators.length);
+  console.log('useCampaignData - Contacted creators:', contactedCreators.map(c => c?.creator.displayName));
 
   const isLoading = campaignLoading || negotiationsLoading || assignmentsLoading;
 
