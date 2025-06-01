@@ -29,19 +29,36 @@ export const CampaignAssignmentModal = ({
   const [selectedCampaignId, setSelectedCampaignId] = useState<string>('');
   const [isAssigning, setIsAssigning] = useState(false);
 
-  // Fetch active campaigns
+  // Fetch assignable campaigns (draft and active)
   const { data: campaigns = [], isLoading } = useQuery({
     queryKey: ['campaigns', currentUser?.uid],
     queryFn: async () => {
       if (!currentUser?.uid) return [];
       const allCampaigns = await campaignsService.getCampaignsByBrand(currentUser.uid);
-      return allCampaigns.filter(campaign => campaign.status === 'active');
+      console.log('All campaigns fetched for assignment:', allCampaigns);
+      // Include both draft and active campaigns for assignment
+      const assignableCampaigns = allCampaigns.filter(campaign => 
+        campaign.status === 'active' || campaign.status === 'draft'
+      );
+      console.log('Assignable campaigns:', assignableCampaigns);
+      return assignableCampaigns;
     },
     enabled: !!currentUser?.uid && open,
   });
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString();
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'active':
+        return 'bg-green-100 text-green-800';
+      case 'draft':
+        return 'bg-gray-100 text-gray-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
   };
 
   const handleAssign = async () => {
@@ -121,7 +138,7 @@ export const CampaignAssignmentModal = ({
             </div>
           ) : campaigns.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-gray-600">No active campaigns found.</p>
+              <p className="text-gray-600">No assignable campaigns found.</p>
               <p className="text-sm text-gray-500 mt-2">Create a campaign first to assign creators.</p>
             </div>
           ) : (
@@ -147,7 +164,7 @@ export const CampaignAssignmentModal = ({
                             </div>
                           </div>
                         </div>
-                        <Badge className="bg-green-100 text-green-800">
+                        <Badge className={getStatusColor(campaign.status)}>
                           {campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1)}
                         </Badge>
                       </div>
