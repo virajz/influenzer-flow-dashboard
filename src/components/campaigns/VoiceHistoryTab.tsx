@@ -17,7 +17,8 @@ export const VoiceHistoryTab = ({ voiceCommunications }: VoiceHistoryTabProps) =
   } | null>(null);
 
   // Filter out communications without audio URLs
-  const communicationsWithAudio = voiceCommunications.filter(comm => comm.audioUrl);
+  const communicationsWithAudio = voiceCommunications;
+  // const communicationsWithAudio = voiceCommunications.filter(comm => comm.audioUrl);
 
   const handleDownload = (audioUrl: string, conversationId: string) => {
     const link = document.createElement('a');
