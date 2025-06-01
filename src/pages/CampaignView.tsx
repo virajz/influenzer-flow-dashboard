@@ -1,3 +1,4 @@
+
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -129,6 +130,39 @@ const CampaignView = () => {
 
   return (
     <div className="p-8">
+      {/* DEBUG SECTION */}
+      <Card className="mb-8 border-red-200 bg-red-50">
+        <CardHeader>
+          <CardTitle className="text-red-800">DEBUG: Raw Data Dump</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            <div>
+              <h4 className="font-semibold text-red-700 mb-2">Negotiations Data ({negotiations.length} items):</h4>
+              <div className="bg-white p-4 rounded border max-h-40 overflow-y-auto">
+                <pre className="text-xs">{JSON.stringify(negotiations, null, 2)}</pre>
+              </div>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold text-red-700 mb-2">Creators Data ({allCreators.length} items):</h4>
+              <div className="bg-white p-4 rounded border max-h-40 overflow-y-auto">
+                <pre className="text-xs">{JSON.stringify(allCreators, null, 2)}</pre>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="font-semibold text-red-700 mb-2">Matching Analysis:</h4>
+              <div className="bg-white p-4 rounded border">
+                <p className="text-sm">Negotiation Creator IDs: {negotiations.map(n => `"${n.creatorId}"`).join(', ')}</p>
+                <p className="text-sm">Creator IDs in DB: {allCreators.map(c => `"${c.creatorId}"`).join(', ')}</p>
+                <p className="text-sm">Matches found: {contactedCreators.length}</p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Campaign Header */}
       <div className="mb-8">
         <div className="flex justify-between items-start mb-4">
