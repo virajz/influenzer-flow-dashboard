@@ -23,14 +23,14 @@ export const CreatorHeader = ({ creator }: CreatorHeaderProps) => {
       <CardContent className="p-8">
         <div className="flex items-start gap-6">
           <Avatar className="w-24 h-24">
-            <AvatarImage src={creator.profileURL} alt={creator.displayName} className="object-cover" />
-            <AvatarFallback>{creator.displayName.charAt(0)}</AvatarFallback>
+            <AvatarImage src={creator.profileURL} alt={creator.name} className="object-cover" />
+            <AvatarFallback>{creator.name.charAt(0)}</AvatarFallback>
           </Avatar>
           
           <div className="flex-1">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">{creator.displayName}</h1>
+                <h1 className="text-3xl font-bold text-gray-900">{creator.name}</h1>
                 <p className="text-lg text-gray-600">@{creator.instagramHandle}</p>
               </div>
               <Badge className={getStatusColor()}>{getStatusText()}</Badge>
