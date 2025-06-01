@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Layout from "./components/Layout";
+import ProtectedRoute from "./components/ProtectedRoute";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Onboarding from "./pages/Onboarding";
@@ -30,12 +31,36 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route path="/onboarding" element={<Onboarding />} />
-            <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
-            <Route path="/campaigns/new" element={<Layout><CampaignCreate /></Layout>} />
-            <Route path="/discovery" element={<Layout><CreatorDiscovery /></Layout>} />
-            <Route path="/outreach" element={<Layout><OutreachConsole /></Layout>} />
-            <Route path="/negotiations" element={<Layout><NegotiationTracker /></Layout>} />
-            <Route path="/performance" element={<Layout><PerformanceOverview /></Layout>} />
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <Layout><Dashboard /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/campaigns/new" element={
+              <ProtectedRoute>
+                <Layout><CampaignCreate /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/discovery" element={
+              <ProtectedRoute>
+                <Layout><CreatorDiscovery /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/outreach" element={
+              <ProtectedRoute>
+                <Layout><OutreachConsole /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/negotiations" element={
+              <ProtectedRoute>
+                <Layout><NegotiationTracker /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/performance" element={
+              <ProtectedRoute>
+                <Layout><PerformanceOverview /></Layout>
+              </ProtectedRoute>
+            } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
