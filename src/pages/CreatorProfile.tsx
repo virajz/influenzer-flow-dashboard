@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -6,7 +7,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { creatorsService } from '@/services/creatorsService';
 import { campaignsService } from '@/services/campaignsService';
 import { negotiationsService } from '@/services/negotiationsService';
-import { communicationsService } from '@/services/communicationsService';
+import { apiService } from '@/services/apiService';
+import { useRealTimeNegotiations } from '@/hooks/useRealTimeNegotiations';
+import { useRealTimeCommunications } from '@/hooks/useRealTimeCommunications';
 import { CampaignAssignmentModal } from '@/components/campaigns/CampaignAssignmentModal';
 import { CreatorHeader } from '@/components/creators/CreatorHeader';
 import { CurrentCampaignsTab } from '@/components/creators/CurrentCampaignsTab';
@@ -27,15 +30,8 @@ const CreatorProfile = () => {
 
   const creator = allCreators.find(c => c.creatorId === creatorId);
 
-  // Fetch negotiations for this creator
-  const { data: negotiations = [], refetch: refetchNegotiations } = useQuery({
-    queryKey: ['negotiations', creatorId],
-    queryFn: async () => {
-      if (!creatorId) return [];
-      return await negotiationsService.getNegotiationsByCreator(creatorId);
-    },
-    enabled: !!creatorId,
-  });
+  // Use real-time negotiations hook
+  const { negotiations, isLoading: negotiationsLoading } = useRealTimeNegotiations(creatorId);
 
   // Fetch campaigns
   const { data: allCampaigns = [] } = useQuery({
@@ -47,21 +43,9 @@ const CreatorProfile = () => {
     enabled: !!currentUser?.uid,
   });
 
-  // Fetch all communications for negotiations involving this creator
-  const { data: allCommunications = [], refetch: refetchCommunications } = useQuery({
-    queryKey: ['communications', negotiations.map(n => n.negotiationId)],
-    queryFn: async () => {
-      if (negotiations.length === 0) return [];
-      
-      const communicationsPromises = negotiations.map(negotiation => 
-        communicationsService.getCommunicationsByNegotiation(negotiation.negotiationId)
-      );
-      
-      const results = await Promise.all(communicationsPromises);
-      return results.flat();
-    },
-    enabled: negotiations.length > 0,
-  });
+  // Use real-time communications hook
+  const negotiationIds = negotiations.map(n => n.negotiationId);
+  const { communications: allCommunications } = useRealTimeCommunications(negotiationIds);
 
   // Get campaigns with negotiations
   const campaignsWithNegotiations = allCampaigns.map(campaign => {
@@ -121,45 +105,16 @@ const CreatorProfile = () => {
           escalationCount: 0
         });
 
-        // Add communication record
-        await communicationsService.addCommunication({
-          negotiationId,
-          type: 'email',
-          direction: 'outbound',
-          status: 'sent',
-          subject: 'Collaboration Opportunity',
-          content: 'Auto-generated email sent with campaign details',
-          aiAgentUsed: true,
-          voiceCallDuration: 0,
-          voiceCallSummary: '',
-          followUpRequired: false,
-          followUpDate: '',
-          messageId: `email_${Date.now()}`
-        });
+        // Call external API to start negotiation
+        await apiService.startNegotiation(negotiationId);
       } else {
         await negotiationsService.updateNegotiation(negotiation.negotiationId, {
           status: 'email_sent'
         });
 
-        // Add communication record
-        await communicationsService.addCommunication({
-          negotiationId: negotiation.negotiationId,
-          type: 'email',
-          direction: 'outbound',
-          status: 'sent',
-          subject: 'Follow-up: Collaboration Opportunity',
-          content: 'Auto-generated follow-up email',
-          aiAgentUsed: true,
-          voiceCallDuration: 0,
-          voiceCallSummary: '',
-          followUpRequired: false,
-          followUpDate: '',
-          messageId: `email_${Date.now()}`
-        });
+        // Call external API to start negotiation
+        await apiService.startNegotiation(negotiation.negotiationId);
       }
-
-      refetchNegotiations();
-      refetchCommunications();
       
       toast({
         title: "Email Sent!",
@@ -211,27 +166,6 @@ const CreatorProfile = () => {
           voiceCallCompleted: true
         });
       }
-
-      if (negotiation) {
-        // Add communication record
-        await communicationsService.addCommunication({
-          negotiationId: negotiation.negotiationId,
-          type: 'voice_call',
-          direction: 'outbound',
-          status: 'completed',
-          subject: 'AI Agent Call',
-          content: 'AI agent call initiated and completed',
-          aiAgentUsed: true,
-          voiceCallDuration: 120, // 2 minutes default
-          voiceCallSummary: 'AI agent call completed successfully',
-          followUpRequired: true,
-          followUpDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Tomorrow
-          messageId: `voice_call_${Date.now()}`
-        });
-
-        refetchNegotiations();
-        refetchCommunications();
-      }
       
       toast({
         title: "Agent Call Initiated!",
@@ -249,14 +183,13 @@ const CreatorProfile = () => {
 
   const handleAssignmentComplete = () => {
     setShowAssignmentModal(false);
-    refetchNegotiations();
     toast({
       title: "Success!",
       description: "Creator has been assigned to the selected campaign.",
     });
   };
 
-  if (creatorsLoading) {
+  if (creatorsLoading || negotiationsLoading) {
     return (
       <div className="p-8">
         <div className="flex justify-center items-center min-h-[400px]">
