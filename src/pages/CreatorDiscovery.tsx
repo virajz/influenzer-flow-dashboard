@@ -1,5 +1,6 @@
 
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
-import { mockCreators } from '@/data/mockData';
+import { creatorsService } from '@/services/creatorsService';
 import { toast } from '@/hooks/use-toast';
 import { FiInstagram, FiYoutube, FiFilter, FiUsers, FiDollarSign, FiMapPin, FiEye } from 'react-icons/fi';
 import { SiTiktok, SiX, SiLinkedin } from 'react-icons/si';
@@ -29,6 +30,14 @@ const CreatorDiscovery = () => {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedCreatorForDetail, setSelectedCreatorForDetail] = useState<any>(null);
 
+  // Fetch real creators data
+  const { data: creators = [], isLoading, error } = useQuery({
+    queryKey: ['creators'],
+    queryFn: creatorsService.getAllCreators,
+  });
+
+  console.log('Creators data from query:', creators);
+
   const getPlatformIcon = (platform: string) => {
     switch (platform.toLowerCase()) {
       case 'instagram': return <FiInstagram className="h-4 w-4" />;
@@ -46,7 +55,7 @@ const CreatorDiscovery = () => {
     return count.toString();
   };
 
-  const filteredCreators = mockCreators.filter(creator => {
+  const filteredCreators = creators.filter(creator => {
     if (filters.category !== 'all' && creator.category !== filters.category) return false;
     if (filters.platform !== 'all' && !creator.platforms.includes(filters.platform)) return false;
     if (creator.followers < filters.minFollowers[0]) return false;
@@ -76,6 +85,29 @@ const CreatorDiscovery = () => {
       description: "Creators have been assigned to the selected campaign.",
     });
   };
+
+  if (isLoading) {
+    return (
+      <div className="p-8">
+        <div className="flex justify-center items-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-4"></div>
+            <p className="text-lg text-gray-600">Loading creators...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-8">
+        <div className="text-center">
+          <p className="text-lg text-red-600">Error loading creators. Please try again.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-8">
@@ -112,12 +144,12 @@ const CreatorDiscovery = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Categories</SelectItem>
-                  <SelectItem value="Lifestyle">Lifestyle</SelectItem>
-                  <SelectItem value="Tech">Tech</SelectItem>
-                  <SelectItem value="Fitness">Fitness</SelectItem>
-                  <SelectItem value="Food">Food</SelectItem>
-                  <SelectItem value="Travel">Travel</SelectItem>
-                  <SelectItem value="Fashion">Fashion</SelectItem>
+                  <SelectItem value="lifestyle">Lifestyle</SelectItem>
+                  <SelectItem value="tech">Tech</SelectItem>
+                  <SelectItem value="fitness">Fitness</SelectItem>
+                  <SelectItem value="food">Food</SelectItem>
+                  <SelectItem value="travel">Travel</SelectItem>
+                  <SelectItem value="fashion">Fashion</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -191,81 +223,89 @@ const CreatorDiscovery = () => {
             )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {filteredCreators.map((creator) => (
-              <Card key={creator.id} className="rounded-2xl shadow-md hover:shadow-lg transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4">
-                    <img
-                      src={creator.avatar}
-                      alt={creator.name}
-                      className="w-16 h-16 rounded-full object-cover"
-                    />
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-2">
-                        <div>
-                          <h3 className="font-semibold text-gray-900">{creator.name}</h3>
-                          <p className="text-sm text-gray-600">{creator.handle}</p>
-                        </div>
-                        <Checkbox
-                          checked={selectedCreators.includes(creator.id)}
-                          onCheckedChange={() => toggleCreatorSelection(creator.id)}
-                        />
-                      </div>
-
-                      <div className="flex items-center gap-2 mb-3">
-                        <FiUsers className="h-4 w-4 text-gray-500" />
-                        <span className="text-sm font-medium">{formatFollowers(creator.followers)}</span>
-                        <Badge variant="secondary">{creator.category}</Badge>
-                      </div>
-
-                      <div className="flex items-center gap-2 mb-3">
-                        <FiMapPin className="h-4 w-4 text-gray-500" />
-                        <span className="text-sm text-gray-600">{creator.location}</span>
-                      </div>
-
-                      <p className="text-sm text-gray-600 mb-4">{creator.bio}</p>
-
-                      <div className="flex items-center gap-2 mb-4">
-                        {creator.platforms.map((platform) => (
-                          <div key={platform} className="flex items-center gap-1 text-gray-600">
-                            {getPlatformIcon(platform)}
+          {filteredCreators.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500">No creators found. Try adjusting your filters.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {filteredCreators.map((creator) => (
+                <Card key={creator.id} className="rounded-2xl shadow-md hover:shadow-lg transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-4">
+                      <img
+                        src={creator.avatar}
+                        alt={creator.name}
+                        className="w-16 h-16 rounded-full object-cover"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-2">
+                          <div>
+                            <h3 className="font-semibold text-gray-900">{creator.name}</h3>
+                            <p className="text-sm text-gray-600">{creator.handle}</p>
                           </div>
-                        ))}
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4 text-sm">
-                          <div className="flex items-center gap-1">
-                            <FiDollarSign className="h-4 w-4 text-green-600" />
-                            <span className="font-medium">${creator.baseRate.toLocaleString()}</span>
-                          </div>
-                          <span className="text-gray-500">{creator.engagementRate}% engagement</span>
+                          <Checkbox
+                            checked={selectedCreators.includes(creator.id)}
+                            onCheckedChange={() => toggleCreatorSelection(creator.id)}
+                          />
                         </div>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleViewCreator(creator)}
-                          >
-                            <FiEye className="h-4 w-4 mr-1" />
-                            View
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant={selectedCreators.includes(creator.id) ? "default" : "outline"}
-                            onClick={() => toggleCreatorSelection(creator.id)}
-                          >
-                            {selectedCreators.includes(creator.id) ? 'Selected' : 'Select'}
-                          </Button>
+
+                        <div className="flex items-center gap-2 mb-3">
+                          <FiUsers className="h-4 w-4 text-gray-500" />
+                          <span className="text-sm font-medium">{formatFollowers(creator.followers)}</span>
+                          <Badge variant="secondary">{creator.category}</Badge>
+                        </div>
+
+                        {creator.location && (
+                          <div className="flex items-center gap-2 mb-3">
+                            <FiMapPin className="h-4 w-4 text-gray-500" />
+                            <span className="text-sm text-gray-600">{creator.location}</span>
+                          </div>
+                        )}
+
+                        <p className="text-sm text-gray-600 mb-4">{creator.bio}</p>
+
+                        <div className="flex items-center gap-2 mb-4">
+                          {creator.platforms.map((platform) => (
+                            <div key={platform} className="flex items-center gap-1 text-gray-600">
+                              {getPlatformIcon(platform)}
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4 text-sm">
+                            <div className="flex items-center gap-1">
+                              <FiDollarSign className="h-4 w-4 text-green-600" />
+                              <span className="font-medium">${creator.baseRate.toLocaleString()}</span>
+                            </div>
+                            <span className="text-gray-500">{creator.engagementRate}% engagement</span>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleViewCreator(creator)}
+                            >
+                              <FiEye className="h-4 w-4 mr-1" />
+                              View
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant={selectedCreators.includes(creator.id) ? "default" : "outline"}
+                              onClick={() => toggleCreatorSelection(creator.id)}
+                            >
+                              {selectedCreators.includes(creator.id) ? 'Selected' : 'Select'}
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
