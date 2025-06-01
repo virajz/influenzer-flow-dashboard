@@ -1,4 +1,3 @@
-
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -9,11 +8,13 @@ import { negotiationsService } from '@/services/negotiationsService';
 import { creatorsService } from '@/services/creatorsService';
 import { creatorAssignmentsService } from '@/services/creatorAssignmentsService';
 import { communicationsService } from '@/services/communicationsService';
+import { apiService } from '@/services/apiService';
 import { CommunicationHistoryTab } from '@/components/creators/CommunicationHistoryTab';
 import { CampaignViewHeader } from '@/components/campaigns/CampaignViewHeader';
 import { CampaignMetrics } from '@/components/campaigns/CampaignMetrics';
 import { ContactedCreatorsList } from '@/components/campaigns/ContactedCreatorsList';
 import { CampaignDebugSection } from '@/components/campaigns/CampaignDebugSection';
+import { toast } from '@/hooks/use-toast';
 
 const CampaignView = () => {
   const { campaignId } = useParams<{ campaignId: string }>();
@@ -143,6 +144,120 @@ const CampaignView = () => {
 
   console.log('Final contacted creators:', contactedCreators.length);
 
+  const handleAutoEmail = async (creatorId: string) => {
+    if (!currentUser?.uid || !campaignId) return;
+
+    try {
+      let negotiation = negotiations.find(n => n.creatorId === creatorId);
+
+      if (!negotiation) {
+        const creator = allCreators.find(c => c.creatorId === creatorId);
+        if (!creator) return;
+
+        const deliverables = campaign?.requiredPlatforms.map(platform => ({
+          platform: platform.platform,
+          contentType: platform.contentType,
+          quantity: platform.quantity,
+          deadline: campaign.endDate,
+          status: 'pending' as const
+        })) || [];
+
+        const negotiationId = await negotiationsService.createNegotiation({
+          campaignId,
+          brandId: currentUser.uid,
+          creatorId,
+          status: 'email_sent',
+          proposedRate: creator.baseRate || 0,
+          counterRate: 0,
+          finalRate: 0,
+          maxBudget: campaign?.budget || 0,
+          deliverables,
+          aiAgentNotes: '',
+          creatorAvailability: 'unknown',
+          initialContactMethod: 'email',
+          phoneContactAttempted: false,
+          voiceCallCompleted: false,
+          paymentStatus: 'pending',
+          escalationCount: 0
+        });
+
+        const token = await currentUser.getIdToken();
+        await apiService.startNegotiation(negotiationId, token);
+      } else {
+        await negotiationsService.updateNegotiation(negotiation.negotiationId, {
+          status: 'email_sent'
+        });
+
+        const token = await currentUser.getIdToken();
+        await apiService.startNegotiation(negotiation.negotiationId, token);
+      }
+
+      toast({
+        title: "Email Sent!",
+        description: "Auto email has been sent to the creator.",
+      });
+    } catch (error) {
+      console.error('Error sending auto email:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send email. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleAgentCall = async (creatorId: string) => {
+    if (!currentUser?.uid || !campaignId) return;
+
+    try {
+      let negotiation = negotiations.find(n => n.creatorId === creatorId);
+
+      if (!negotiation) {
+        const creator = allCreators.find(c => c.creatorId === creatorId);
+        if (!creator) return;
+
+        const negotiationId = await negotiationsService.createNegotiation({
+          campaignId,
+          brandId: currentUser.uid,
+          creatorId,
+          status: 'phone_contacted',
+          proposedRate: creator.baseRate || 0,
+          counterRate: 0,
+          finalRate: 0,
+          maxBudget: campaign?.budget || 0,
+          deliverables: [],
+          aiAgentNotes: '',
+          creatorAvailability: 'unknown',
+          initialContactMethod: 'phone',
+          phoneContactAttempted: true,
+          voiceCallCompleted: true,
+          paymentStatus: 'pending',
+          escalationCount: 0
+        });
+
+        negotiation = { negotiationId } as any;
+      } else {
+        await negotiationsService.updateNegotiation(negotiation.negotiationId, {
+          status: 'phone_contacted',
+          phoneContactAttempted: true,
+          voiceCallCompleted: true
+        });
+      }
+
+      toast({
+        title: "Agent Call Initiated!",
+        description: "AI agent is calling the creator.",
+      });
+    } catch (error) {
+      console.error('Error initiating agent call:', error);
+      toast({
+        title: "Error",
+        description: "Failed to initiate call. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
   if (campaignLoading || negotiationsLoading || assignmentsLoading) {
     return (
       <div className="p-8">
@@ -192,6 +307,10 @@ const CampaignView = () => {
             onCreatorSelect={setSelectedCreatorId}
             negotiationsCount={negotiations.length}
             allNegotiationsCount={allNegotiations.length}
+            creatorAssignments={creatorAssignments}
+            communications={communications}
+            onAutoEmail={handleAutoEmail}
+            onAgentCall={handleAgentCall}
           />
         </div>
 

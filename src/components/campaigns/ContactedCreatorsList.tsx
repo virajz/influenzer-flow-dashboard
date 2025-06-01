@@ -2,9 +2,12 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Mail, PhoneCall } from 'lucide-react';
 import { Creator } from '@/services/creatorsService';
 import { Negotiation } from '@/services/negotiationsService';
+import { CreatorAssignment } from '@/services/creatorAssignmentsService';
 import { CreatorFilters } from './CreatorFilters';
 
 interface ContactedCreator {
@@ -18,6 +21,10 @@ interface ContactedCreatorsListProps {
   onCreatorSelect: (creatorId: string) => void;
   negotiationsCount: number;
   allNegotiationsCount: number;
+  creatorAssignments: CreatorAssignment[];
+  communications: any[];
+  onAutoEmail?: (creatorId: string) => void;
+  onAgentCall?: (creatorId: string) => void;
 }
 
 export const ContactedCreatorsList = ({ 
@@ -25,7 +32,11 @@ export const ContactedCreatorsList = ({
   selectedCreatorId, 
   onCreatorSelect,
   negotiationsCount,
-  allNegotiationsCount
+  allNegotiationsCount,
+  creatorAssignments,
+  communications,
+  onAutoEmail,
+  onAgentCall
 }: ContactedCreatorsListProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -59,6 +70,17 @@ export const ContactedCreatorsList = ({
     }
   };
 
+  const getCreatorAssignment = (creatorId: string) => {
+    return creatorAssignments.find(assignment => assignment.creatorId === creatorId);
+  };
+
+  const canMakeAgentCall = (creatorId: string) => {
+    const assignment = getCreatorAssignment(creatorId);
+    return assignment?.phoneDiscovered && assignment?.phoneNumber;
+  };
+
+  const showOutreachButtons = selectedCreatorId && communications.length === 0;
+
   return (
     <Card className="rounded-2xl shadow-md">
       <CardHeader>
@@ -88,48 +110,86 @@ export const ContactedCreatorsList = ({
         ) : (
           <div className="space-y-3">
             {filteredCreators.map(({ creator, negotiation }) => (
-              <div
-                key={creator.creatorId}
-                className={`p-4 rounded-lg cursor-pointer transition-all hover:shadow-sm ${
-                  selectedCreatorId === creator.creatorId
-                    ? 'bg-purple-50 border-2 border-purple-200'
-                    : 'hover:bg-gray-50 border border-gray-200'
-                }`}
-                onClick={() => onCreatorSelect(creator.creatorId)}
-              >
-                <div className="flex items-start gap-3">
-                  <Avatar className="h-12 w-12">
-                    <AvatarImage 
-                      src={creator.profileURL} 
-                      alt={creator.displayName}
-                    />
-                    <AvatarFallback className="bg-purple-100 text-purple-700 font-medium">
-                      {creator.displayName.split(' ').map(n => n[0]).join('').toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium text-sm text-gray-900">{creator.displayName}</div>
-                    <div className="text-xs text-gray-500 mt-1">
-                      {creator.instagramHandle && `@${creator.instagramHandle}`}
-                      {creator.instagramHandle && creator.email && ' • '}
-                      {creator.email}
-                    </div>
-                    <div className="flex items-center gap-2 mt-2">
-                      <Badge 
-                        variant="outline" 
-                        className={`text-xs ${getStatusColor(negotiation.status)}`}
-                      >
-                        {negotiation.status.replace('_', ' ')}
-                      </Badge>
-                      {creator.instagramFollowers && (
-                        <span className="text-xs text-gray-400">
-                          {(creator.instagramFollowers / 1000).toFixed(1)}K followers
-                        </span>
-                      )}
+              <div key={creator.creatorId}>
+                <div
+                  className={`p-4 rounded-lg cursor-pointer transition-all hover:shadow-sm ${
+                    selectedCreatorId === creator.creatorId
+                      ? 'bg-purple-50 border-2 border-purple-200'
+                      : 'hover:bg-gray-50 border border-gray-200'
+                  }`}
+                  onClick={() => onCreatorSelect(creator.creatorId)}
+                >
+                  <div className="flex items-start gap-3">
+                    <Avatar className="h-12 w-12">
+                      <AvatarImage 
+                        src={creator.profileURL} 
+                        alt={creator.displayName}
+                      />
+                      <AvatarFallback className="bg-purple-100 text-purple-700 font-medium">
+                        {creator.displayName.split(' ').map(n => n[0]).join('').toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-sm text-gray-900">{creator.displayName}</div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        {creator.instagramHandle && `@${creator.instagramHandle}`}
+                        {creator.instagramHandle && creator.email && ' • '}
+                        {creator.email}
+                      </div>
+                      <div className="flex items-center gap-2 mt-2">
+                        <Badge 
+                          variant="outline" 
+                          className={`text-xs ${getStatusColor(negotiation.status)}`}
+                        >
+                          {negotiation.status.replace('_', ' ')}
+                        </Badge>
+                        {creator.instagramFollowers && (
+                          <span className="text-xs text-gray-400">
+                            {(creator.instagramFollowers / 1000).toFixed(1)}K followers
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
+
+                {/* Show outreach buttons if this creator is selected and has no communication history */}
+                {selectedCreatorId === creator.creatorId && showOutreachButtons && (
+                  <div className="mt-3 p-4 bg-gray-50 rounded-lg border">
+                    <p className="text-sm text-gray-600 mb-3">No communication history found. Start outreach:</p>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onAutoEmail?.(creator.creatorId);
+                        }}
+                        className="flex items-center gap-2"
+                      >
+                        <Mail className="h-4 w-4" />
+                        Auto Email
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onAgentCall?.(creator.creatorId);
+                        }}
+                        disabled={!canMakeAgentCall(creator.creatorId)}
+                        className="flex items-center gap-2"
+                      >
+                        <PhoneCall className="h-4 w-4" />
+                        Agent Call
+                        {!canMakeAgentCall(creator.creatorId) && (
+                          <span className="text-xs">(No Phone)</span>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
