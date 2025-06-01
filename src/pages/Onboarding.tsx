@@ -70,7 +70,7 @@ const Onboarding = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          uid: currentUser.uid,
+          // uid: currentUser.uid,
           brandName: formData.brandName,
           description: formData.description,
           email: currentUser.email,
