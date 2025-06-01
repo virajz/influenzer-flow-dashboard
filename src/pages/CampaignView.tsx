@@ -16,6 +16,7 @@ import { CampaignViewHeader } from '@/components/campaigns/CampaignViewHeader';
 import { CampaignMetrics } from '@/components/campaigns/CampaignMetrics';
 import { ContactedCreatorsList } from '@/components/campaigns/ContactedCreatorsList';
 import { CreatorSelectionModal } from '@/components/campaigns/CreatorSelectionModal';
+import { useRealTimeCommunications } from '@/hooks/useRealTimeCommunications';
 import { toast } from '@/hooks/use-toast';
 
 const CampaignView = () => {
@@ -23,6 +24,8 @@ const CampaignView = () => {
   const { currentUser } = useAuth();
   const [selectedCreatorId, setSelectedCreatorId] = useState<string | null>(null);
   const [showCreatorSelectionModal, setShowCreatorSelectionModal] = useState(false);
+  const [isEmailLoading, setIsEmailLoading] = useState(false);
+  const [isCallLoading, setIsCallLoading] = useState(false);
 
   console.log('CampaignView - campaignId:', campaignId);
 
@@ -75,16 +78,13 @@ const CampaignView = () => {
     },
   });
 
-  // Fetch communications for selected negotiation
-  const selectedNegotiation = negotiations.find(n => n.creatorId === selectedCreatorId);
-  const { data: communications = [] } = useQuery({
-    queryKey: ['communications', selectedNegotiation?.negotiationId],
-    queryFn: async () => {
-      if (!selectedNegotiation?.negotiationId) return [];
-      return await communicationsService.getCommunicationsByNegotiation(selectedNegotiation.negotiationId);
-    },
-    enabled: !!selectedNegotiation?.negotiationId,
-  });
+  // Get negotiation IDs for selected creator for real-time communications
+  const selectedNegotiationIds = selectedCreatorId 
+    ? negotiations.filter(n => n.creatorId === selectedCreatorId).map(n => n.negotiationId)
+    : [];
+
+  // Use real-time communications hook
+  const { communications, isLoading: communicationsLoading } = useRealTimeCommunications(selectedNegotiationIds);
 
   // Get creators assigned to this campaign from creatorAssignments
   const assignedCreatorIds = creatorAssignments
@@ -137,9 +137,14 @@ const CampaignView = () => {
 
   console.log('Final contacted creators:', contactedCreators.length);
 
+  // Get selected creator data
+  const selectedCreator = selectedCreatorId ? allCreators.find(c => c.creatorId === selectedCreatorId) : null;
+  const hasPhone = selectedCreator?.phoneDiscovered !== false;
+
   const handleAutoEmail = async (creatorId: string) => {
     if (!currentUser?.uid || !campaignId) return;
 
+    setIsEmailLoading(true);
     try {
       let negotiation = negotiations.find(n => n.creatorId === creatorId);
 
@@ -196,12 +201,15 @@ const CampaignView = () => {
         description: "Failed to send email. Please try again.",
         variant: "destructive"
       });
+    } finally {
+      setIsEmailLoading(false);
     }
   };
 
   const handleAgentCall = async (creatorId: string) => {
     if (!currentUser?.uid || !campaignId) return;
 
+    setIsCallLoading(true);
     try {
       let negotiation = negotiations.find(n => n.creatorId === creatorId);
 
@@ -248,6 +256,8 @@ const CampaignView = () => {
         description: "Failed to initiate call. Please try again.",
         variant: "destructive"
       });
+    } finally {
+      setIsCallLoading(false);
     }
   };
 
@@ -307,8 +317,22 @@ const CampaignView = () => {
         {/* Right Content - Communication History */}
         <div className="flex-1">
           {selectedCreatorId ? (
-            communications.length > 0 ? (
-              <CommunicationHistoryTab communications={communications} />
+            communicationsLoading ? (
+              <Card className="rounded-2xl shadow-md">
+                <CardContent className="p-12">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading communications...</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : communications.length > 0 ? (
+              <CommunicationHistoryTab 
+                communications={communications} 
+                showAgentCall={hasPhone}
+                onAgentCall={() => handleAgentCall(selectedCreatorId)}
+                isCallLoading={isCallLoading}
+              />
             ) : (
               <Card className="rounded-2xl shadow-md">
                 <CardContent className="p-12">
@@ -319,19 +343,22 @@ const CampaignView = () => {
                     <div className="flex justify-center gap-4">
                       <Button
                         onClick={() => handleAutoEmail(selectedCreatorId)}
+                        disabled={isEmailLoading}
                         variant="outline"
                         className="flex items-center gap-2"
                       >
                         <Mail className="h-4 w-4" />
-                        Auto Email
+                        {isEmailLoading ? 'Sending...' : 'Auto Email'}
                       </Button>
                       <Button
                         onClick={() => handleAgentCall(selectedCreatorId)}
+                        disabled={!hasPhone || isCallLoading}
                         variant="outline"
                         className="flex items-center gap-2"
                       >
                         <PhoneCall className="h-4 w-4" />
-                        Agent Call
+                        {isCallLoading ? 'Calling...' : 'Agent Call'}
+                        {!hasPhone && <span className="text-xs ml-1">(No Phone)</span>}
                       </Button>
                     </div>
                   </div>

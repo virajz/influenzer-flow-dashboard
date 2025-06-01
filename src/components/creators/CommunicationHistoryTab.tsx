@@ -1,14 +1,23 @@
-
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { FiMail, FiPhone, FiMessageSquare, FiVideo } from 'react-icons/fi';
+import { PhoneCall } from 'lucide-react';
 import { Communication } from '@/services/communicationsService';
 
 interface CommunicationHistoryTabProps {
   communications: Communication[];
+  showAgentCall?: boolean;
+  onAgentCall?: () => void;
+  isCallLoading?: boolean;
 }
 
-export const CommunicationHistoryTab = ({ communications }: CommunicationHistoryTabProps) => {
+export const CommunicationHistoryTab = ({ 
+  communications, 
+  showAgentCall = false,
+  onAgentCall,
+  isCallLoading = false
+}: CommunicationHistoryTabProps) => {
   const getCommunicationIcon = (type: string) => {
     switch (type) {
       case 'email':
@@ -50,8 +59,24 @@ export const CommunicationHistoryTab = ({ communications }: CommunicationHistory
   return (
     <Card className="rounded-2xl shadow-md">
       <CardHeader>
-        <CardTitle>Communication History</CardTitle>
-        <CardDescription>All interactions with this creator</CardDescription>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle>Communication History</CardTitle>
+            <CardDescription>All interactions with this creator</CardDescription>
+          </div>
+          {showAgentCall && (
+            <Button
+              onClick={onAgentCall}
+              disabled={isCallLoading}
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2"
+            >
+              <PhoneCall className="h-4 w-4" />
+              {isCallLoading ? 'Calling...' : 'Agent Call'}
+            </Button>
+          )}
+        </div>
       </CardHeader>
       <CardContent>
         {communications.length === 0 ? (
