@@ -43,7 +43,7 @@ export const CreatorSelectionModal = ({
   // Debug logging
   console.log('CreatorSelectionModal - Campaign ID:', campaignId);
   console.log('CreatorSelectionModal - All creators count:', creators.length);
-  console.log('CreatorSelectionModal - Existing creator IDs (should be ASSIGNMENTS only):', existingCreatorIds);
+  console.log('CreatorSelectionModal - Existing creator IDs (all contacted creators):', existingCreatorIds);
   console.log('CreatorSelectionModal - Search term:', searchTerm);
 
   // Filter out existing creators and apply search
@@ -169,11 +169,6 @@ export const CreatorSelectionModal = ({
             </div>
           )}
 
-          {/* Debug info */}
-          <div className="mb-4 p-3 bg-gray-50 rounded-lg text-xs text-gray-600">
-            <p>Debug: Total creators: {creators.length}, Existing (excluded): {existingCreatorIds.length}, Available: {filteredCreators.length}</p>
-          </div>
-
           {/* Creators list */}
           {isLoading ? (
             <div className="flex justify-center py-8">
@@ -186,7 +181,7 @@ export const CreatorSelectionModal = ({
                 {searchTerm ? 'No available creators match your search.' : 'No available creators found.'}
               </p>
               <p className="text-sm text-gray-500 mt-2">
-                Total creators: {creators.length}, Existing: {existingCreatorIds.length}
+                Total creators: {creators.length}, Contacted: {existingCreatorIds.length}
               </p>
             </div>
           ) : (

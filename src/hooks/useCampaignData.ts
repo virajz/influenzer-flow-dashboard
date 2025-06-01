@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { campaignsService } from '@/services/campaignsService';
@@ -70,16 +69,15 @@ export const useCampaignData = (campaignId: string | undefined) => {
   // Combine both sets of creator IDs for THIS CAMPAIGN ONLY (unique) - for contacted creators list
   const allContactedCreatorIds = [...new Set([...assignedCreatorIds, ...negotiationCreatorIds])];
 
-  // For the CreatorSelectionModal, we ONLY exclude creators who are ASSIGNED to this campaign
-  // This should NOT include creators who only have negotiations
-  const existingCreatorIds = assignedCreatorIds;
+  // For the CreatorSelectionModal, we exclude ALL contacted creators (assignments + negotiations)
+  const existingCreatorIds = allContactedCreatorIds;
 
   console.log('useCampaignData - Campaign ID:', campaignId);
   console.log('useCampaignData - All creator assignments:', creatorAssignments.length);
   console.log('useCampaignData - Assignments for this campaign:', assignedCreatorIds);
-  console.log('useCampaignData - Existing creator IDs (for exclusion in modal - ASSIGNMENTS ONLY):', existingCreatorIds);
   console.log('useCampaignData - Negotiations for this campaign:', negotiationCreatorIds);
-  console.log('useCampaignData - Final contacted creator IDs for this campaign (ASSIGNMENTS + NEGOTIATIONS):', allContactedCreatorIds);
+  console.log('useCampaignData - All contacted creator IDs (assignments + negotiations):', allContactedCreatorIds);
+  console.log('useCampaignData - Existing creator IDs (for exclusion in modal - ALL CONTACTED):', existingCreatorIds);
 
   // Get contacted creators with their data
   const contactedCreators = allContactedCreatorIds.map(creatorId => {
@@ -124,7 +122,7 @@ export const useCampaignData = (campaignId: string | undefined) => {
     allCreators,
     contactedCreators,
     allContactedCreatorIds,
-    existingCreatorIds, // This should ONLY contain creator IDs that are assigned via creatorAssignments
+    existingCreatorIds, // This now contains ALL contacted creators (assignments + negotiations)
     refetchAssignments,
     isLoading
   };
