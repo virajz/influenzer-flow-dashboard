@@ -33,17 +33,29 @@ export const communicationsService = {
   },
 
   async getCommunicationsByNegotiation(negotiationId: string): Promise<Communication[]> {
-    const q = query(
-      collection(db, COMMUNICATIONS_COLLECTION),
-      where('negotiationId', '==', negotiationId),
-      orderBy('createdAt', 'desc')
-    );
-    
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({
-      ...doc.data(),
-      communicationId: doc.id
-    } as Communication));
+    try {
+      const q = query(
+        collection(db, COMMUNICATIONS_COLLECTION),
+        where('negotiationId', '==', negotiationId),
+        orderBy('createdAt', 'desc')
+      );
+      
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => ({
+        ...doc.data(),
+        communicationId: doc.id
+      } as Communication));
+    } catch (error: any) {
+      if (error?.code === 'failed-precondition') {
+        console.error('Missing composite index for communications query. Please create an index for:', {
+          collection: COMMUNICATIONS_COLLECTION,
+          fields: ['negotiationId', 'createdAt'],
+          error: error.message
+        });
+      }
+      console.error('Error fetching communications by negotiation:', error);
+      throw error;
+    }
   },
 
   async getAllCommunications(): Promise<Communication[]> {

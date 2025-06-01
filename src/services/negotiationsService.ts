@@ -69,17 +69,29 @@ export const negotiationsService = {
     },
 
     async getNegotiationsByCreator(creatorId: string): Promise<Negotiation[]> {
-        const q = query(
-            collection(db, NEGOTIATIONS_COLLECTION),
-            where('creatorId', '==', creatorId),
-            orderBy('createdAt', 'desc')
-        );
+        try {
+            const q = query(
+                collection(db, NEGOTIATIONS_COLLECTION),
+                where('creatorId', '==', creatorId),
+                orderBy('createdAt', 'desc')
+            );
 
-        const querySnapshot = await getDocs(q);
-        return querySnapshot.docs.map(doc => ({
-            ...doc.data(),
-            negotiationId: doc.id
-        } as Negotiation));
+            const querySnapshot = await getDocs(q);
+            return querySnapshot.docs.map(doc => ({
+                ...doc.data(),
+                negotiationId: doc.id
+            } as Negotiation));
+        } catch (error: any) {
+            if (error?.code === 'failed-precondition') {
+                console.error('Missing composite index for negotiations query by creator. Please create an index for:', {
+                    collection: NEGOTIATIONS_COLLECTION,
+                    fields: ['creatorId', 'createdAt'],
+                    error: error.message
+                });
+            }
+            console.error('Error fetching negotiations by creator:', error);
+            throw error;
+        }
     },
 
     async getNegotiationsByCampaign(campaignId: string): Promise<Negotiation[]> {
@@ -103,13 +115,20 @@ export const negotiationsService = {
             
             console.log('Total negotiations found for campaign:', negotiations.length);
             return negotiations;
-        } catch (error) {
+        } catch (error: any) {
+            if (error?.code === 'failed-precondition') {
+                console.error('Missing composite index for negotiations query by campaign. Please create an index for:', {
+                    collection: NEGOTIATIONS_COLLECTION,
+                    fields: ['campaignId', 'createdAt'],
+                    error: error.message
+                });
+            }
             console.error("Firestore query failed for getNegotiationsByCampaign:", error);
             console.error("Campaign ID:", campaignId);
             console.error("Error details:", {
-                code: (error as any)?.code,
-                message: (error as any)?.message,
-                stack: (error as any)?.stack
+                code: error?.code,
+                message: error?.message,
+                stack: error?.stack
             });
             throw error;
         }
@@ -141,8 +160,15 @@ export const negotiationsService = {
                 ...doc.data(),
                 negotiationId: doc.id
             } as Negotiation));
-        } catch (error) {
-            console.error("Firestore query failed:", error);
+        } catch (error: any) {
+            if (error?.code === 'failed-precondition') {
+                console.error('Missing composite index for negotiations query by brand. Please create an index for:', {
+                    collection: NEGOTIATIONS_COLLECTION,
+                    fields: ['brandId', 'createdAt'],
+                    error: error.message
+                });
+            }
+            console.error("Firestore query failed for getNegotiationsByBrand:", error);
             throw error;
         }
     }

@@ -25,16 +25,28 @@ const VOICE_COMMUNICATIONS_COLLECTION = 'voiceCommunications';
 
 export const voiceCommunicationsService = {
   async getVoiceCommunicationsByNegotiation(negotiationId: string): Promise<VoiceCommunication[]> {
-    const q = query(
-      collection(db, VOICE_COMMUNICATIONS_COLLECTION),
-      where('negotiationId', '==', negotiationId),
-      orderBy('createdAt', 'desc')
-    );
-    
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({
-      ...doc.data(),
-      voiceCommunicationId: doc.id
-    } as VoiceCommunication));
+    try {
+      const q = query(
+        collection(db, VOICE_COMMUNICATIONS_COLLECTION),
+        where('negotiationId', '==', negotiationId),
+        orderBy('createdAt', 'desc')
+      );
+      
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => ({
+        ...doc.data(),
+        voiceCommunicationId: doc.id
+      } as VoiceCommunication));
+    } catch (error: any) {
+      if (error?.code === 'failed-precondition') {
+        console.error('Missing composite index for voiceCommunications query. Please create an index for:', {
+          collection: VOICE_COMMUNICATIONS_COLLECTION,
+          fields: ['negotiationId', 'createdAt'],
+          error: error.message
+        });
+      }
+      console.error('Error fetching voice communications by negotiation:', error);
+      throw error;
+    }
   }
 };

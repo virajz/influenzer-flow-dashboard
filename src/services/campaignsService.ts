@@ -1,3 +1,4 @@
+
 import {
   collection,
   addDoc,
@@ -68,10 +69,7 @@ export const campaignsService = {
   // Get all campaigns for a brand
   async getCampaignsByBrand(brandId: string): Promise<Campaign[]> {
     try {
-
-
       const campaignsCollection = collection(db, CAMPAIGNS_COLLECTION);
-
 
       const q = query(
         campaignsCollection,
@@ -79,25 +77,27 @@ export const campaignsService = {
         orderBy('createdAt', 'desc')
       );
 
-
-
       const querySnapshot = await getDocs(q);
-
 
       const campaigns: Campaign[] = [];
 
       querySnapshot.forEach((doc) => {
-
         campaigns.push({
           campaignId: doc.id,
           ...doc.data()
         } as Campaign);
       });
 
-
       return campaigns;
-    } catch (error) {
-
+    } catch (error: any) {
+      if (error?.code === 'failed-precondition') {
+        console.error('Missing composite index for campaigns query. Please create an index for:', {
+          collection: CAMPAIGNS_COLLECTION,
+          fields: ['brandId', 'createdAt'],
+          error: error.message
+        });
+      }
+      console.error('Error fetching campaigns by brand:', error);
       throw error;
     }
   },
