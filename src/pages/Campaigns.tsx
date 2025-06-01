@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -20,24 +19,38 @@ const Campaigns = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
+  console.log('Current user:', currentUser);
+  console.log('Current user ID:', currentUser?.uid);
+
   // Fetch campaigns using React Query
   const { data: campaigns = [], isLoading, error, isError } = useQuery({
     queryKey: ['campaigns', currentUser?.uid],
-    queryFn: () => {
+    queryFn: async () => {
+      console.log('Query function called with user ID:', currentUser?.uid);
       if (!currentUser?.uid) {
+        console.error('User not authenticated');
         throw new Error('User not authenticated');
       }
-      return campaignsService.getCampaignsByBrand(currentUser.uid);
+      try {
+        const result = await campaignsService.getCampaignsByBrand(currentUser.uid);
+        console.log('Campaigns fetched successfully:', result);
+        return result;
+      } catch (error) {
+        console.error('Error in query function:', error);
+        throw error;
+      }
     },
     enabled: !!currentUser?.uid,
   });
+
+  console.log('Query state:', { campaigns, isLoading, error, isError });
 
   useEffect(() => {
     if (isError && error) {
       console.error('Error loading campaigns:', error);
       toast({
         title: "Error loading campaigns",
-        description: "There was an error loading your campaigns. Please try again.",
+        description: error instanceof Error ? error.message : "There was an error loading your campaigns. Please try again.",
         variant: "destructive"
       });
     }
@@ -82,6 +95,15 @@ const Campaigns = () => {
 
   return (
     <div className="p-8">
+      {/* Debug information */}
+      <div className="mb-4 p-4 bg-gray-100 rounded text-sm">
+        <p>Debug Info:</p>
+        <p>User ID: {currentUser?.uid}</p>
+        <p>Campaigns count: {campaigns.length}</p>
+        <p>Is Error: {isError ? 'Yes' : 'No'}</p>
+        <p>Error: {error instanceof Error ? error.message : 'None'}</p>
+      </div>
+
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Campaigns</h1>
