@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -9,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { FcGoogle } from 'react-icons/fc';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -20,15 +21,40 @@ const Login = () => {
   });
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
+  const checkBrandAndRedirect = async (user: any) => {
+    try {
+      console.log('Login: Checking brand for user:', user.uid);
+      const brandRef = doc(db, 'brands', user.uid);
+      const brandSnap = await getDoc(brandRef);
+
+      if (brandSnap.exists()) {
+        console.log('Login: User has brand, redirecting to dashboard');
+        navigate('/dashboard');
+      } else {
+        console.log('Login: User has no brand, redirecting to onboarding');
+        navigate('/onboarding');
+      }
+    } catch (error) {
+      console.error('Login: Error checking brand status:', error);
+      navigate('/onboarding');
+    }
+  };
+
   const handleGoogleLogin = async () => {
     setIsGoogleLoading(true);
     try {
-      await loginWithGoogle();
+      const result = await loginWithGoogle();
       toast({
         title: "Welcome to InfluencerFlow AI!",
         description: "Your Google account has been connected successfully.",
       });
-      navigate('/onboarding');
+      
+      // Check if user has brand data and redirect accordingly
+      if (result?.user) {
+        await checkBrandAndRedirect(result.user);
+      } else {
+        navigate('/onboarding');
+      }
     } catch (error) {
       console.error('Google login error:', error);
       toast({

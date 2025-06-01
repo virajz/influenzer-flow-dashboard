@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,14 +8,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
 const Onboarding = () => {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const [formData, setFormData] = useState({
-    brandName: 'Tech Startup Inc.', // Prefilled example
+    brandName: '',
     description: '',
     phoneNumber: '',
     website: '',
@@ -24,6 +24,42 @@ const Onboarding = () => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load existing brand data if available
+  useEffect(() => {
+    const loadExistingBrandData = async () => {
+      if (!currentUser) return;
+
+      try {
+        console.log('Onboarding: Loading existing brand data for user:', currentUser.uid);
+        const brandRef = doc(db, 'brands', currentUser.uid);
+        const brandSnap = await getDoc(brandRef);
+
+        if (brandSnap.exists()) {
+          const brandData = brandSnap.data();
+          console.log('Onboarding: Found existing brand data:', brandData);
+          
+          setFormData({
+            brandName: brandData.brandName || '',
+            description: brandData.description || '',
+            phoneNumber: brandData.phone || '',
+            website: brandData.website || '',
+            industry: brandData.industry || '',
+            companySize: brandData.companySize || ''
+          });
+        } else {
+          console.log('Onboarding: No existing brand data found');
+        }
+      } catch (error) {
+        console.error('Onboarding: Error loading brand data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadExistingBrandData();
+  }, [currentUser]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -117,6 +153,17 @@ const Onboarding = () => {
     { value: 'large', label: 'Large (201-1000 employees)' },
     { value: 'enterprise', label: 'Enterprise (1000+ employees)' }
   ];
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-lg text-gray-600">Loading your profile...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center p-4">
