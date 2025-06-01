@@ -292,7 +292,7 @@ const CampaignView = () => {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-8 h-screen flex flex-col">
       <CampaignViewHeader 
         campaign={campaign} 
         onAddCreator={() => setShowCreatorSelectionModal(true)}
@@ -301,9 +301,9 @@ const CampaignView = () => {
       <CampaignMetrics campaign={campaign} />
 
       {/* Main Content */}
-      <div className="flex gap-6">
+      <div className="flex gap-6 flex-1 min-h-0">
         {/* Left Sidebar - Contacted Creators */}
-        <div className="w-1/3">
+        <div className="w-1/3 flex flex-col min-h-0">
           <ContactedCreatorsList
             contactedCreators={contactedCreators}
             selectedCreatorId={selectedCreatorId}
@@ -316,10 +316,10 @@ const CampaignView = () => {
         </div>
 
         {/* Right Content - Communication History */}
-        <div className="flex-1">
+        <div className="flex-1 flex flex-col min-h-0">
           {selectedCreatorId ? (
             communicationsLoading ? (
-              <Card className="rounded-2xl shadow-md">
+              <Card className="rounded-2xl shadow-md flex-1">
                 <CardContent className="p-12">
                   <div className="text-center">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-4"></div>
@@ -335,7 +335,7 @@ const CampaignView = () => {
                 isCallLoading={isCallLoading}
               />
             ) : (
-              <Card className="rounded-2xl shadow-md">
+              <Card className="rounded-2xl shadow-md flex-1">
                 <CardContent className="p-12">
                   <div className="text-center space-y-4">
                     <p className="text-gray-600 mb-4">No communication history found</p>
@@ -367,7 +367,7 @@ const CampaignView = () => {
               </Card>
             )
           ) : (
-            <Card className="rounded-2xl shadow-md">
+            <Card className="rounded-2xl shadow-md flex-1">
               <CardContent className="p-12">
                 <div className="text-center">
                   <p className="text-gray-600">Select a creator to view communication history</p>

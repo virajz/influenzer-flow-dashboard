@@ -1,6 +1,6 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Creator } from '@/services/creatorsService';
@@ -69,20 +69,22 @@ export const ContactedCreatorsList = ({
   };
 
   return (
-    <Card className="rounded-2xl shadow-md">
-      <CardHeader>
+    <Card className="rounded-2xl shadow-md flex flex-col h-full">
+      <CardHeader className="flex-shrink-0">
         <CardTitle>Contacted Creators ({filteredCreators.length})</CardTitle>
       </CardHeader>
-      <CardContent>
-        <CreatorFilters
-          searchTerm={searchTerm}
-          statusFilter={statusFilter}
-          onSearchChange={setSearchTerm}
-          onStatusFilterChange={setStatusFilter}
-        />
+      <CardContent className="flex-1 flex flex-col min-h-0">
+        <div className="flex-shrink-0 mb-4">
+          <CreatorFilters
+            searchTerm={searchTerm}
+            statusFilter={statusFilter}
+            onSearchChange={setSearchTerm}
+            onStatusFilterChange={setStatusFilter}
+          />
+        </div>
         
         {filteredCreators.length === 0 ? (
-          <div className="text-center py-8">
+          <div className="text-center py-8 flex-1 flex items-center justify-center">
             <p className="text-gray-600">
               {contactedCreators.length === 0 
                 ? "No creators contacted yet" 
@@ -90,48 +92,50 @@ export const ContactedCreatorsList = ({
             </p>
           </div>
         ) : (
-          <div className="space-y-3">
-            {filteredCreators.map(({ creator, negotiation }) => (
-              <div
-                key={creator.creatorId}
-                className={`p-4 rounded-lg cursor-pointer transition-all hover:shadow-sm ${
-                  selectedCreatorId === creator.creatorId
-                    ? 'bg-purple-50 border-2 border-purple-200'
-                    : 'hover:bg-gray-50 border border-gray-200'
-                }`}
-                onClick={() => onCreatorSelect(creator.creatorId)}
-              >
-                <div className="flex items-start gap-3">
-                  <Avatar className="h-12 w-12">
-                    <AvatarImage 
-                      src={creator.profileURL} 
-                      alt={creator.displayName}
-                    />
-                    <AvatarFallback className="bg-purple-100 text-purple-700 font-medium">
-                      {creator.displayName.split(' ').map(n => n[0]).join('').toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium text-sm text-gray-900">{creator.displayName}</div>
-                    <div className="text-xs text-gray-500 mt-1">
-                      {creator.instagramHandle && `@${creator.instagramHandle}`}
-                      {creator.instagramHandle && creator.email && ' • '}
-                      {creator.email}
-                    </div>
-                    <div className="flex items-center gap-2 mt-2">
-                      <Badge 
-                        variant="outline" 
-                        className={`text-xs ${getStatusColor(negotiation.status)}`}
-                      >
-                        {negotiation.status.replace('_', ' ')}
-                      </Badge>
+          <ScrollArea className="flex-1">
+            <div className="space-y-3 pr-4">
+              {filteredCreators.map(({ creator, negotiation }) => (
+                <div
+                  key={creator.creatorId}
+                  className={`p-4 rounded-lg cursor-pointer transition-all hover:shadow-sm ${
+                    selectedCreatorId === creator.creatorId
+                      ? 'bg-purple-50 border-2 border-purple-200'
+                      : 'hover:bg-gray-50 border border-gray-200'
+                  }`}
+                  onClick={() => onCreatorSelect(creator.creatorId)}
+                >
+                  <div className="flex items-start gap-3">
+                    <Avatar className="h-12 w-12">
+                      <AvatarImage 
+                        src={creator.profileURL} 
+                        alt={creator.displayName}
+                      />
+                      <AvatarFallback className="bg-purple-100 text-purple-700 font-medium">
+                        {creator.displayName.split(' ').map(n => n[0]).join('').toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-sm text-gray-900">{creator.displayName}</div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        {creator.instagramHandle && `@${creator.instagramHandle}`}
+                        {creator.instagramHandle && creator.email && ' • '}
+                        {creator.email}
+                      </div>
+                      <div className="flex items-center gap-2 mt-2">
+                        <Badge 
+                          variant="outline" 
+                          className={`text-xs ${getStatusColor(negotiation.status)}`}
+                        >
+                          {negotiation.status.replace('_', ' ')}
+                        </Badge>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </ScrollArea>
         )}
       </CardContent>
     </Card>
