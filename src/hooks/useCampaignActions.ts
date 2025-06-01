@@ -1,8 +1,8 @@
-
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { negotiationsService } from '@/services/negotiationsService';
 import { apiService } from '@/services/apiService';
+import { creatorAssignmentsService } from '@/services/creatorAssignmentsService';
 import { toast } from '@/hooks/use-toast';
 
 export const useCampaignActions = (
@@ -87,16 +87,26 @@ export const useCampaignActions = (
     try {
       let negotiation = negotiations.find(n => n.creatorId === creatorId);
 
-      const creator = allCreators.find(c => c.creatorId === creatorId);
-      if (!negotiation) {
-        if (!creator) return;
+      // Fetch the phone number from creatorAssignments
+      const assignment = await creatorAssignmentsService.getCreatorAssignment(currentUser.uid, creatorId);
+      if (!assignment || !assignment.phoneNumber) {
+        toast({
+          title: "Error",
+          description: "Phone number not found for the creator.",
+          variant: "destructive",
+        });
+        return;
+      }
 
+      const phone = assignment.phoneNumber;
+
+      if (!negotiation) {
         const negotiationId = await negotiationsService.createNegotiation({
           campaignId,
           brandId: currentUser.uid,
           creatorId,
           status: 'phone_contacted',
-          proposedRate: creator.baseRate || 0,
+          proposedRate: 0,
           counterRate: 0,
           finalRate: 0,
           maxBudget: campaign?.budget || 0,
@@ -107,7 +117,7 @@ export const useCampaignActions = (
           phoneContactAttempted: true,
           voiceCallCompleted: true,
           paymentStatus: 'pending',
-          escalationCount: 0
+          escalationCount: 0,
         });
 
         negotiation = { negotiationId } as any;
@@ -115,11 +125,12 @@ export const useCampaignActions = (
         await negotiationsService.updateNegotiation(negotiation.negotiationId, {
           status: 'phone_contacted',
           phoneContactAttempted: true,
-          voiceCallCompleted: true
+          voiceCallCompleted: true,
         });
-        await apiService.initiateAgentCall(negotiation.negotiationId, creator.phone);
       }
 
+      // Initiate the agent call with the phone number
+      await apiService.initiateAgentCall(negotiation.negotiationId, phone);
 
       toast({
         title: "Agent Call Initiated!",
@@ -130,7 +141,7 @@ export const useCampaignActions = (
       toast({
         title: "Error",
         description: "Failed to initiate call. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setIsCallLoading(false);
