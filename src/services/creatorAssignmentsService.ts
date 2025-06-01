@@ -7,7 +7,7 @@ export interface CreatorAssignment {
     creatorId: string;
     campaignIds: string[];
     phoneDiscovered: boolean;
-    phoneNumber?: string;
+    phone?: string;
     createdAt: Date;
     updatedAt: Date;
 }

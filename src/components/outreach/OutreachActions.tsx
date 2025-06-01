@@ -62,7 +62,8 @@ export const OutreachActions = ({
             currentUser.uid,
             negotiation.creatorId
         );
-        if (!assignment || !assignment.phoneNumber) {
+        console.log('Assignment:', assignment);
+        if (!assignment || !assignment.phone) {
             toast({
                 title: 'Error',
                 description: 'Phone number not found for the creator.',
@@ -70,7 +71,7 @@ export const OutreachActions = ({
             });
             return;
         }
-        const phone = assignment.phoneNumber;
+        const phone = assignment.phone;
 
         try {
             await apiService.initiateAgentCall(negotiation.negotiationId, phone);

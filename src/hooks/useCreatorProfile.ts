@@ -127,6 +127,7 @@ export const useCreatorProfile = () => {
 
             // Fetch the phone number from creatorAssignments
             const assignment = await creatorAssignmentsService.getCreatorAssignment(currentUser.uid, creatorId);
+            console.log('Assignment:', assignment);
             if (!assignment || !assignment.phoneNumber) {
                 toast({
                     title: "Error",
