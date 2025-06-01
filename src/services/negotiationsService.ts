@@ -26,6 +26,7 @@ export interface Negotiation {
     initialContactMethod: 'email' | 'phone' | 'instagram' | 'youtube';
     phoneContactAttempted: boolean;
     voiceCallCompleted: boolean;
+    paymentStatus: 'pending' | 'completed' | 'failed';
     createdAt: string;
     updatedAt: string;
     escalationCount: number;
