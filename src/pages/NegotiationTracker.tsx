@@ -1,20 +1,55 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
-import { mockCreators, mockNegotiations, mockCampaigns } from '@/data/mockData';
+import { useAuth } from '@/contexts/AuthContext';
+import { campaignsService } from '@/services/campaignsService';
 import { toast } from '@/hooks/use-toast';
 import { FiDollarSign, FiCalendar, FiUser, FiMessageSquare, FiCheck, FiClock } from 'react-icons/fi';
 
+// For now, we'll use mock negotiation data until we have a negotiations service
+const mockNegotiations = [
+  {
+    id: '1',
+    campaignId: '',
+    creatorId: 'creator1',
+    status: 'negotiating',
+    proposedRate: 2500,
+    counterRate: 3000,
+    finalRate: null,
+    paymentStatus: 'pending',
+    deliverables: [
+      { platform: 'Instagram', quantity: 3, deadline: '2024-07-15' },
+      { platform: 'TikTok', quantity: 2, deadline: '2024-07-20' }
+    ],
+    notes: 'Creator has strong engagement rates in target demographic. Counter offer reasonable given follower count and previous campaign performance.'
+  }
+];
+
 const NegotiationTracker = () => {
+  const { currentUser } = useAuth();
   const [negotiations] = useState(mockNegotiations);
   const [counterOffer, setCounterOffer] = useState<{[key: string]: string}>({});
 
-  const getCreatorById = (id: string) => mockCreators.find(c => c.id === id);
-  const getCampaignById = (id: string) => mockCampaigns.find(c => c.id === id);
+  // Fetch campaigns to get campaign names
+  const { data: campaigns = [] } = useQuery({
+    queryKey: ['campaigns', currentUser?.uid],
+    queryFn: () => {
+      if (!currentUser?.uid) {
+        throw new Error('User not authenticated');
+      }
+      return campaignsService.getCampaignsByBrand(currentUser.uid);
+    },
+    enabled: !!currentUser?.uid,
+  });
+
+  const getCampaignName = (campaignId: string) => {
+    const campaign = campaigns.find(c => c.campaignId === campaignId);
+    return campaign?.campaignName || 'Unknown Campaign';
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -133,25 +168,26 @@ const NegotiationTracker = () => {
 
       {/* Negotiations List */}
       <div className="space-y-6">
-        {negotiations.map((negotiation) => {
-          const creator = getCreatorById(negotiation.creatorId);
-          const campaign = getCampaignById(negotiation.campaignId);
-          
-          if (!creator || !campaign) return null;
-
-          return (
+        {negotiations.length === 0 ? (
+          <Card className="rounded-2xl shadow-md">
+            <CardContent className="p-8 text-center">
+              <FiMessageSquare className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No active negotiations</h3>
+              <p className="text-gray-500">Start reaching out to creators to begin negotiations.</p>
+            </CardContent>
+          </Card>
+        ) : (
+          negotiations.map((negotiation) => (
             <Card key={negotiation.id} className="rounded-2xl shadow-md">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <img
-                      src={creator.avatar}
-                      alt={creator.name}
-                      className="w-12 h-12 rounded-full object-cover"
-                    />
+                    <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                      <FiUser className="h-6 w-6 text-purple-600" />
+                    </div>
                     <div>
-                      <CardTitle className="text-lg">{creator.name}</CardTitle>
-                      <CardDescription>{campaign.name}</CardDescription>
+                      <CardTitle className="text-lg">Creator #{negotiation.creatorId}</CardTitle>
+                      <CardDescription>{getCampaignName(negotiation.campaignId) || 'Sample Campaign'}</CardDescription>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -265,8 +301,8 @@ const NegotiationTracker = () => {
                 </div>
               </CardContent>
             </Card>
-          );
-        })}
+          ))
+        )}
       </div>
     </div>
   );
