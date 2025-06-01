@@ -10,8 +10,10 @@ import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
 import { mockCreators } from '@/data/mockData';
 import { toast } from '@/hooks/use-toast';
-import { FiInstagram, FiYoutube, FiFilter, FiUsers, FiDollarSign, FiMapPin } from 'react-icons/fi';
+import { FiInstagram, FiYoutube, FiFilter, FiUsers, FiDollarSign, FiMapPin, FiEye } from 'react-icons/fi';
 import { SiTiktok, SiX, SiLinkedin } from 'react-icons/si';
+import { CampaignAssignmentModal } from '@/components/campaigns/CampaignAssignmentModal';
+import { CreatorDetailModal } from '@/components/creators/CreatorDetailModal';
 
 const CreatorDiscovery = () => {
   const [filters, setFilters] = useState({
@@ -23,6 +25,9 @@ const CreatorDiscovery = () => {
   });
 
   const [selectedCreators, setSelectedCreators] = useState<string[]>([]);
+  const [showAssignmentModal, setShowAssignmentModal] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedCreatorForDetail, setSelectedCreatorForDetail] = useState<any>(null);
 
   const getPlatformIcon = (platform: string) => {
     switch (platform.toLowerCase()) {
@@ -59,14 +64,17 @@ const CreatorDiscovery = () => {
     );
   };
 
-  const addSelectedToCalmapaign = () => {
-    if (selectedCreators.length > 0) {
-      toast({
-        title: "Creators Added!",
-        description: `${selectedCreators.length} creators added to your campaign.`,
-      });
-      setSelectedCreators([]);
-    }
+  const handleViewCreator = (creator: any) => {
+    setSelectedCreatorForDetail(creator);
+    setShowDetailModal(true);
+  };
+
+  const handleAssignmentComplete = () => {
+    setSelectedCreators([]);
+    toast({
+      title: "Success!",
+      description: "Creators have been assigned to the selected campaign.",
+    });
   };
 
   return (
@@ -174,7 +182,10 @@ const CreatorDiscovery = () => {
           <div className="flex justify-between items-center mb-6">
             <p className="text-gray-600">{filteredCreators.length} creators found</p>
             {selectedCreators.length > 0 && (
-              <Button onClick={addSelectedToCalmapaign} className="bg-purple-600 hover:bg-purple-700">
+              <Button 
+                onClick={() => setShowAssignmentModal(true)} 
+                className="bg-purple-600 hover:bg-purple-700"
+              >
                 Add {selectedCreators.length} to Campaign
               </Button>
             )}
@@ -231,13 +242,23 @@ const CreatorDiscovery = () => {
                           </div>
                           <span className="text-gray-500">{creator.engagementRate}% engagement</span>
                         </div>
-                        <Button
-                          size="sm"
-                          variant={selectedCreators.includes(creator.id) ? "default" : "outline"}
-                          onClick={() => toggleCreatorSelection(creator.id)}
-                        >
-                          {selectedCreators.includes(creator.id) ? 'Added' : 'Add to Campaign'}
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleViewCreator(creator)}
+                          >
+                            <FiEye className="h-4 w-4 mr-1" />
+                            View
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant={selectedCreators.includes(creator.id) ? "default" : "outline"}
+                            onClick={() => toggleCreatorSelection(creator.id)}
+                          >
+                            {selectedCreators.includes(creator.id) ? 'Selected' : 'Select'}
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -247,6 +268,21 @@ const CreatorDiscovery = () => {
           </div>
         </div>
       </div>
+
+      {/* Campaign Assignment Modal */}
+      <CampaignAssignmentModal
+        open={showAssignmentModal}
+        onOpenChange={setShowAssignmentModal}
+        selectedCreatorIds={selectedCreators}
+        onAssignmentComplete={handleAssignmentComplete}
+      />
+
+      {/* Creator Detail Modal */}
+      <CreatorDetailModal
+        open={showDetailModal}
+        onOpenChange={setShowDetailModal}
+        creator={selectedCreatorForDetail}
+      />
     </div>
   );
 };
