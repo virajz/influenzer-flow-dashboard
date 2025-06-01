@@ -2,7 +2,6 @@
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { negotiationsService } from '@/services/negotiationsService';
-import { creatorAssignmentsService } from '@/services/creatorAssignmentsService';
 import { apiService } from '@/services/apiService';
 import { toast } from '@/hooks/use-toast';
 
@@ -135,36 +134,9 @@ export const useCampaignActions = (
     }
   };
 
-  const handleRemoveCreator = async (creatorId: string, selectedCreatorId: string | null, setSelectedCreatorId: (id: string | null) => void) => {
-    if (!currentUser?.uid || !campaignId) return;
-
-    try {
-      await creatorAssignmentsService.removeCampaignFromCreator(currentUser.uid, creatorId, campaignId);
-      
-      toast({
-        title: "Creator Removed",
-        description: "Creator has been removed from this campaign.",
-      });
-      
-      refetchAssignments();
-      
-      // If the removed creator was selected, clear selection
-      if (selectedCreatorId === creatorId) {
-        setSelectedCreatorId(null);
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to remove creator. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
-
   return {
     handleAutoEmail,
     handleAgentCall,
-    handleRemoveCreator,
     isEmailLoading,
     isCallLoading
   };

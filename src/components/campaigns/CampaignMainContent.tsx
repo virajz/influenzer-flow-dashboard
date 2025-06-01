@@ -11,7 +11,6 @@ interface CampaignMainContentProps {
   negotiations: any[];
   creatorAssignments: any[];
   allContactedCreatorIds: string[];
-  onRemoveCreator: (creatorId: string, selectedCreatorId: string | null, setSelectedCreatorId: (id: string | null) => void) => void;
   onAutoEmail: (creatorId: string) => void;
   onAgentCall: (creatorId: string) => void;
   isEmailLoading: boolean;
@@ -25,7 +24,6 @@ export const CampaignMainContent = ({
   negotiations,
   creatorAssignments,
   allContactedCreatorIds,
-  onRemoveCreator,
   onAutoEmail,
   onAgentCall,
   isEmailLoading,
@@ -66,7 +64,6 @@ export const CampaignMainContent = ({
             allNegotiationsCount={0}
             creatorAssignments={creatorAssignments}
             communications={communications}
-            onRemoveCreator={(creatorId) => onRemoveCreator(creatorId, selectedCreatorId, setSelectedCreatorId)}
           />
         </div>
 

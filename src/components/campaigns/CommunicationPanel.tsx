@@ -55,9 +55,6 @@ export const CommunicationPanel = ({
     return (
       <CommunicationHistoryTab 
         communications={communications} 
-        showAgentCall={hasPhone}
-        onAgentCall={() => onAgentCall(selectedCreatorId)}
-        isCallLoading={isCallLoading}
       />
     );
   }

@@ -23,7 +23,6 @@ const CampaignView = () => {
   const {
     handleAutoEmail,
     handleAgentCall,
-    handleRemoveCreator,
     isEmailLoading,
     isCallLoading
   } = useCampaignActions(campaignId, campaign, negotiations, allCreators, refetchAssignments);
@@ -67,7 +66,6 @@ const CampaignView = () => {
         negotiations={negotiations}
         creatorAssignments={creatorAssignments}
         allContactedCreatorIds={allContactedCreatorIds}
-        onRemoveCreator={handleRemoveCreator}
         onAutoEmail={handleAutoEmail}
         onAgentCall={handleAgentCall}
         isEmailLoading={isEmailLoading}
