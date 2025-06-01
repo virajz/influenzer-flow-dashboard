@@ -12,34 +12,52 @@ interface TranscriptModalProps {
 }
 
 export const TranscriptModal = ({ open, onOpenChange, transcript, conversationId }: TranscriptModalProps) => {
+  const formatTime = (timestamp: string) => {
+    try {
+      const date = new Date(timestamp);
+      // Check if the date is valid
+      if (isNaN(date.getTime())) {
+        return 'Invalid time';
+      }
+      return date.toLocaleTimeString();
+    } catch (error) {
+      return 'Invalid time';
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[80vh]">
+      <DialogContent className="max-w-3xl max-h-[85vh]">
         <DialogHeader>
           <DialogTitle>Voice Call Transcript</DialogTitle>
           <DialogDescription>
-            Conversation ID: {conversationId}
+            Conversation transcript between AI agent and creator
           </DialogDescription>
         </DialogHeader>
         
-        <ScrollArea className="flex-1 pr-4">
+        <ScrollArea className="flex-1 h-[60vh] pr-4">
           <div className="space-y-4">
             {transcript.map((turn, index) => (
               <div key={index} className={`flex ${turn.speaker === 'agent' ? 'justify-start' : 'justify-end'}`}>
-                <div className={`max-w-[80%] p-3 rounded-lg ${
+                <div className={`max-w-[75%] p-4 rounded-lg shadow-sm ${
                   turn.speaker === 'agent' 
-                    ? 'bg-blue-100 text-blue-900' 
-                    : 'bg-green-100 text-green-900'
+                    ? 'bg-slate-100 text-slate-900 rounded-bl-sm' 
+                    : 'bg-blue-500 text-white rounded-br-sm'
                 }`}>
-                  <div className="flex items-center gap-2 mb-1">
-                    <Badge variant={turn.speaker === 'agent' ? 'default' : 'secondary'}>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Badge 
+                      variant={turn.speaker === 'agent' ? 'secondary' : 'default'}
+                      className={turn.speaker === 'agent' ? 'bg-slate-200 text-slate-700' : 'bg-blue-600 text-white'}
+                    >
                       {turn.speaker === 'agent' ? 'AI Agent' : 'Creator'}
                     </Badge>
-                    <span className="text-xs text-gray-500">
-                      {new Date(turn.timestamp).toLocaleTimeString()}
+                    <span className={`text-xs ${
+                      turn.speaker === 'agent' ? 'text-slate-500' : 'text-blue-100'
+                    }`}>
+                      {formatTime(turn.timestamp)}
                     </span>
                   </div>
-                  <p className="text-sm">{turn.message}</p>
+                  <p className="text-sm leading-relaxed">{turn.message}</p>
                 </div>
               </div>
             ))}
