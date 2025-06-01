@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -41,14 +40,26 @@ export const CreatorSelectionModal = ({
     enabled: open,
   });
 
+  // Debug logging
+  console.log('CreatorSelectionModal - All creators count:', creators.length);
+  console.log('CreatorSelectionModal - Existing creator IDs:', existingCreatorIds);
+  console.log('CreatorSelectionModal - Search term:', searchTerm);
+
   // Filter out existing creators and apply search
   const filteredCreators = creators
-    .filter(creator => !existingCreatorIds.includes(creator.creatorId))
+    .filter(creator => {
+      const isNotExisting = !existingCreatorIds.includes(creator.creatorId);
+      console.log(`Creator ${creator.displayName} (${creator.creatorId}): isNotExisting=${isNotExisting}`);
+      return isNotExisting;
+    })
     .filter(creator =>
       creator.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       creator.instagramHandle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       creator.email.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+  console.log('CreatorSelectionModal - Filtered creators count:', filteredCreators.length);
+  console.log('CreatorSelectionModal - Filtered creators:', filteredCreators.map(c => c.displayName));
 
   const toggleCreatorSelection = (creatorId: string) => {
     setSelectedCreatorIds(prev =>
@@ -167,6 +178,9 @@ export const CreatorSelectionModal = ({
               <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <p className="text-gray-600">
                 {searchTerm ? 'No available creators match your search.' : 'No available creators found.'}
+              </p>
+              <p className="text-sm text-gray-500 mt-2">
+                Total creators: {creators.length}, Existing: {existingCreatorIds.length}
               </p>
             </div>
           ) : (
