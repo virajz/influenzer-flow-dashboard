@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { FiMail, FiPhone, FiMessageSquare, FiVideo } from 'react-icons/fi';
-import { PhoneCall } from 'lucide-react';
+import { PhoneCall, Trash2 } from 'lucide-react';
 import { Communication } from '@/services/communicationsService';
 
 interface CommunicationHistoryTabProps {
@@ -12,13 +12,17 @@ interface CommunicationHistoryTabProps {
   showAgentCall?: boolean;
   onAgentCall?: () => void;
   isCallLoading?: boolean;
+  onDelete?: () => void;
+  isDeleteLoading?: boolean;
 }
 
 export const CommunicationHistoryTab = ({ 
   communications, 
   showAgentCall = false,
   onAgentCall,
-  isCallLoading = false
+  isCallLoading = false,
+  onDelete,
+  isDeleteLoading = false
 }: CommunicationHistoryTabProps) => {
   const getCommunicationIcon = (type: string) => {
     switch (type) {
@@ -66,18 +70,32 @@ export const CommunicationHistoryTab = ({
             <CardTitle>Communication History</CardTitle>
             <CardDescription>All interactions with this creator</CardDescription>
           </div>
-          {showAgentCall && (
-            <Button
-              onClick={onAgentCall}
-              disabled={isCallLoading}
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-2"
-            >
-              <PhoneCall className="h-4 w-4" />
-              {isCallLoading ? 'Calling...' : 'Agent Call'}
-            </Button>
-          )}
+          <div className="flex items-center gap-2">
+            {showAgentCall && (
+              <Button
+                onClick={onAgentCall}
+                disabled={isCallLoading}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <PhoneCall className="h-4 w-4" />
+                {isCallLoading ? 'Calling...' : 'Agent Call'}
+              </Button>
+            )}
+            {onDelete && (
+              <Button
+                onClick={onDelete}
+                disabled={isDeleteLoading}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2 text-red-600 hover:text-red-700"
+              >
+                <Trash2 className="h-4 w-4" />
+                {isDeleteLoading ? 'Deleting...' : 'Delete'}
+              </Button>
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col min-h-0">
