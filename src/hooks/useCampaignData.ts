@@ -8,6 +8,10 @@ import { creatorAssignmentsService } from '@/services/creatorAssignmentsService'
 export const useCampaignData = (campaignId: string | undefined) => {
   const { currentUser } = useAuth();
 
+  // Debug user information
+  console.log('useCampaignData - Current user:', currentUser);
+  console.log('useCampaignData - Current user UID:', currentUser?.uid);
+
   // Fetch campaign details
   const { data: campaign, isLoading: campaignLoading } = useQuery({
     queryKey: ['campaign', campaignId],
@@ -25,8 +29,13 @@ export const useCampaignData = (campaignId: string | undefined) => {
   const { data: creatorAssignments = [], isLoading: assignmentsLoading, refetch: refetchAssignments } = useQuery({
     queryKey: ['creatorAssignments', currentUser?.uid],
     queryFn: async () => {
-      if (!currentUser?.uid) return [];
+      if (!currentUser?.uid) {
+        console.log('useCampaignData - No current user UID, returning empty assignments');
+        return [];
+      }
+      console.log('useCampaignData - Fetching assignments for user:', currentUser.uid);
       const assignments = await creatorAssignmentsService.getAssignmentsByUser(currentUser.uid);
+      console.log('useCampaignData - Raw assignments from service:', assignments);
       return assignments;
     },
     enabled: !!currentUser?.uid,
@@ -74,6 +83,7 @@ export const useCampaignData = (campaignId: string | undefined) => {
 
   console.log('useCampaignData - Campaign ID:', campaignId);
   console.log('useCampaignData - All creator assignments:', creatorAssignments.length);
+  console.log('useCampaignData - Creator assignments details:', creatorAssignments);
   console.log('useCampaignData - Assignments for this campaign:', assignedCreatorIds);
   console.log('useCampaignData - Negotiations for this campaign:', negotiationCreatorIds);
   console.log('useCampaignData - All contacted creator IDs (assignments + negotiations):', allContactedCreatorIds);
