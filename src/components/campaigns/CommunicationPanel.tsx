@@ -16,6 +16,7 @@ interface CommunicationPanelProps {
   onAutoEmail: (creatorId: string) => void;
   onAgentCall: (creatorId: string) => void;
   negotiationIds: string[];
+  creatorName: string;
 }
 
 export const CommunicationPanel = ({
@@ -27,7 +28,8 @@ export const CommunicationPanel = ({
   isCallLoading,
   onAutoEmail,
   onAgentCall,
-  negotiationIds
+  negotiationIds,
+  creatorName
 }: CommunicationPanelProps) => {
   // Get voice communications for selected creator
   const { voiceCommunications, isLoading: voiceLoading } = useRealTimeVoiceCommunications(negotiationIds);
@@ -59,9 +61,10 @@ export const CommunicationPanel = ({
 
   if (communications.length > 0 || voiceCommunications.length > 0) {
     return (
-      <TabbedCommunicationHistory 
+      <TabbedCommunicationHistory
         communications={communications}
         voiceCommunications={voiceCommunications}
+        creatorName={creatorName}
       />
     );
   }
@@ -72,7 +75,7 @@ export const CommunicationPanel = ({
         <div className="text-center space-y-4">
           <p className="text-gray-600 mb-4">No communication history found</p>
           <p className="text-sm text-gray-500 mb-6">Start outreach using the buttons below</p>
-          
+
           <div className="flex justify-center gap-4">
             <Button
               onClick={() => onAutoEmail(selectedCreatorId)}

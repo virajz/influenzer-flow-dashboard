@@ -8,9 +8,10 @@ import { TranscriptModal } from './TranscriptModal';
 
 interface VoiceHistoryTabProps {
   voiceCommunications: VoiceCommunication[];
+  creatorName: string;
 }
 
-export const VoiceHistoryTab = ({ voiceCommunications }: VoiceHistoryTabProps) => {
+export const VoiceHistoryTab = ({ voiceCommunications, creatorName }: VoiceHistoryTabProps) => {
   const [selectedTranscript, setSelectedTranscript] = useState<{
     transcript: any[];
     conversationId: string;
@@ -57,7 +58,7 @@ export const VoiceHistoryTab = ({ voiceCommunications }: VoiceHistoryTabProps) =
                   {new Date(comm.createdAt).toLocaleDateString()} {new Date(comm.createdAt).toLocaleTimeString()}
                 </span>
               </div>
-              
+
               {/* Audio Player */}
               <div className="mb-3">
                 <audio controls className="w-full max-w-md">
@@ -65,7 +66,7 @@ export const VoiceHistoryTab = ({ voiceCommunications }: VoiceHistoryTabProps) =
                   Your browser does not support the audio element.
                 </audio>
               </div>
-              
+
               <div className="flex items-center gap-2 flex-wrap mb-3">
                 <Badge variant="outline">voice_call</Badge>
                 <Badge className="bg-green-100 text-green-800">{comm.status}</Badge>
@@ -75,7 +76,7 @@ export const VoiceHistoryTab = ({ voiceCommunications }: VoiceHistoryTabProps) =
                   </Badge>
                 )}
               </div>
-              
+
               {/* Action Buttons */}
               <div className="flex items-center gap-2">
                 <Button
@@ -101,13 +102,14 @@ export const VoiceHistoryTab = ({ voiceCommunications }: VoiceHistoryTabProps) =
           </div>
         </div>
       ))}
-      
+
       {selectedTranscript && (
         <TranscriptModal
           open={!!selectedTranscript}
           onOpenChange={() => setSelectedTranscript(null)}
           transcript={selectedTranscript.transcript}
           conversationId={selectedTranscript.conversationId}
+          creatorName={creatorName}
         />
       )}
     </div>
