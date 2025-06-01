@@ -96,6 +96,19 @@ export const negotiationsService = {
         } as Negotiation));
     },
 
+    async getAllNegotiations(): Promise<Negotiation[]> {
+        const q = query(
+            collection(db, NEGOTIATIONS_COLLECTION),
+            orderBy('createdAt', 'desc')
+        );
+
+        const querySnapshot = await getDocs(q);
+        return querySnapshot.docs.map(doc => ({
+            ...doc.data(),
+            negotiationId: doc.id
+        } as Negotiation));
+    },
+
     async getNegotiationsByBrand(brandId: string): Promise<Negotiation[]> {
         try {
             const q = query(
