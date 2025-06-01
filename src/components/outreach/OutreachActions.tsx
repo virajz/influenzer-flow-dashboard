@@ -4,20 +4,22 @@ import { FiPhone, FiSend } from 'react-icons/fi';
 import { Negotiation } from '@/services/negotiationsService';
 import { toast } from '@/hooks/use-toast';
 import { apiService } from '@/services/apiService';
+import { useAuth } from '@/contexts/AuthContext';
+import { creatorAssignmentsService } from '@/services/creatorAssignmentsService';
 
 interface OutreachActionsProps {
     negotiation: Negotiation | null;
-    creatorPhone?: string;
     onAutoEmail: () => void;
     onAgentCall: () => void;
 }
 
 export const OutreachActions = ({
     negotiation,
-    creatorPhone,
     onAutoEmail,
     onAgentCall
 }: OutreachActionsProps) => {
+    const { currentUser } = useAuth();
+
     const getStatusBadge = () => {
         if (!negotiation) {
             return <Badge variant="secondary">Not Started</Badge>;
@@ -42,27 +44,42 @@ export const OutreachActions = ({
     };
 
     const canSendEmail = !negotiation || !['accepted', 'rejected', 'cancelled'].includes(negotiation.status);
-    const canCall = creatorPhone && canSendEmail;
+    const canCall = canSendEmail;
     const hasPhoneAttempted = negotiation?.phoneContactAttempted;
 
     const handleAgentCall = async () => {
-        if (!negotiation || !creatorPhone) {
+        if (!negotiation || !currentUser) {
             toast({
                 title: 'Error',
-                description: 'Missing negotiation or phone number.',
+                description: 'Missing negotiation or authentication.',
                 variant: 'destructive',
             });
             return;
         }
 
+        // Fetch the phone number from creatorAssignments
+        const assignment = await creatorAssignmentsService.getCreatorAssignment(
+            currentUser.uid,
+            negotiation.creatorId
+        );
+        if (!assignment || !assignment.phoneNumber) {
+            toast({
+                title: 'Error',
+                description: 'Phone number not found for the creator.',
+                variant: 'destructive',
+            });
+            return;
+        }
+        const phone = assignment.phoneNumber;
+
         try {
-            await apiService.initiateAgentCall(negotiation.negotiationId, creatorPhone);
+            await apiService.initiateAgentCall(negotiation.negotiationId, phone);
 
             toast({
                 title: 'Success',
                 description: 'Call initiated successfully.',
             });
-        } catch (error) {
+        } catch (error: any) {
             toast({
                 title: 'Error',
                 description: error.message || 'Failed to initiate call.',
@@ -91,14 +108,13 @@ export const OutreachActions = ({
 
                 <Button
                     onClick={handleAgentCall}
-                    disabled={!creatorPhone || !negotiation}
+                    disabled={!negotiation}
                     variant="outline"
                     className="flex items-center gap-2"
                 >
                     <FiPhone className="h-4 w-4" />
                     Agent Call
-                    {!creatorPhone && <span className="text-xs">(No Phone)</span>}
-                    {hasPhoneAttempted && <Badge variant="secondary" className="ml-1">Called</Badge>}
+                    {negotiation?.phoneContactAttempted && <Badge variant="secondary" className="ml-1">Called</Badge>}
                 </Button>
             </div>
 

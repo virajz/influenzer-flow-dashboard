@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -126,6 +125,18 @@ export const useCreatorProfile = () => {
         try {
             let negotiation = negotiations.find(n => n.campaignId === campaignId);
 
+            // Fetch the phone number from creatorAssignments
+            const assignment = await creatorAssignmentsService.getCreatorAssignment(currentUser.uid, creatorId);
+            if (!assignment || !assignment.phoneNumber) {
+                toast({
+                    title: "Error",
+                    description: "Phone number not found for the creator in assignments.",
+                    variant: "destructive",
+                });
+                return;
+            }
+            const phone = assignment.phoneNumber;
+
             if (!negotiation && campaignId) {
                 const campaign = brandCampaigns.find(c => c.campaignId === campaignId);
                 if (!campaign) return;
@@ -149,15 +160,26 @@ export const useCreatorProfile = () => {
                     escalationCount: 0
                 });
 
-                negotiation = { negotiationId } as any;
+                negotiation = { negotiationId } as any; // Cast to Negotiation like type
             } else if (negotiation) {
                 await negotiationsService.updateNegotiation(negotiation.negotiationId, {
                     status: 'phone_contacted',
                     phoneContactAttempted: true,
                     voiceCallCompleted: true
                 });
-                await apiService.initiateAgentCall(negotiation.negotiationId, creator.phone);
             }
+
+            if (!negotiation) {
+                toast({
+                    title: "Error",
+                    description: "Negotiation could not be found or created.",
+                    variant: "destructive",
+                });
+                return;
+            }
+
+            // Use the fetched phone number
+            await apiService.initiateAgentCall(negotiation.negotiationId, phone);
 
             toast({
                 title: "Agent Call Initiated!",
