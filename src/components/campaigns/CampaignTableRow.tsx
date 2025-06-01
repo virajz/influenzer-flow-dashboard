@@ -1,7 +1,8 @@
+
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Edit } from 'lucide-react';
+import { Edit, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Campaign } from '@/services/campaignsService';
 
@@ -70,13 +71,22 @@ export const CampaignTableRow = ({ campaign }: CampaignTableRowProps) => {
             </TableCell>
             <TableCell>{getPlatforms()}</TableCell>
             <TableCell>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => navigate(`/campaigns/${campaign.campaignId}/edit`)}
-                >
-                    <Edit className="h-4 w-4" />
-                </Button>
+                <div className="flex gap-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate(`/campaigns/${campaign.campaignId}`)}
+                    >
+                        <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate(`/campaigns/${campaign.campaignId}/edit`)}
+                    >
+                        <Edit className="h-4 w-4" />
+                    </Button>
+                </div>
             </TableCell>
         </TableRow>
     );

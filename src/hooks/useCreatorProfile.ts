@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -8,7 +9,6 @@ import { negotiationsService } from '@/services/negotiationsService';
 import { creatorAssignmentsService } from '@/services/creatorAssignmentsService';
 import { apiService } from '@/services/apiService';
 import { useRealTimeNegotiations } from '@/hooks/useRealTimeNegotiations';
-import { useRealTimeCommunications } from '@/hooks/useRealTimeCommunications';
 import { toast } from '@/hooks/use-toast';
 
 export const useCreatorProfile = () => {
@@ -57,10 +57,6 @@ export const useCreatorProfile = () => {
   const allCampaigns = brandCampaigns.filter(campaign =>
     allCampaignIds.includes(campaign.campaignId)
   );
-
-  // Use real-time communications hook
-  const negotiationIds = negotiations.map(n => n.negotiationId);
-  const { communications: allCommunications } = useRealTimeCommunications(negotiationIds);
 
   const handleAutoEmail = async (campaignId: string) => {
     if (!currentUser?.uid || !creatorId) return;
@@ -201,7 +197,6 @@ export const useCreatorProfile = () => {
     creator,
     negotiations,
     allCampaigns,
-    allCommunications,
     showAssignmentModal,
     setShowAssignmentModal,
     creatorsLoading,

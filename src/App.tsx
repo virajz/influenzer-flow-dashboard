@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,6 +14,7 @@ import Dashboard from "./pages/Dashboard";
 import Campaigns from "./pages/Campaigns";
 import CampaignCreate from "./pages/CampaignCreate";
 import CampaignEdit from "./pages/CampaignEdit";
+import CampaignView from "./pages/CampaignView";
 import CreatorDiscovery from "./pages/CreatorDiscovery";
 import NegotiationTracker from "./pages/NegotiationTracker";
 import PerformanceOverview from "./pages/PerformanceOverview";
@@ -45,6 +47,11 @@ const App = () => (
             <Route path="/campaigns/new" element={
               <ProtectedRoute>
                 <Layout><CampaignCreate /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/campaigns/:campaignId" element={
+              <ProtectedRoute>
+                <Layout><CampaignView /></Layout>
               </ProtectedRoute>
             } />
             <Route path="/campaigns/:campaignId/edit" element={

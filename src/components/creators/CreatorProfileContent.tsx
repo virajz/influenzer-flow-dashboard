@@ -4,17 +4,14 @@ import { CampaignAssignmentModal } from '@/components/campaigns/CampaignAssignme
 import { CreatorHeader } from '@/components/creators/CreatorHeader';
 import { CurrentCampaignsTab } from '@/components/creators/CurrentCampaignsTab';
 import { PastCampaignsTab } from '@/components/creators/PastCampaignsTab';
-import { CommunicationHistoryTab } from '@/components/creators/CommunicationHistoryTab';
 import { Creator } from '@/services/creatorsService';
 import { Campaign } from '@/services/campaignsService';
 import { Negotiation } from '@/services/negotiationsService';
-import { Communication } from '@/services/communicationsService';
 
 interface CreatorProfileContentProps {
     creator: Creator;
     currentCampaigns: Array<{ campaign: Campaign; negotiation: Negotiation | undefined }>;
     pastCampaigns: Array<{ campaign: Campaign; negotiation: Negotiation | undefined }>;
-    allCommunications: Communication[];
     showAssignmentModal: boolean;
     onAssignmentModalChange: (open: boolean) => void;
     onAutoEmail: (campaignId: string) => void;
@@ -27,7 +24,6 @@ export const CreatorProfileContent = ({
     creator,
     currentCampaigns,
     pastCampaigns,
-    allCommunications,
     showAssignmentModal,
     onAssignmentModalChange,
     onAutoEmail,
@@ -40,10 +36,9 @@ export const CreatorProfileContent = ({
             <CreatorHeader creator={creator} />
 
             <Tabs defaultValue="current" className="space-y-6">
-                <TabsList className="grid w-full grid-cols-3 py-2 px-2 h-auto">
+                <TabsList className="grid w-full grid-cols-2 py-2 px-2 h-auto">
                     <TabsTrigger value="current">Current Campaigns</TabsTrigger>
                     <TabsTrigger value="past">Past Campaigns</TabsTrigger>
-                    <TabsTrigger value="history">History</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="current">
@@ -58,10 +53,6 @@ export const CreatorProfileContent = ({
 
                 <TabsContent value="past">
                     <PastCampaignsTab pastCampaigns={pastCampaigns} />
-                </TabsContent>
-
-                <TabsContent value="history">
-                    <CommunicationHistoryTab communications={allCommunications} />
                 </TabsContent>
             </Tabs>
 

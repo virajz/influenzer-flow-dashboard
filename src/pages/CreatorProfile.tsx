@@ -11,7 +11,6 @@ const CreatorProfile = () => {
     creator,
     negotiations,
     allCampaigns,
-    allCommunications,
     showAssignmentModal,
     setShowAssignmentModal,
     creatorsLoading,
@@ -36,7 +35,6 @@ const CreatorProfile = () => {
       creator={creator}
       currentCampaigns={currentCampaigns}
       pastCampaigns={pastCampaigns}
-      allCommunications={allCommunications}
       showAssignmentModal={showAssignmentModal}
       onAssignmentModalChange={setShowAssignmentModal}
       onAutoEmail={handleAutoEmail}
