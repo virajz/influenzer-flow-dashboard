@@ -1,15 +1,15 @@
-import { 
-  collection, 
-  addDoc, 
-  getDocs, 
-  doc, 
-  getDoc, 
-  updateDoc, 
-  deleteDoc, 
-  query, 
-  where, 
+import {
+  collection,
+  addDoc,
+  getDocs,
+  doc,
+  getDoc,
+  updateDoc,
+  deleteDoc,
+  query,
+  where,
   orderBy,
-  Timestamp 
+  Timestamp
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
@@ -54,7 +54,7 @@ export const campaignsService = {
         createdAt: now,
         updatedAt: now
       };
-      
+
       console.log('Final campaign data to save:', campaignData);
       const docRef = await addDoc(collection(db, CAMPAIGNS_COLLECTION), campaignData);
       console.log('Campaign created with ID:', docRef.id);
@@ -68,41 +68,36 @@ export const campaignsService = {
   // Get all campaigns for a brand
   async getCampaignsByBrand(brandId: string): Promise<Campaign[]> {
     try {
-      console.log('Fetching campaigns for brand:', brandId);
-      console.log('Database instance:', db);
-      console.log('Collection name:', CAMPAIGNS_COLLECTION);
-      
+
+
       const campaignsCollection = collection(db, CAMPAIGNS_COLLECTION);
-      console.log('Collection reference:', campaignsCollection);
-      
+
+
       const q = query(
         campaignsCollection,
         where('brandId', '==', brandId),
         orderBy('createdAt', 'desc')
       );
-      
-      console.log('Query created:', q);
-      
+
+
+
       const querySnapshot = await getDocs(q);
-      console.log('Query snapshot received:', querySnapshot);
-      console.log('Query snapshot size:', querySnapshot.size);
-      console.log('Query snapshot empty:', querySnapshot.empty);
-      
+
+
       const campaigns: Campaign[] = [];
-      
+
       querySnapshot.forEach((doc) => {
-        console.log('Processing document:', doc.id, doc.data());
+
         campaigns.push({
           campaignId: doc.id,
           ...doc.data()
         } as Campaign);
       });
-      
-      console.log('Final campaigns array:', campaigns);
+
+
       return campaigns;
     } catch (error) {
-      console.error('Error fetching campaigns:', error);
-      console.error('Error details:', error);
+
       throw error;
     }
   },
@@ -112,17 +107,17 @@ export const campaignsService = {
     try {
       const docRef = doc(db, CAMPAIGNS_COLLECTION, campaignId);
       const docSnap = await getDoc(docRef);
-      
+
       if (docSnap.exists()) {
         return {
           campaignId: docSnap.id,
           ...docSnap.data()
         } as Campaign;
       }
-      
+
       return null;
     } catch (error) {
-      console.error('Error fetching campaign:', error);
+
       throw error;
     }
   },
@@ -135,9 +130,9 @@ export const campaignsService = {
         ...updates,
         updatedAt: new Date().toISOString()
       });
-      console.log('Campaign updated:', campaignId);
+
     } catch (error) {
-      console.error('Error updating campaign:', error);
+
       throw error;
     }
   },
@@ -147,9 +142,9 @@ export const campaignsService = {
     try {
       const docRef = doc(db, CAMPAIGNS_COLLECTION, campaignId);
       await deleteDoc(docRef);
-      console.log('Campaign deleted:', campaignId);
+
     } catch (error) {
-      console.error('Error deleting campaign:', error);
+
       throw error;
     }
   }
