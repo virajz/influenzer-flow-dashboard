@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -10,14 +11,18 @@ import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
 import { creatorsService } from '@/services/creatorsService';
+import { creatorAssignmentsService } from '@/services/creatorAssignmentsService';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
-import { FiInstagram, FiYoutube, FiFilter, FiUsers, FiDollarSign, FiMapPin, FiEye } from 'react-icons/fi';
+import { FiInstagram, FiYoutube, FiFilter, FiUsers, FiDollarSign, FiMapPin, FiEye, FiPlus } from 'react-icons/fi';
 import { SiTiktok, SiX, SiLinkedin } from 'react-icons/si';
+import { Target } from 'lucide-react';
 import { CampaignAssignmentModal } from '@/components/campaigns/CampaignAssignmentModal';
 import { CreatorDetailModal } from '@/components/creators/CreatorDetailModal';
 
 const CreatorDiscovery = () => {
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const [filters, setFilters] = useState({
     category: 'all',
     platform: 'all',
@@ -31,13 +36,29 @@ const CreatorDiscovery = () => {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedCreatorForDetail, setSelectedCreatorForDetail] = useState<any>(null);
 
-  // Fetch real creators data
-  const { data: creators = [], isLoading, error } = useQuery({
+  // Fetch creator assignments for current user
+  const { data: assignments = [], isLoading: assignmentsLoading } = useQuery({
+    queryKey: ['creatorAssignments', currentUser?.uid],
+    queryFn: () => currentUser ? creatorAssignmentsService.getAssignmentsByUser(currentUser.uid) : [],
+    enabled: !!currentUser
+  });
+
+  // Fetch all creators
+  const { data: allCreators = [], isLoading: creatorsLoading } = useQuery({
     queryKey: ['creators'],
     queryFn: creatorsService.getAllCreators,
   });
 
-  console.log('Creators data from query:', creators);
+  const isLoading = assignmentsLoading || creatorsLoading;
+
+  // Filter creators to show only assigned ones
+  const assignedCreatorIds = assignments.map(assignment => assignment.creatorId);
+  const assignedCreators = allCreators.filter(creator => 
+    assignedCreatorIds.includes(creator.creatorId)
+  );
+
+  console.log('Assigned creator IDs:', assignedCreatorIds);
+  console.log('Assigned creators:', assignedCreators);
 
   const getPlatformIcon = (platform: string) => {
     switch (platform.toLowerCase()) {
@@ -56,7 +77,7 @@ const CreatorDiscovery = () => {
     return count.toString();
   };
 
-  const filteredCreators = creators.filter(creator => {
+  const filteredCreators = assignedCreators.filter(creator => {
     if (filters.category !== 'all' && creator.category !== filters.category) return false;
     if (filters.platform !== 'all' && 
         !((creator.instagramHandle && filters.platform === 'Instagram') || 
@@ -95,18 +116,32 @@ const CreatorDiscovery = () => {
         <div className="flex justify-center items-center min-h-[400px]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-4"></div>
-            <p className="text-lg text-gray-600">Loading creators...</p>
+            <p className="text-lg text-gray-600">Loading your assigned creators...</p>
           </div>
         </div>
       </div>
     );
   }
 
-  if (error) {
+  // Show empty state if no creators are assigned
+  if (assignedCreators.length === 0) {
     return (
       <div className="p-8">
-        <div className="text-center">
-          <p className="text-lg text-red-600">Error loading creators. Please try again.</p>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">My Assigned Creators</h1>
+          <p className="text-gray-600">Manage creators you've assigned to campaigns</p>
+        </div>
+        
+        <div className="text-center py-12">
+          <Target className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No creators assigned yet</h3>
+          <p className="text-gray-500 mb-4">
+            You haven't assigned any creators to your campaigns yet. Start by discovering and assigning creators.
+          </p>
+          <Button onClick={() => navigate('/discovery')} className="bg-purple-600 hover:bg-purple-700">
+            <FiPlus className="mr-2 h-4 w-4" />
+            Discover Creators
+          </Button>
         </div>
       </div>
     );
@@ -115,8 +150,8 @@ const CreatorDiscovery = () => {
   return (
     <div className="p-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Creator Discovery</h1>
-        <p className="text-gray-600">Find the perfect creators for your campaign</p>
+        <h1 className="text-3xl font-bold text-gray-900">My Assigned Creators</h1>
+        <p className="text-gray-600">Manage creators you've assigned to campaigns</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -215,7 +250,7 @@ const CreatorDiscovery = () => {
         {/* Creator Grid */}
         <div className="lg:col-span-3">
           <div className="flex justify-between items-center mb-6">
-            <p className="text-gray-600">{filteredCreators.length} creators found</p>
+            <p className="text-gray-600">{filteredCreators.length} assigned creators found</p>
             {selectedCreators.length > 0 && (
               <Button 
                 onClick={() => setShowAssignmentModal(true)} 
@@ -228,7 +263,7 @@ const CreatorDiscovery = () => {
 
           {filteredCreators.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500">No creators found. Try adjusting your filters.</p>
+              <p className="text-gray-500">No assigned creators match your current filters.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
