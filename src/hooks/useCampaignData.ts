@@ -67,18 +67,19 @@ export const useCampaignData = (campaignId: string | undefined) => {
   // Get creators who have negotiations for this campaign
   const negotiationCreatorIds = negotiations.map(n => n.creatorId);
 
-  // Combine both sets of creator IDs for THIS CAMPAIGN ONLY (unique)
+  // Combine both sets of creator IDs for THIS CAMPAIGN ONLY (unique) - for contacted creators list
   const allContactedCreatorIds = [...new Set([...assignedCreatorIds, ...negotiationCreatorIds])];
 
-  // For the CreatorSelectionModal, we only need to exclude creators who are ASSIGNED to this campaign
+  // For the CreatorSelectionModal, we ONLY exclude creators who are ASSIGNED to this campaign
+  // This should NOT include creators who only have negotiations
   const existingCreatorIds = assignedCreatorIds;
 
   console.log('useCampaignData - Campaign ID:', campaignId);
   console.log('useCampaignData - All creator assignments:', creatorAssignments.length);
   console.log('useCampaignData - Assignments for this campaign:', assignedCreatorIds);
-  console.log('useCampaignData - Existing creator IDs (for exclusion):', existingCreatorIds);
+  console.log('useCampaignData - Existing creator IDs (for exclusion in modal - ASSIGNMENTS ONLY):', existingCreatorIds);
   console.log('useCampaignData - Negotiations for this campaign:', negotiationCreatorIds);
-  console.log('useCampaignData - Final contacted creator IDs for this campaign:', allContactedCreatorIds);
+  console.log('useCampaignData - Final contacted creator IDs for this campaign (ASSIGNMENTS + NEGOTIATIONS):', allContactedCreatorIds);
 
   // Get contacted creators with their data
   const contactedCreators = allContactedCreatorIds.map(creatorId => {
@@ -123,7 +124,7 @@ export const useCampaignData = (campaignId: string | undefined) => {
     allCreators,
     contactedCreators,
     allContactedCreatorIds,
-    existingCreatorIds, // This is what CreatorSelectionModal should use for filtering
+    existingCreatorIds, // This should ONLY contain creator IDs that are assigned via creatorAssignments
     refetchAssignments,
     isLoading
   };

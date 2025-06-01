@@ -41,15 +41,16 @@ export const CreatorSelectionModal = ({
   });
 
   // Debug logging
+  console.log('CreatorSelectionModal - Campaign ID:', campaignId);
   console.log('CreatorSelectionModal - All creators count:', creators.length);
-  console.log('CreatorSelectionModal - Existing creator IDs:', existingCreatorIds);
+  console.log('CreatorSelectionModal - Existing creator IDs (should be ASSIGNMENTS only):', existingCreatorIds);
   console.log('CreatorSelectionModal - Search term:', searchTerm);
 
   // Filter out existing creators and apply search
   const filteredCreators = creators
     .filter(creator => {
       const isNotExisting = !existingCreatorIds.includes(creator.creatorId);
-      console.log(`Creator ${creator.displayName} (${creator.creatorId}): isNotExisting=${isNotExisting}`);
+      console.log(`CreatorSelectionModal - Creator ${creator.displayName} (${creator.creatorId}): isNotExisting=${isNotExisting}`);
       return isNotExisting;
     })
     .filter(creator =>
@@ -59,7 +60,7 @@ export const CreatorSelectionModal = ({
     );
 
   console.log('CreatorSelectionModal - Filtered creators count:', filteredCreators.length);
-  console.log('CreatorSelectionModal - Filtered creators:', filteredCreators.map(c => c.displayName));
+  console.log('CreatorSelectionModal - Filtered creators:', filteredCreators.map(c => `${c.displayName} (${c.creatorId})`));
 
   const toggleCreatorSelection = (creatorId: string) => {
     setSelectedCreatorIds(prev =>
@@ -167,6 +168,11 @@ export const CreatorSelectionModal = ({
               </p>
             </div>
           )}
+
+          {/* Debug info */}
+          <div className="mb-4 p-3 bg-gray-50 rounded-lg text-xs text-gray-600">
+            <p>Debug: Total creators: {creators.length}, Existing (excluded): {existingCreatorIds.length}, Available: {filteredCreators.length}</p>
+          </div>
 
           {/* Creators list */}
           {isLoading ? (
