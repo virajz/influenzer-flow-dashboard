@@ -48,6 +48,7 @@ const CampaignView = () => {
     queryFn: async () => {
       const creatorsData = await creatorsService.getAllCreators();
       console.log('All creators fetched:', creatorsData.length);
+      console.log('Creator IDs available:', creatorsData.map(c => c.creatorId));
       return creatorsData;
     },
   });
@@ -65,8 +66,18 @@ const CampaignView = () => {
 
   // Get contacted creators (those with negotiations)
   const contactedCreators = negotiations.map(negotiation => {
-    const creator = allCreators.find(c => c.creatorId === negotiation.creatorId);
+    console.log('Processing negotiation with creatorId:', negotiation.creatorId);
+    const creator = allCreators.find(c => {
+      console.log(`Comparing negotiation.creatorId "${negotiation.creatorId}" with creator.creatorId "${c.creatorId}"`);
+      return c.creatorId === negotiation.creatorId;
+    });
     console.log('Looking for creator with ID:', negotiation.creatorId, 'Found:', !!creator);
+    if (creator) {
+      console.log('Found creator:', creator.displayName, creator.email);
+    } else {
+      console.log('No creator found for negotiation creatorId:', negotiation.creatorId);
+      console.log('Available creator IDs:', allCreators.map(c => c.creatorId));
+    }
     return {
       creator,
       negotiation,
@@ -169,6 +180,14 @@ const CampaignView = () => {
                   <p className="text-xs text-gray-500 mt-2">
                     Debug: Found {negotiations.length} negotiations, {allCreators.length} total creators
                   </p>
+                  {negotiations.length > 0 && (
+                    <div className="mt-4 text-xs text-red-600">
+                      <p>Negotiation creator IDs:</p>
+                      {negotiations.map((neg, idx) => (
+                        <p key={idx}>{neg.creatorId}</p>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="space-y-2">
