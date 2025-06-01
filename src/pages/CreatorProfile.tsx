@@ -163,7 +163,7 @@ const CreatorProfile = () => {
         <CardContent className="p-8">
           <div className="flex items-start gap-6">
             <Avatar className="w-24 h-24">
-              <AvatarImage src={creator.avatar} alt={creator.name} />
+              <AvatarImage src={creator.avatar} alt={creator.name} className="object-cover" />
               <AvatarFallback>{creator.name.charAt(0)}</AvatarFallback>
             </Avatar>
             
