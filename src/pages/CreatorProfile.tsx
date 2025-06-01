@@ -356,7 +356,7 @@ const CreatorProfile = () => {
       <EmailComposerModal
         open={showEmailModal}
         onOpenChange={setShowEmailModal}
-        creatorName={creator.name}
+        creatorName={creator.displayName}
         creatorEmail={creator.email}
         onSend={handleEmailSend}
       />
