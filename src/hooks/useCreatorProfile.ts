@@ -91,6 +91,7 @@ export const useCreatorProfile = () => {
           initialContactMethod: 'email',
           phoneContactAttempted: false,
           voiceCallCompleted: false,
+          paymentStatus: 'pending',
           escalationCount: 0
         });
 
@@ -144,6 +145,7 @@ export const useCreatorProfile = () => {
           initialContactMethod: 'phone',
           phoneContactAttempted: true,
           voiceCallCompleted: true,
+          paymentStatus: 'pending',
           escalationCount: 0
         });
 
