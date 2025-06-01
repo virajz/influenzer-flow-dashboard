@@ -1,8 +1,11 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Trash2 } from 'lucide-react';
 import { Creator } from '@/services/creatorsService';
 import { Negotiation } from '@/services/negotiationsService';
 import { CreatorAssignment } from '@/services/creatorAssignmentsService';
@@ -23,6 +26,7 @@ interface ContactedCreatorsListProps {
   communications: any[];
   onAutoEmail?: (creatorId: string) => void;
   onAgentCall?: (creatorId: string) => void;
+  onRemoveCreator?: (creatorId: string) => void;
 }
 
 export const ContactedCreatorsList = ({ 
@@ -34,7 +38,8 @@ export const ContactedCreatorsList = ({
   creatorAssignments,
   communications,
   onAutoEmail,
-  onAgentCall
+  onAgentCall,
+  onRemoveCreator
 }: ContactedCreatorsListProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -131,6 +136,20 @@ export const ContactedCreatorsList = ({
                         </Badge>
                       </div>
                     </div>
+
+                    {onRemoveCreator && (
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onRemoveCreator(creator.creatorId);
+                        }}
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
                 </div>
               ))}

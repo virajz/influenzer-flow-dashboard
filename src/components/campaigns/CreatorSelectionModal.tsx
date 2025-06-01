@@ -18,13 +18,15 @@ interface CreatorSelectionModalProps {
   onOpenChange: (open: boolean) => void;
   campaignId: string;
   onCreatorAssigned: () => void;
+  existingCreatorIds?: string[];
 }
 
 export const CreatorSelectionModal = ({
   open,
   onOpenChange,
   campaignId,
-  onCreatorAssigned
+  onCreatorAssigned,
+  existingCreatorIds = []
 }: CreatorSelectionModalProps) => {
   const { currentUser } = useAuth();
   const queryClient = useQueryClient();
@@ -39,12 +41,14 @@ export const CreatorSelectionModal = ({
     enabled: open,
   });
 
-  // Filter creators based on search
-  const filteredCreators = creators.filter(creator =>
-    creator.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    creator.instagramHandle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    creator.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter out existing creators and apply search
+  const filteredCreators = creators
+    .filter(creator => !existingCreatorIds.includes(creator.creatorId))
+    .filter(creator =>
+      creator.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      creator.instagramHandle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      creator.email.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
   const toggleCreatorSelection = (creatorId: string) => {
     setSelectedCreatorIds(prev =>
@@ -106,7 +110,6 @@ export const CreatorSelectionModal = ({
       setSelectedCreatorIds([]);
       setSearchTerm('');
     } catch (error) {
-      console.error('Error assigning creators:', error);
       toast({
         title: "Error",
         description: "Failed to assign creators to campaign. Please try again.",
@@ -163,7 +166,7 @@ export const CreatorSelectionModal = ({
             <div className="text-center py-8">
               <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <p className="text-gray-600">
-                {searchTerm ? 'No creators match your search.' : 'No creators found.'}
+                {searchTerm ? 'No available creators match your search.' : 'No available creators found.'}
               </p>
             </div>
           ) : (

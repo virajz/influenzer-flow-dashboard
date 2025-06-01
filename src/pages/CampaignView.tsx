@@ -1,3 +1,4 @@
+
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -27,15 +28,12 @@ const CampaignView = () => {
   const [isEmailLoading, setIsEmailLoading] = useState(false);
   const [isCallLoading, setIsCallLoading] = useState(false);
 
-  console.log('CampaignView - campaignId:', campaignId);
-
   // Fetch campaign details
   const { data: campaign, isLoading: campaignLoading } = useQuery({
     queryKey: ['campaign', campaignId],
     queryFn: async () => {
       if (!campaignId) throw new Error('Campaign ID is required');
       const campaignData = await campaignsService.getCampaignById(campaignId);
-      console.log('Campaign data fetched:', campaignData);
       return campaignData;
     },
     enabled: !!campaignId,
@@ -46,9 +44,7 @@ const CampaignView = () => {
     queryKey: ['creatorAssignments', currentUser?.uid],
     queryFn: async () => {
       if (!currentUser?.uid) return [];
-      console.log('Fetching creator assignments for user:', currentUser.uid);
       const assignments = await creatorAssignmentsService.getAssignmentsByUser(currentUser.uid);
-      console.log('Creator assignments fetched:', assignments.length);
       return assignments;
     },
     enabled: !!currentUser?.uid,
@@ -59,10 +55,7 @@ const CampaignView = () => {
     queryKey: ['negotiations', campaignId],
     queryFn: async () => {
       if (!campaignId) return [];
-      console.log('Fetching negotiations for campaign:', campaignId);
-      
       const negotiationsData = await negotiationsService.getNegotiationsByCampaign(campaignId);
-      console.log('Negotiations fetched for campaign:', negotiationsData.length);
       return negotiationsData;
     },
     enabled: !!campaignId,
@@ -73,7 +66,6 @@ const CampaignView = () => {
     queryKey: ['creators'],
     queryFn: async () => {
       const creatorsData = await creatorsService.getAllCreators();
-      console.log('All creators fetched:', creatorsData.length);
       return creatorsData;
     },
   });
@@ -91,15 +83,11 @@ const CampaignView = () => {
     .filter(assignment => assignment.campaignIds.includes(campaignId || ''))
     .map(assignment => assignment.creatorId);
 
-  console.log('Creators assigned to this campaign:', assignedCreatorIds.length);
-
   // Get creators who have negotiations for this campaign
   const negotiationCreatorIds = negotiations.map(n => n.creatorId);
 
   // Combine both sets of creator IDs (unique)
   const allContactedCreatorIds = [...new Set([...assignedCreatorIds, ...negotiationCreatorIds])];
-
-  console.log('Total contacted creators (assignments + negotiations):', allContactedCreatorIds.length);
 
   // Get contacted creators with their data
   const contactedCreators = allContactedCreatorIds.map(creatorId => {
@@ -134,8 +122,6 @@ const CampaignView = () => {
       negotiation: defaultNegotiation,
     };
   }).filter(item => item.creator);
-
-  console.log('Final contacted creators:', contactedCreators.length);
 
   // Get selected creator data and assignment
   const selectedCreator = selectedCreatorId ? allCreators.find(c => c.creatorId === selectedCreatorId) : null;
@@ -196,7 +182,6 @@ const CampaignView = () => {
         description: "Auto email has been sent to the creator.",
       });
     } catch (error) {
-      console.error('Error sending auto email:', error);
       toast({
         title: "Error",
         description: "Failed to send email. Please try again.",
@@ -251,7 +236,6 @@ const CampaignView = () => {
         description: "AI agent is calling the creator.",
       });
     } catch (error) {
-      console.error('Error initiating agent call:', error);
       toast({
         title: "Error",
         description: "Failed to initiate call. Please try again.",
@@ -259,6 +243,32 @@ const CampaignView = () => {
       });
     } finally {
       setIsCallLoading(false);
+    }
+  };
+
+  const handleRemoveCreator = async (creatorId: string) => {
+    if (!currentUser?.uid || !campaignId) return;
+
+    try {
+      await creatorAssignmentsService.removeCampaignFromCreator(currentUser.uid, creatorId, campaignId);
+      
+      toast({
+        title: "Creator Removed",
+        description: "Creator has been removed from this campaign.",
+      });
+      
+      refetchAssignments();
+      
+      // If the removed creator was selected, clear selection
+      if (selectedCreatorId === creatorId) {
+        setSelectedCreatorId(null);
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to remove creator. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -312,6 +322,7 @@ const CampaignView = () => {
             allNegotiationsCount={0}
             creatorAssignments={creatorAssignments}
             communications={communications}
+            onRemoveCreator={handleRemoveCreator}
           />
         </div>
 
@@ -384,6 +395,7 @@ const CampaignView = () => {
           onOpenChange={setShowCreatorSelectionModal}
           campaignId={campaignId || ''}
           onCreatorAssigned={handleCreatorAssigned}
+          existingCreatorIds={allContactedCreatorIds}
         />
       )}
     </div>
