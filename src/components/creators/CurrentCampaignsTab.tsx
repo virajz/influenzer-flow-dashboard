@@ -1,3 +1,4 @@
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { OutreachActions } from '@/components/outreach/OutreachActions';
@@ -71,7 +72,6 @@ export const CurrentCampaignsTab = ({
 
                                 <OutreachActions
                                     negotiation={negotiation}
-                                    creatorPhone={creator.phone}
                                     onAutoEmail={() => onAutoEmail(campaign.campaignId)}
                                     onAgentCall={() => onAgentCall(campaign.campaignId)}
                                 />

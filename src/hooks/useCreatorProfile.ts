@@ -128,7 +128,7 @@ export const useCreatorProfile = () => {
             // Fetch the phone number from creatorAssignments
             const assignment = await creatorAssignmentsService.getCreatorAssignment(currentUser.uid, creatorId);
             console.log('Assignment:', assignment);
-            if (!assignment || !assignment.phoneNumber) {
+            if (!assignment || !assignment.phone) {
                 toast({
                     title: "Error",
                     description: "Phone number not found for the creator in assignments.",
@@ -136,7 +136,7 @@ export const useCreatorProfile = () => {
                 });
                 return;
             }
-            const phone = assignment.phoneNumber;
+            const phone = assignment.phone;
 
             if (!negotiation && campaignId) {
                 const campaign = brandCampaigns.find(c => c.campaignId === campaignId);
