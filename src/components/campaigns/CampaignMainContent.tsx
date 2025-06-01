@@ -11,6 +11,7 @@ interface CampaignMainContentProps {
   negotiations: any[];
   creatorAssignments: any[];
   allContactedCreatorIds: string[];
+  existingCreatorIds: string[];
   onAutoEmail: (creatorId: string) => void;
   onAgentCall: (creatorId: string) => void;
   isEmailLoading: boolean;
@@ -26,6 +27,7 @@ export const CampaignMainContent = ({
   negotiations,
   creatorAssignments,
   allContactedCreatorIds,
+  existingCreatorIds,
   onAutoEmail,
   onAgentCall,
   isEmailLoading,
@@ -91,7 +93,7 @@ export const CampaignMainContent = ({
           onOpenChange={setShowCreatorSelectionModal}
           campaignId={campaignId}
           onCreatorAssigned={handleCreatorAssignedInternal}
-          existingCreatorIds={allContactedCreatorIds}
+          existingCreatorIds={existingCreatorIds}
         />
       )}
     </>

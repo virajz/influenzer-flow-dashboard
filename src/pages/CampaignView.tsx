@@ -18,6 +18,7 @@ const CampaignView = () => {
     allCreators,
     contactedCreators,
     allContactedCreatorIds,
+    existingCreatorIds,
     refetchAssignments,
     isLoading
   } = useCampaignData(campaignId);
@@ -68,6 +69,7 @@ const CampaignView = () => {
         negotiations={negotiations}
         creatorAssignments={creatorAssignments}
         allContactedCreatorIds={allContactedCreatorIds}
+        existingCreatorIds={existingCreatorIds}
         onAutoEmail={handleAutoEmail}
         onAgentCall={handleAgentCall}
         isEmailLoading={isEmailLoading}

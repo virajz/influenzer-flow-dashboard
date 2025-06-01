@@ -70,9 +70,13 @@ export const useCampaignData = (campaignId: string | undefined) => {
   // Combine both sets of creator IDs for THIS CAMPAIGN ONLY (unique)
   const allContactedCreatorIds = [...new Set([...assignedCreatorIds, ...negotiationCreatorIds])];
 
+  // For the CreatorSelectionModal, we only need to exclude creators who are ASSIGNED to this campaign
+  const existingCreatorIds = assignedCreatorIds;
+
   console.log('useCampaignData - Campaign ID:', campaignId);
   console.log('useCampaignData - All creator assignments:', creatorAssignments.length);
   console.log('useCampaignData - Assignments for this campaign:', assignedCreatorIds);
+  console.log('useCampaignData - Existing creator IDs (for exclusion):', existingCreatorIds);
   console.log('useCampaignData - Negotiations for this campaign:', negotiationCreatorIds);
   console.log('useCampaignData - Final contacted creator IDs for this campaign:', allContactedCreatorIds);
 
@@ -119,6 +123,7 @@ export const useCampaignData = (campaignId: string | undefined) => {
     allCreators,
     contactedCreators,
     allContactedCreatorIds,
+    existingCreatorIds, // This is what CreatorSelectionModal should use for filtering
     refetchAssignments,
     isLoading
   };
