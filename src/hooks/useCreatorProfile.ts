@@ -27,8 +27,8 @@ export const useCreatorProfile = () => {
   // Use real-time negotiations hook
   const { negotiations, isLoading: negotiationsLoading } = useRealTimeNegotiations(creatorId);
 
-  // Fetch campaigns
-  const { data: allCampaigns = [] } = useQuery({
+  // Fetch ALL campaigns for the brand
+  const { data: brandCampaigns = [] } = useQuery({
     queryKey: ['campaigns', currentUser?.uid],
     queryFn: async () => {
       if (!currentUser?.uid) return [];
@@ -36,6 +36,12 @@ export const useCreatorProfile = () => {
     },
     enabled: !!currentUser?.uid,
   });
+
+  // Filter campaigns to only show those where this creator has negotiations/assignments
+  const creatorCampaignIds = negotiations.map(n => n.campaignId);
+  const allCampaigns = brandCampaigns.filter(campaign => 
+    creatorCampaignIds.includes(campaign.campaignId)
+  );
 
   // Use real-time communications hook
   const negotiationIds = negotiations.map(n => n.negotiationId);
@@ -48,7 +54,7 @@ export const useCreatorProfile = () => {
       let negotiation = negotiations.find(n => n.campaignId === campaignId);
       
       if (!negotiation) {
-        const campaign = allCampaigns.find(c => c.campaignId === campaignId);
+        const campaign = brandCampaigns.find(c => c.campaignId === campaignId);
         if (!campaign) return;
 
         const deliverables = campaign.requiredPlatforms.map(platform => ({
@@ -107,7 +113,7 @@ export const useCreatorProfile = () => {
       let negotiation = negotiations.find(n => n.campaignId === campaignId);
       
       if (!negotiation && campaignId) {
-        const campaign = allCampaigns.find(c => c.campaignId === campaignId);
+        const campaign = brandCampaigns.find(c => c.campaignId === campaignId);
         if (!campaign) return;
 
         const negotiationId = await negotiationsService.createNegotiation({
