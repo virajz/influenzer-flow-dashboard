@@ -18,6 +18,8 @@ export const useCampaignData = (campaignId: string | undefined) => {
       return campaignData;
     },
     enabled: !!campaignId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
   });
 
   // Fetch creator assignments for current user
@@ -29,6 +31,8 @@ export const useCampaignData = (campaignId: string | undefined) => {
       return assignments;
     },
     enabled: !!currentUser?.uid,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    refetchOnWindowFocus: false,
   });
 
   // Fetch negotiations for this campaign
@@ -40,6 +44,8 @@ export const useCampaignData = (campaignId: string | undefined) => {
       return negotiationsData;
     },
     enabled: !!campaignId,
+    staleTime: 30 * 1000, // 30 seconds
+    refetchOnWindowFocus: false,
   });
 
   // Fetch all creators to get creator details
@@ -49,6 +55,8 @@ export const useCampaignData = (campaignId: string | undefined) => {
       const creatorsData = await creatorsService.getAllCreators();
       return creatorsData;
     },
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    refetchOnWindowFocus: false,
   });
 
   // Get creators assigned to this campaign from creatorAssignments

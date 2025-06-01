@@ -9,30 +9,42 @@ export const useRealTimeCommunications = (negotiationIds: string[]) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // If no negotiation IDs, clear communications and don't set up listener
     if (negotiationIds.length === 0) {
       setCommunications([]);
       setIsLoading(false);
       return;
     }
 
-    const q = query(
-      collection(db, 'communications'),
-      where('negotiationId', 'in', negotiationIds),
-      orderBy('createdAt', 'desc')
-    );
+    // Add a small delay to prevent rapid successive queries
+    const timeoutId = setTimeout(() => {
+      setIsLoading(true);
 
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const communicationsData = querySnapshot.docs.map(doc => ({
-        ...doc.data(),
-        communicationId: doc.id
-      } as Communication));
-      
-      setCommunications(communicationsData);
-      setIsLoading(false);
-    });
+      const q = query(
+        collection(db, 'communications'),
+        where('negotiationId', 'in', negotiationIds),
+        orderBy('createdAt', 'desc')
+      );
 
-    return () => unsubscribe();
-  }, [negotiationIds]);
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const communicationsData = querySnapshot.docs.map(doc => ({
+          ...doc.data(),
+          communicationId: doc.id
+        } as Communication));
+        
+        setCommunications(communicationsData);
+        setIsLoading(false);
+      }, (error) => {
+        setIsLoading(false);
+      });
+
+      return () => unsubscribe();
+    }, 100); // Small delay to debounce rapid changes
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [negotiationIds.join(',')]); // Use join to create a stable dependency
 
   return { communications, isLoading };
 };
