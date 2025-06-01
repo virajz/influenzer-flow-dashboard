@@ -21,7 +21,7 @@ const Campaigns = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
   // Fetch campaigns using React Query
-  const { data: campaigns = [], isLoading, error } = useQuery({
+  const { data: campaigns = [], isLoading, error, isError } = useQuery({
     queryKey: ['campaigns', currentUser?.uid],
     queryFn: () => {
       if (!currentUser?.uid) {
@@ -33,7 +33,7 @@ const Campaigns = () => {
   });
 
   useEffect(() => {
-    if (error) {
+    if (isError && error) {
       console.error('Error loading campaigns:', error);
       toast({
         title: "Error loading campaigns",
@@ -41,7 +41,7 @@ const Campaigns = () => {
         variant: "destructive"
       });
     }
-  }, [error]);
+  }, [isError, error]);
 
   const getStatusColor = (status: Campaign['status']) => {
     switch (status) {

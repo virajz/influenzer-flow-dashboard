@@ -7,7 +7,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
@@ -15,9 +14,13 @@ import { CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
 import { FiCalendar, FiTarget, FiDollarSign } from 'react-icons/fi';
+import { useAuth } from '@/contexts/AuthContext';
+import { campaignsService, CampaignPlatformRequirement, CampaignTargetCategory } from '@/services/campaignsService';
 
 const CampaignCreate = () => {
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   
@@ -26,15 +29,19 @@ const CampaignCreate = () => {
     budget: '',
     targetAudience: '',
     description: '',
-    platforms: [] as { platform: string; contentType: string; quantity: number }[],
-    targetCategories: [] as { category: string; minFollowers: number; maxBudget: number }[]
+    platforms: [] as CampaignPlatformRequirement[],
+    targetCategories: [] as CampaignTargetCategory[]
   });
 
-  const [newPlatform, setNewPlatform] = useState({ platform: '', contentType: '', quantity: 1 });
+  const [newPlatform, setNewPlatform] = useState({ 
+    platform: '' as CampaignPlatformRequirement['platform'], 
+    contentType: '' as CampaignPlatformRequirement['contentType'], 
+    quantity: 1 
+  });
   const [newCategory, setNewCategory] = useState({ category: '', minFollowers: 0, maxBudget: 0 });
 
-  const platforms = ['Instagram', 'TikTok', 'YouTube', 'Twitter', 'LinkedIn'];
-  const contentTypes = ['Posts', 'Stories', 'Reels', 'Videos', 'Reviews'];
+  const platforms: CampaignPlatformRequirement['platform'][] = ['instagram', 'tiktok', 'youtube', 'twitter', 'facebook'];
+  const contentTypes: CampaignPlatformRequirement['contentType'][] = ['post', 'story', 'reel', 'video', 'live'];
   const categories = ['Lifestyle', 'Tech', 'Fitness', 'Food', 'Travel', 'Fashion', 'Gaming'];
 
   const addPlatform = () => {
@@ -43,7 +50,7 @@ const CampaignCreate = () => {
         ...formData,
         platforms: [...formData.platforms, newPlatform]
       });
-      setNewPlatform({ platform: '', contentType: '', quantity: 1 });
+      setNewPlatform({ platform: '' as CampaignPlatformRequirement['platform'], contentType: '' as CampaignPlatformRequirement['contentType'], quantity: 1 });
     }
   };
 
@@ -51,26 +58,70 @@ const CampaignCreate = () => {
     if (newCategory.category && newCategory.minFollowers && newCategory.maxBudget) {
       setFormData({
         ...formData,
-        targetCategories: [...formData.targetCategories, newCategory]
+        targetCategories: [...formData.targetCategories, { 
+          category: newCategory.category, 
+          minFollowers: newCategory.minFollowers, 
+          maxBudgetPerCreator: newCategory.maxBudget 
+        }]
       });
       setNewCategory({ category: '', minFollowers: 0, maxBudget: 0 });
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.name && formData.budget && startDate && endDate) {
+    
+    if (!currentUser?.uid) {
       toast({
-        title: "Campaign Created!",
-        description: "Your campaign has been created successfully.",
+        title: "Error",
+        description: "You must be logged in to create a campaign.",
+        variant: "destructive"
       });
-      navigate('/discovery');
-    } else {
+      return;
+    }
+
+    if (!formData.name || !formData.budget || !startDate || !endDate) {
       toast({
         title: "Error",
         description: "Please fill in all required fields.",
         variant: "destructive"
       });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const campaignData = {
+        brandId: currentUser.uid,
+        campaignName: formData.name,
+        description: formData.description,
+        budget: parseInt(formData.budget),
+        targetAudience: formData.targetAudience,
+        requiredPlatforms: formData.platforms,
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        status: 'draft' as const,
+        targetCreatorCategories: formData.targetCategories
+      };
+
+      const campaignId = await campaignsService.createCampaign(campaignData);
+      
+      toast({
+        title: "Campaign Created!",
+        description: "Your campaign has been created successfully.",
+      });
+      
+      navigate('/campaigns');
+    } catch (error) {
+      console.error('Error creating campaign:', error);
+      toast({
+        title: "Error",
+        description: "There was an error creating your campaign. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -202,7 +253,7 @@ const CampaignCreate = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-4 gap-4">
-                  <Select value={newPlatform.platform} onValueChange={(value) => setNewPlatform({...newPlatform, platform: value})}>
+                  <Select value={newPlatform.platform} onValueChange={(value: CampaignPlatformRequirement['platform']) => setNewPlatform({...newPlatform, platform: value})}>
                     <SelectTrigger>
                       <SelectValue placeholder="Platform" />
                     </SelectTrigger>
@@ -213,7 +264,7 @@ const CampaignCreate = () => {
                     </SelectContent>
                   </Select>
 
-                  <Select value={newPlatform.contentType} onValueChange={(value) => setNewPlatform({...newPlatform, contentType: value})}>
+                  <Select value={newPlatform.contentType} onValueChange={(value: CampaignPlatformRequirement['contentType']) => setNewPlatform({...newPlatform, contentType: value})}>
                     <SelectTrigger>
                       <SelectValue placeholder="Content Type" />
                     </SelectTrigger>
@@ -309,7 +360,7 @@ const CampaignCreate = () => {
                           {category.minFollowers.toLocaleString()}+ followers
                         </div>
                         <div className="text-sm text-gray-600">
-                          Max: ${category.maxBudget.toLocaleString()}
+                          Max: ${category.maxBudgetPerCreator.toLocaleString()}
                         </div>
                         <Button
                           type="button"
@@ -331,10 +382,14 @@ const CampaignCreate = () => {
             </Card>
 
             <div className="flex gap-4">
-              <Button type="submit" className="flex-1 bg-purple-600 hover:bg-purple-700">
-                Create Campaign
+              <Button 
+                type="submit" 
+                className="flex-1 bg-purple-600 hover:bg-purple-700"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Creating...' : 'Create Campaign'}
               </Button>
-              <Button type="button" variant="outline" onClick={() => navigate('/dashboard')}>
+              <Button type="button" variant="outline" onClick={() => navigate('/campaigns')}>
                 Cancel
               </Button>
             </div>
