@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { campaignsService } from '@/services/campaignsService';
@@ -25,25 +26,7 @@ export const useCampaignData = (campaignId: string | undefined) => {
     refetchOnWindowFocus: false,
   });
 
-  // Fetch creator assignments for current user
-  const { data: creatorAssignments = [], isLoading: assignmentsLoading, refetch: refetchAssignments } = useQuery({
-    queryKey: ['creatorAssignments', currentUser?.uid],
-    queryFn: async () => {
-      if (!currentUser?.uid) {
-        console.log('useCampaignData - No current user UID, returning empty assignments');
-        return [];
-      }
-      console.log('useCampaignData - Fetching assignments for user:', currentUser.uid);
-      const assignments = await creatorAssignmentsService.getAssignmentsByUser(currentUser.uid);
-      console.log('useCampaignData - Raw assignments from service:', assignments);
-      return assignments;
-    },
-    enabled: !!currentUser?.uid,
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    refetchOnWindowFocus: false,
-  });
-
-  // Fetch negotiations for this campaign
+  // Fetch negotiations for this campaign first
   const { data: negotiations = [], isLoading: negotiationsLoading } = useQuery({
     queryKey: ['negotiations', campaignId],
     queryFn: async () => {
@@ -53,6 +36,56 @@ export const useCampaignData = (campaignId: string | undefined) => {
     },
     enabled: !!campaignId,
     staleTime: 30 * 1000, // 30 seconds
+    refetchOnWindowFocus: false,
+  });
+
+  // Sync missing creator assignments from negotiations
+  const syncAssignments = async () => {
+    if (!currentUser?.uid || !campaignId || negotiations.length === 0) return;
+    
+    console.log('useCampaignData - Syncing assignments from negotiations');
+    
+    for (const negotiation of negotiations) {
+      try {
+        const isAssigned = await creatorAssignmentsService.isCreatorAssigned(
+          currentUser.uid, 
+          negotiation.creatorId, 
+          campaignId
+        );
+        
+        if (!isAssigned) {
+          console.log(`useCampaignData - Creating missing assignment for creator ${negotiation.creatorId}`);
+          await creatorAssignmentsService.createOrUpdateAssignment(
+            currentUser.uid,
+            negotiation.creatorId,
+            campaignId
+          );
+        }
+      } catch (error) {
+        console.error('useCampaignData - Error syncing assignment:', error);
+      }
+    }
+  };
+
+  // Fetch creator assignments for current user (after potential sync)
+  const { data: creatorAssignments = [], isLoading: assignmentsLoading, refetch: refetchAssignments } = useQuery({
+    queryKey: ['creatorAssignments', currentUser?.uid, campaignId],
+    queryFn: async () => {
+      if (!currentUser?.uid) {
+        console.log('useCampaignData - No current user UID, returning empty assignments');
+        return [];
+      }
+      
+      // First sync any missing assignments from negotiations
+      await syncAssignments();
+      
+      console.log('useCampaignData - Fetching assignments for user:', currentUser.uid);
+      const assignments = await creatorAssignmentsService.getAssignmentsByUser(currentUser.uid);
+      console.log('useCampaignData - Raw assignments from service:', assignments);
+      return assignments;
+    },
+    enabled: !!currentUser?.uid && !!campaignId,
+    staleTime: 2 * 60 * 1000, // 2 minutes
     refetchOnWindowFocus: false,
   });
 
@@ -89,7 +122,7 @@ export const useCampaignData = (campaignId: string | undefined) => {
   console.log('useCampaignData - All contacted creator IDs (assignments + negotiations):', allContactedCreatorIds);
   console.log('useCampaignData - Existing creator IDs (for exclusion in modal - ALL CONTACTED):', existingCreatorIds);
 
-  // Build contacted creators list from ALL ASSIGNED creators (not just those with negotiations)
+  // Build contacted creators list from assignedCreatorIds (which should now include all creators with negotiations after sync)
   const contactedCreators = assignedCreatorIds.map(creatorId => {
     const creator = allCreators.find(c => c.creatorId === creatorId);
     const negotiation = negotiations.find(n => n.creatorId === creatorId);
