@@ -44,13 +44,13 @@ const Login = () => {
     setIsGoogleLoading(true);
     try {
       const result = await loginWithGoogle();
-      toast({
-        title: "Welcome to InfluencerFlow AI!",
-        description: "Your Google account has been connected successfully.",
-      });
-      
-      // Check if user has brand data and redirect accordingly
-      if (result?.user) {
+      if (result && result.user) {
+        toast({
+          title: "Welcome to InfluencerFlow AI!",
+          description: "Your Google account has been connected successfully.",
+        });
+        
+        // Check if user has brand data and redirect accordingly
         await checkBrandAndRedirect(result.user);
       } else {
         navigate('/onboarding');

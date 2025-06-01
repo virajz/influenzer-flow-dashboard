@@ -11,6 +11,7 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Onboarding from "./pages/Onboarding";
 import Dashboard from "./pages/Dashboard";
+import Campaigns from "./pages/Campaigns";
 import CampaignCreate from "./pages/CampaignCreate";
 import CreatorDiscovery from "./pages/CreatorDiscovery";
 import OutreachConsole from "./pages/OutreachConsole";
@@ -34,6 +35,11 @@ const App = () => (
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <Layout><Dashboard /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/campaigns" element={
+              <ProtectedRoute>
+                <Layout><Campaigns /></Layout>
               </ProtectedRoute>
             } />
             <Route path="/campaigns/new" element={
