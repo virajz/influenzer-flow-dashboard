@@ -58,11 +58,14 @@ const CreatorDiscovery = () => {
 
   const filteredCreators = creators.filter(creator => {
     if (filters.category !== 'all' && creator.category !== filters.category) return false;
-    if (filters.platform !== 'all' && !creator.platforms.includes(filters.platform)) return false;
-    if (creator.followers < filters.minFollowers[0]) return false;
+    if (filters.platform !== 'all' && 
+        !((creator.instagramHandle && filters.platform === 'Instagram') || 
+          (creator.youtubeHandle && filters.platform === 'YouTube'))) return false;
+    if (creator.instagramFollowers < filters.minFollowers[0]) return false;
     if (creator.baseRate > filters.maxBudget[0]) return false;
-    if (filters.searchTerm && !creator.name.toLowerCase().includes(filters.searchTerm.toLowerCase()) &&
-        !creator.handle.toLowerCase().includes(filters.searchTerm.toLowerCase())) return false;
+    if (filters.searchTerm && 
+        !creator.displayName.toLowerCase().includes(filters.searchTerm.toLowerCase()) &&
+        !creator.instagramHandle.toLowerCase().includes(filters.searchTerm.toLowerCase())) return false;
     return true;
   });
 
@@ -75,7 +78,7 @@ const CreatorDiscovery = () => {
   };
 
   const handleViewCreator = (creator: any) => {
-    navigate(`/creators/${creator.id}`);
+    navigate(`/creators/${creator.creatorId}`);
   };
 
   const handleAssignmentComplete = () => {
@@ -230,47 +233,52 @@ const CreatorDiscovery = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {filteredCreators.map((creator) => (
-                <Card key={creator.id} className="rounded-2xl shadow-md hover:shadow-lg transition-shadow">
+                <Card key={creator.creatorId} className="rounded-2xl shadow-md hover:shadow-lg transition-shadow">
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4">
                       <img
-                        src={creator.avatar}
-                        alt={creator.name}
+                        src={creator.profileURL}
+                        alt={creator.displayName}
                         className="w-16 h-16 rounded-full object-cover"
                       />
                       <div className="flex-1">
                         <div className="flex items-center justify-between mb-2">
                           <div>
-                            <h3 className="font-semibold text-gray-900">{creator.name}</h3>
-                            <p className="text-sm text-gray-600">{creator.handle}</p>
+                            <h3 className="font-semibold text-gray-900">{creator.displayName}</h3>
+                            <p className="text-sm text-gray-600">{creator.instagramHandle}</p>
                           </div>
                           <Checkbox
-                            checked={selectedCreators.includes(creator.id)}
-                            onCheckedChange={() => toggleCreatorSelection(creator.id)}
+                            checked={selectedCreators.includes(creator.creatorId)}
+                            onCheckedChange={() => toggleCreatorSelection(creator.creatorId)}
                           />
                         </div>
 
                         <div className="flex items-center gap-2 mb-3">
                           <FiUsers className="h-4 w-4 text-gray-500" />
-                          <span className="text-sm font-medium">{formatFollowers(creator.followers)}</span>
+                          <span className="text-sm font-medium">{formatFollowers(creator.instagramFollowers)}</span>
                           <Badge variant="secondary">{creator.category}</Badge>
                         </div>
 
-                        {creator.location && (
-                          <div className="flex items-center gap-2 mb-3">
-                            <FiMapPin className="h-4 w-4 text-gray-500" />
-                            <span className="text-sm text-gray-600">{creator.location}</span>
-                          </div>
-                        )}
+                        <div className="flex items-center gap-2 mb-3">
+                          <FiMapPin className="h-4 w-4 text-gray-500" />
+                          <span className="text-sm text-gray-600">Location TBD</span>
+                        </div>
 
-                        <p className="text-sm text-gray-600 mb-4">{creator.bio}</p>
+                        <p className="text-sm text-gray-600 mb-4">
+                          {creator.category} creator with {creator.averageEngagementRate}% engagement rate
+                        </p>
 
                         <div className="flex items-center gap-2 mb-4">
-                          {creator.platforms.map((platform) => (
-                            <div key={platform} className="flex items-center gap-1 text-gray-600">
-                              {getPlatformIcon(platform)}
+                          {creator.instagramHandle && (
+                            <div className="flex items-center gap-1 text-gray-600">
+                              {getPlatformIcon('Instagram')}
                             </div>
-                          ))}
+                          )}
+                          {creator.youtubeHandle && (
+                            <div className="flex items-center gap-1 text-gray-600">
+                              {getPlatformIcon('YouTube')}
+                            </div>
+                          )}
                         </div>
 
                         <div className="flex items-center justify-between">
@@ -279,7 +287,7 @@ const CreatorDiscovery = () => {
                               <FiDollarSign className="h-4 w-4 text-green-600" />
                               <span className="font-medium">${creator.baseRate.toLocaleString()}</span>
                             </div>
-                            <span className="text-gray-500">{creator.engagementRate}% engagement</span>
+                            <span className="text-gray-500">{creator.averageEngagementRate}% engagement</span>
                           </div>
                           <div className="flex gap-2">
                             <Button
@@ -292,10 +300,10 @@ const CreatorDiscovery = () => {
                             </Button>
                             <Button
                               size="sm"
-                              variant={selectedCreators.includes(creator.id) ? "default" : "outline"}
-                              onClick={() => toggleCreatorSelection(creator.id)}
+                              variant={selectedCreators.includes(creator.creatorId) ? "default" : "outline"}
+                              onClick={() => toggleCreatorSelection(creator.creatorId)}
                             >
-                              {selectedCreators.includes(creator.id) ? 'Selected' : 'Select'}
+                              {selectedCreators.includes(creator.creatorId) ? 'Selected' : 'Select'}
                             </Button>
                           </div>
                         </div>

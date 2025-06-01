@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -28,7 +27,7 @@ const CreatorProfile = () => {
     queryFn: creatorsService.getAllCreators,
   });
 
-  const creator = allCreators.find(c => c.id === creatorId);
+  const creator = allCreators.find(c => c.creatorId === creatorId);
 
   // Fetch negotiations for this creator
   const { data: negotiations = [], refetch: refetchNegotiations } = useQuery({
@@ -304,7 +303,7 @@ const CreatorProfile = () => {
       <EmailComposerModal
         open={showEmailModal}
         onOpenChange={setShowEmailModal}
-        creatorName={creator.name}
+        creatorName={creator.displayName}
         creatorEmail={creator.email}
         onSend={handleEmailSend}
       />
