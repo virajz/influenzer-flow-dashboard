@@ -1,23 +1,24 @@
 
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FiMail, FiPhone, FiMessageSquare } from 'react-icons/fi';
-import { CommunicationRecord } from '@/services/communicationHistoryService';
+import { FiMail, FiPhone, FiMessageSquare, FiVideo } from 'react-icons/fi';
+import { Communication } from '@/services/communicationsService';
 
 interface CommunicationHistoryTabProps {
-  communicationHistory: CommunicationRecord[];
+  communications: Communication[];
 }
 
-export const CommunicationHistoryTab = ({ communicationHistory }: CommunicationHistoryTabProps) => {
+export const CommunicationHistoryTab = ({ communications }: CommunicationHistoryTabProps) => {
   const getCommunicationIcon = (type: string) => {
     switch (type) {
       case 'email':
         return <FiMail className="h-4 w-4" />;
-      case 'call':
-      case 'agent_call':
+      case 'voice_call':
         return <FiPhone className="h-4 w-4" />;
-      case 'dm':
+      case 'instagram_dm':
         return <FiMessageSquare className="h-4 w-4" />;
+      case 'youtube_message':
+        return <FiVideo className="h-4 w-4" />;
       default:
         return <FiMail className="h-4 w-4" />;
     }
@@ -29,7 +30,7 @@ export const CommunicationHistoryTab = ({ communicationHistory }: CommunicationH
         return 'bg-blue-100 text-blue-800';
       case 'delivered':
         return 'bg-green-100 text-green-800';
-      case 'read':
+      case 'opened':
         return 'bg-purple-100 text-purple-800';
       case 'replied':
         return 'bg-cyan-100 text-cyan-800';
@@ -42,6 +43,10 @@ export const CommunicationHistoryTab = ({ communicationHistory }: CommunicationH
     }
   };
 
+  const getDirectionColor = (direction: string) => {
+    return direction === 'outbound' ? 'bg-orange-100 text-orange-800' : 'bg-blue-100 text-blue-800';
+  };
+
   return (
     <Card className="rounded-2xl shadow-md">
       <CardHeader>
@@ -49,14 +54,14 @@ export const CommunicationHistoryTab = ({ communicationHistory }: CommunicationH
         <CardDescription>All interactions with this creator</CardDescription>
       </CardHeader>
       <CardContent>
-        {communicationHistory.length === 0 ? (
+        {communications.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-600">No communication history found</p>
           </div>
         ) : (
           <div className="space-y-4">
-            {communicationHistory.map((item) => (
-              <div key={item.id} className="p-4 border rounded-xl">
+            {communications.map((item) => (
+              <div key={item.communicationId} className="p-4 border rounded-xl">
                 <div className="flex items-start gap-4">
                   <div className="p-2 bg-gray-100 rounded-lg">
                     {getCommunicationIcon(item.type)}
@@ -65,27 +70,39 @@ export const CommunicationHistoryTab = ({ communicationHistory }: CommunicationH
                     <div className="flex items-center justify-between mb-2">
                       <h4 className="font-medium text-gray-900">{item.subject}</h4>
                       <span className="text-sm text-gray-500">
-                        {new Date(item.timestamp).toLocaleDateString()} {new Date(item.timestamp).toLocaleTimeString()}
+                        {new Date(item.createdAt).toLocaleDateString()} {new Date(item.createdAt).toLocaleTimeString()}
                       </span>
                     </div>
-                    <p className="text-gray-600 mb-2">{item.details}</p>
-                    <div className="flex items-center gap-2">
+                    <p className="text-gray-600 mb-2">{item.content}</p>
+                    <div className="flex items-center gap-2 flex-wrap">
                       <Badge variant="outline">{item.type}</Badge>
-                      <Badge variant="outline">{item.method}</Badge>
+                      <Badge className={getDirectionColor(item.direction)}>
+                        {item.direction}
+                      </Badge>
                       <Badge className={getStatusColor(item.status)}>
                         {item.status}
                       </Badge>
-                      {item.metadata?.hasAudio && (
-                        <Badge variant="outline" className="text-blue-600">
-                          Audio Available
+                      {item.aiAgentUsed && (
+                        <Badge variant="outline" className="text-purple-600">
+                          AI Agent Used
                         </Badge>
                       )}
-                      {item.metadata?.hasTranscript && (
+                      {item.type === 'voice_call' && item.voiceCallDuration > 0 && (
                         <Badge variant="outline" className="text-green-600">
-                          Transcript Available
+                          Duration: {item.voiceCallDuration}s
+                        </Badge>
+                      )}
+                      {item.followUpRequired && (
+                        <Badge variant="outline" className="text-yellow-600">
+                          Follow-up Required
                         </Badge>
                       )}
                     </div>
+                    {item.type === 'voice_call' && item.voiceCallSummary && (
+                      <div className="mt-2 p-2 bg-gray-50 rounded text-sm">
+                        <strong>Call Summary:</strong> {item.voiceCallSummary}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

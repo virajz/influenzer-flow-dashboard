@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { creatorsService } from '@/services/creatorsService';
 import { campaignsService } from '@/services/campaignsService';
 import { negotiationsService } from '@/services/negotiationsService';
-import { communicationHistoryService } from '@/services/communicationHistoryService';
+import { communicationsService } from '@/services/communicationsService';
 import { CampaignAssignmentModal } from '@/components/campaigns/CampaignAssignmentModal';
 import { EmailComposerModal, EmailData } from '@/components/outreach/EmailComposerModal';
 import { CreatorHeader } from '@/components/creators/CreatorHeader';
@@ -49,14 +49,20 @@ const CreatorProfile = () => {
     enabled: !!currentUser?.uid,
   });
 
-  // Fetch communication history
-  const { data: communicationHistory = [], refetch: refetchHistory } = useQuery({
-    queryKey: ['communication-history', creatorId, currentUser?.uid],
+  // Fetch all communications for negotiations involving this creator
+  const { data: allCommunications = [], refetch: refetchCommunications } = useQuery({
+    queryKey: ['communications', negotiations.map(n => n.negotiationId)],
     queryFn: async () => {
-      if (!creatorId || !currentUser?.uid) return [];
-      return await communicationHistoryService.getCommunicationHistory(creatorId, currentUser.uid);
+      if (negotiations.length === 0) return [];
+      
+      const communicationsPromises = negotiations.map(negotiation => 
+        communicationsService.getCommunicationsByNegotiation(negotiation.negotiationId)
+      );
+      
+      const results = await Promise.all(communicationsPromises);
+      return results.flat();
     },
-    enabled: !!creatorId && !!currentUser?.uid,
+    enabled: negotiations.length > 0,
   });
 
   // Get campaigns with negotiations
@@ -111,28 +117,46 @@ const CreatorProfile = () => {
           voiceCallCompleted: false,
           escalationCount: 0
         });
+
+        // Add communication record
+        await communicationsService.addCommunication({
+          negotiationId,
+          type: 'email',
+          direction: 'outbound',
+          status: 'sent',
+          subject: 'Collaboration Opportunity',
+          content: 'Auto-generated email sent with campaign details',
+          aiAgentUsed: true,
+          voiceCallDuration: 0,
+          voiceCallSummary: '',
+          followUpRequired: false,
+          followUpDate: '',
+          messageId: `email_${Date.now()}`
+        });
       } else {
         await negotiationsService.updateNegotiation(negotiation.negotiationId, {
           status: 'email_sent'
         });
+
+        // Add communication record
+        await communicationsService.addCommunication({
+          negotiationId: negotiation.negotiationId,
+          type: 'email',
+          direction: 'outbound',
+          status: 'sent',
+          subject: 'Follow-up: Collaboration Opportunity',
+          content: 'Auto-generated follow-up email',
+          aiAgentUsed: true,
+          voiceCallDuration: 0,
+          voiceCallSummary: '',
+          followUpRequired: false,
+          followUpDate: '',
+          messageId: `email_${Date.now()}`
+        });
       }
 
-      // Add communication record
-      await communicationHistoryService.addCommunicationRecord({
-        creatorId,
-        brandId: currentUser.uid,
-        campaignId,
-        negotiationId: negotiation?.negotiationId,
-        type: 'email',
-        method: 'auto',
-        subject: 'Collaboration Opportunity',
-        status: 'sent',
-        details: 'Auto-generated email sent with campaign details',
-        timestamp: new Date().toISOString()
-      });
-
       refetchNegotiations();
-      refetchHistory();
+      refetchCommunications();
       
       toast({
         title: "Email Sent!",
@@ -152,20 +176,27 @@ const CreatorProfile = () => {
     if (!currentUser?.uid || !creatorId) return;
 
     try {
-      // Add communication record
-      await communicationHistoryService.addCommunicationRecord({
-        creatorId,
-        brandId: currentUser.uid,
-        type: 'email',
-        method: 'manual',
-        subject: emailData.subject,
-        content: emailData.content,
-        status: 'sent',
-        details: `Manual email sent: ${emailData.subject}`,
-        timestamp: new Date().toISOString()
-      });
+      // Find an existing negotiation to link the communication to
+      const activeNegotiation = negotiations.find(n => !['rejected', 'cancelled'].includes(n.status));
+      
+      if (activeNegotiation) {
+        await communicationsService.addCommunication({
+          negotiationId: activeNegotiation.negotiationId,
+          type: 'email',
+          direction: 'outbound',
+          status: 'sent',
+          subject: emailData.subject,
+          content: emailData.content,
+          aiAgentUsed: false,
+          voiceCallDuration: 0,
+          voiceCallSummary: '',
+          followUpRequired: false,
+          followUpDate: '',
+          messageId: `manual_email_${Date.now()}`
+        });
 
-      refetchHistory();
+        refetchCommunications();
+      }
       
       toast({
         title: "Email Sent!",
@@ -185,37 +216,59 @@ const CreatorProfile = () => {
     if (!currentUser?.uid || !creatorId) return;
 
     try {
-      // Add communication record
-      await communicationHistoryService.addCommunicationRecord({
-        creatorId,
-        brandId: currentUser.uid,
-        campaignId,
-        type: 'agent_call',
-        method: 'ai_agent',
-        subject: 'AI Agent Call',
-        status: 'completed',
-        details: 'AI agent call initiated',
-        timestamp: new Date().toISOString(),
-        metadata: {
-          hasAudio: true,
-          hasTranscript: true,
-          duration: 0
-        }
-      });
+      let negotiation = negotiations.find(n => n.campaignId === campaignId);
+      
+      if (!negotiation && campaignId) {
+        const campaign = allCampaigns.find(c => c.campaignId === campaignId);
+        if (!campaign) return;
 
-      // Update negotiation if exists
-      if (campaignId) {
-        const negotiation = negotiations.find(n => n.campaignId === campaignId);
-        if (negotiation) {
-          await negotiationsService.updateNegotiation(negotiation.negotiationId, {
-            status: 'phone_contacted',
-            phoneContactAttempted: true
-          });
-          refetchNegotiations();
-        }
+        const negotiationId = await negotiationsService.createNegotiation({
+          campaignId,
+          brandId: currentUser.uid,
+          creatorId,
+          status: 'phone_contacted',
+          proposedRate: creator?.baseRate || 0,
+          counterRate: 0,
+          finalRate: 0,
+          maxBudget: campaign.budget,
+          deliverables: [],
+          aiAgentNotes: '',
+          creatorAvailability: 'unknown',
+          initialContactMethod: 'phone',
+          phoneContactAttempted: true,
+          voiceCallCompleted: true,
+          escalationCount: 0
+        });
+
+        negotiation = { negotiationId } as any;
+      } else if (negotiation) {
+        await negotiationsService.updateNegotiation(negotiation.negotiationId, {
+          status: 'phone_contacted',
+          phoneContactAttempted: true,
+          voiceCallCompleted: true
+        });
       }
 
-      refetchHistory();
+      if (negotiation) {
+        // Add communication record
+        await communicationsService.addCommunication({
+          negotiationId: negotiation.negotiationId,
+          type: 'voice_call',
+          direction: 'outbound',
+          status: 'completed',
+          subject: 'AI Agent Call',
+          content: 'AI agent call initiated and completed',
+          aiAgentUsed: true,
+          voiceCallDuration: 120, // 2 minutes default
+          voiceCallSummary: 'AI agent call completed successfully',
+          followUpRequired: true,
+          followUpDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Tomorrow
+          messageId: `voice_call_${Date.now()}`
+        });
+
+        refetchNegotiations();
+        refetchCommunications();
+      }
       
       toast({
         title: "Agent Call Initiated!",
@@ -288,7 +341,7 @@ const CreatorProfile = () => {
         </TabsContent>
 
         <TabsContent value="history">
-          <CommunicationHistoryTab communicationHistory={communicationHistory} />
+          <CommunicationHistoryTab communications={allCommunications} />
         </TabsContent>
       </Tabs>
 
@@ -303,7 +356,7 @@ const CreatorProfile = () => {
       <EmailComposerModal
         open={showEmailModal}
         onOpenChange={setShowEmailModal}
-        creatorName={creator.displayName}
+        creatorName={creator.name}
         creatorEmail={creator.email}
         onSend={handleEmailSend}
       />
