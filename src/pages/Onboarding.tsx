@@ -14,7 +14,6 @@ const Onboarding = () => {
   const [formData, setFormData] = useState({
     brandName: 'Tech Startup Inc.', // Prefilled example
     description: '',
-    email: 'john@techstartup.com', // Prefilled example
     phoneNumber: '',
     website: '',
     industry: '',
@@ -33,7 +32,7 @@ const Onboarding = () => {
   const isFormValid = () => {
     return (
       formData.brandName.trim() !== '' &&
-      formData.email.trim() !== '' &&
+      formData.description.trim() !== '' &&
       formData.phoneNumber.trim() !== '' &&
       formData.industry.trim() !== '' &&
       formData.companySize !== ''
@@ -46,7 +45,7 @@ const Onboarding = () => {
     if (!isFormValid()) {
       toast({
         title: "Please complete all required fields",
-        description: "All fields except description are mandatory.",
+        description: "All fields are mandatory except website.",
         variant: "destructive"
       });
       return;
@@ -65,6 +64,16 @@ const Onboarding = () => {
     setIsSubmitting(false);
     navigate('/dashboard');
   };
+
+  const industryOptions = [
+    { value: 'fashion', label: 'Fashion & Beauty' },
+    { value: 'technology', label: 'Technology' },
+    { value: 'food', label: 'Food & Beverage' },
+    { value: 'fitness', label: 'Health & Fitness' },
+    { value: 'travel', label: 'Travel & Lifestyle' },
+    { value: 'gaming', label: 'Gaming & Entertainment' },
+    { value: 'other', label: 'Other' }
+  ];
 
   const companySizeOptions = [
     { value: 'startup', label: 'Startup (1-10 employees)' },
@@ -103,96 +112,91 @@ const Onboarding = () => {
             {/* Description */}
             <div className="space-y-2">
               <Label htmlFor="description" className="text-sm font-medium">
-                Brand Description
+                Brand Description <span className="text-red-500">*</span>
               </Label>
               <Textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => handleInputChange('description', e.target.value)}
-                placeholder="Tell us about your brand (optional)"
+                placeholder="Tell us about your brand"
                 className="min-h-[100px] resize-none"
               />
             </div>
 
-            {/* Email */}
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium">
-                Email <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                value={formData.email}
-                readOnly
-                className="h-12 bg-gray-50 cursor-not-allowed"
-              />
+            {/* Phone Number and Website Row */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="phoneNumber" className="text-sm font-medium">
+                  Phone Number <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="phoneNumber"
+                  type="tel"
+                  value={formData.phoneNumber}
+                  onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
+                  placeholder="Enter your phone number"
+                  className="h-12"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="website" className="text-sm font-medium">
+                  Website
+                </Label>
+                <Input
+                  id="website"
+                  type="url"
+                  value={formData.website}
+                  onChange={(e) => handleInputChange('website', e.target.value)}
+                  placeholder="https://yourbrand.com"
+                  className="h-12"
+                />
+              </div>
             </div>
 
-            {/* Phone Number */}
-            <div className="space-y-2">
-              <Label htmlFor="phoneNumber" className="text-sm font-medium">
-                Phone Number <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="phoneNumber"
-                type="tel"
-                value={formData.phoneNumber}
-                onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
-                placeholder="Enter your phone number"
-                className="h-12"
-              />
-            </div>
+            {/* Industry and Company Size Row */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="industry" className="text-sm font-medium">
+                  Industry <span className="text-red-500">*</span>
+                </Label>
+                <Select 
+                  value={formData.industry} 
+                  onValueChange={(value) => handleInputChange('industry', value)}
+                >
+                  <SelectTrigger className="h-12">
+                    <SelectValue placeholder="Select your industry" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {industryOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-            {/* Website */}
-            <div className="space-y-2">
-              <Label htmlFor="website" className="text-sm font-medium">
-                Website
-              </Label>
-              <Input
-                id="website"
-                type="url"
-                value={formData.website}
-                onChange={(e) => handleInputChange('website', e.target.value)}
-                placeholder="https://yourbrand.com"
-                className="h-12"
-              />
-            </div>
-
-            {/* Industry */}
-            <div className="space-y-2">
-              <Label htmlFor="industry" className="text-sm font-medium">
-                Industry <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="industry"
-                type="text"
-                value={formData.industry}
-                onChange={(e) => handleInputChange('industry', e.target.value)}
-                placeholder="e.g., Fashion, Technology, Food & Beverage"
-                className="h-12"
-              />
-            </div>
-
-            {/* Company Size */}
-            <div className="space-y-2">
-              <Label htmlFor="companySize" className="text-sm font-medium">
-                Company Size <span className="text-red-500">*</span>
-              </Label>
-              <Select 
-                value={formData.companySize} 
-                onValueChange={(value) => handleInputChange('companySize', value)}
-              >
-                <SelectTrigger className="h-12">
-                  <SelectValue placeholder="Select your company size" />
-                </SelectTrigger>
-                <SelectContent>
-                  {companySizeOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="space-y-2">
+                <Label htmlFor="companySize" className="text-sm font-medium">
+                  Company Size <span className="text-red-500">*</span>
+                </Label>
+                <Select 
+                  value={formData.companySize} 
+                  onValueChange={(value) => handleInputChange('companySize', value)}
+                >
+                  <SelectTrigger className="h-12">
+                    <SelectValue placeholder="Select your company size" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {companySizeOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             {/* Submit Button */}
