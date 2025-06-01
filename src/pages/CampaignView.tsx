@@ -1,8 +1,11 @@
 
+
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Mail, PhoneCall } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { campaignsService } from '@/services/campaignsService';
 import { negotiationsService } from '@/services/negotiationsService';
