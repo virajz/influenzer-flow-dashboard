@@ -8,7 +8,6 @@ import { campaignsService } from '@/services/campaignsService';
 import { negotiationsService } from '@/services/negotiationsService';
 import { communicationsService } from '@/services/communicationsService';
 import { CampaignAssignmentModal } from '@/components/campaigns/CampaignAssignmentModal';
-import { EmailComposerModal, EmailData } from '@/components/outreach/EmailComposerModal';
 import { CreatorHeader } from '@/components/creators/CreatorHeader';
 import { CurrentCampaignsTab } from '@/components/creators/CurrentCampaignsTab';
 import { PastCampaignsTab } from '@/components/creators/PastCampaignsTab';
@@ -19,7 +18,6 @@ const CreatorProfile = () => {
   const { creatorId } = useParams<{ creatorId: string }>();
   const { currentUser } = useAuth();
   const [showAssignmentModal, setShowAssignmentModal] = useState(false);
-  const [showEmailModal, setShowEmailModal] = useState(false);
 
   // Fetch creator data
   const { data: allCreators = [], isLoading: creatorsLoading } = useQuery({
@@ -85,10 +83,6 @@ const CreatorProfile = () => {
            (negotiation && ['rejected', 'cancelled', 'accepted'].includes(negotiation.status));
   });
 
-  const handleManualEmail = () => {
-    setShowEmailModal(true);
-  };
-
   const handleAutoEmail = async (campaignId: string) => {
     if (!currentUser?.uid || !creatorId) return;
 
@@ -100,6 +94,15 @@ const CreatorProfile = () => {
         const campaign = allCampaigns.find(c => c.campaignId === campaignId);
         if (!campaign) return;
 
+        // Map campaign requiredPlatforms to deliverables
+        const deliverables = campaign.requiredPlatforms.map(platform => ({
+          platform: platform.platform,
+          contentType: platform.contentType,
+          quantity: platform.quantity,
+          deadline: campaign.endDate,
+          status: 'pending' as const
+        }));
+
         const negotiationId = await negotiationsService.createNegotiation({
           campaignId,
           brandId: currentUser.uid,
@@ -109,7 +112,7 @@ const CreatorProfile = () => {
           counterRate: 0,
           finalRate: 0,
           maxBudget: campaign.budget,
-          deliverables: [],
+          deliverables,
           aiAgentNotes: '',
           creatorAvailability: 'unknown',
           initialContactMethod: 'email',
@@ -164,46 +167,6 @@ const CreatorProfile = () => {
       });
     } catch (error) {
       console.error('Error sending auto email:', error);
-      toast({
-        title: "Error",
-        description: "Failed to send email. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handleEmailSend = async (emailData: EmailData) => {
-    if (!currentUser?.uid || !creatorId) return;
-
-    try {
-      // Find an existing negotiation to link the communication to
-      const activeNegotiation = negotiations.find(n => !['rejected', 'cancelled'].includes(n.status));
-      
-      if (activeNegotiation) {
-        await communicationsService.addCommunication({
-          negotiationId: activeNegotiation.negotiationId,
-          type: 'email',
-          direction: 'outbound',
-          status: 'sent',
-          subject: emailData.subject,
-          content: emailData.content,
-          aiAgentUsed: false,
-          voiceCallDuration: 0,
-          voiceCallSummary: '',
-          followUpRequired: false,
-          followUpDate: '',
-          messageId: `manual_email_${Date.now()}`
-        });
-
-        refetchCommunications();
-      }
-      
-      toast({
-        title: "Email Sent!",
-        description: "Your email has been sent to the creator.",
-      });
-    } catch (error) {
-      console.error('Error sending email:', error);
       toast({
         title: "Error",
         description: "Failed to send email. Please try again.",
@@ -330,7 +293,6 @@ const CreatorProfile = () => {
             currentCampaigns={currentCampaigns}
             creator={creator}
             onAssignToCampaign={() => setShowAssignmentModal(true)}
-            onManualEmail={handleManualEmail}
             onAutoEmail={handleAutoEmail}
             onAgentCall={handleAgentCall}
           />
@@ -345,20 +307,12 @@ const CreatorProfile = () => {
         </TabsContent>
       </Tabs>
 
-      {/* Modals */}
+      {/* Campaign Assignment Modal */}
       <CampaignAssignmentModal
         open={showAssignmentModal}
         onOpenChange={setShowAssignmentModal}
         selectedCreatorIds={creatorId ? [creatorId] : []}
         onAssignmentComplete={handleAssignmentComplete}
-      />
-
-      <EmailComposerModal
-        open={showEmailModal}
-        onOpenChange={setShowEmailModal}
-        creatorName={creator.displayName}
-        creatorEmail={creator.email}
-        onSend={handleEmailSend}
       />
     </div>
   );

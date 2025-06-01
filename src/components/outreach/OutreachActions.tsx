@@ -1,14 +1,12 @@
 
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { FiMail, FiPhone, FiSend } from 'react-icons/fi';
+import { FiPhone, FiSend } from 'react-icons/fi';
 import { Negotiation } from '@/services/negotiationsService';
 
 interface OutreachActionsProps {
   negotiation: Negotiation | null;
   creatorPhone?: string;
-  onManualEmail: () => void;
   onAutoEmail: () => void;
   onAgentCall: () => void;
 }
@@ -16,7 +14,6 @@ interface OutreachActionsProps {
 export const OutreachActions = ({ 
   negotiation, 
   creatorPhone, 
-  onManualEmail, 
   onAutoEmail, 
   onAgentCall 
 }: OutreachActionsProps) => {
@@ -54,17 +51,7 @@ export const OutreachActions = ({
         {getStatusBadge()}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <Button
-          onClick={onManualEmail}
-          disabled={!canSendEmail}
-          variant="outline"
-          className="flex items-center gap-2"
-        >
-          <FiMail className="h-4 w-4" />
-          Manual Email
-        </Button>
-
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <Button
           onClick={onAutoEmail}
           disabled={!canSendEmail}

@@ -11,7 +11,6 @@ interface CurrentCampaignsTabProps {
   currentCampaigns: Array<{ campaign: Campaign; negotiation: Negotiation | undefined }>;
   creator: Creator;
   onAssignToCampaign: () => void;
-  onManualEmail: () => void;
   onAutoEmail: (campaignId: string) => void;
   onAgentCall: (campaignId: string) => void;
 }
@@ -20,7 +19,6 @@ export const CurrentCampaignsTab = ({
   currentCampaigns,
   creator,
   onAssignToCampaign,
-  onManualEmail,
   onAutoEmail,
   onAgentCall
 }: CurrentCampaignsTabProps) => {
@@ -68,7 +66,6 @@ export const CurrentCampaignsTab = ({
                 <OutreachActions
                   negotiation={negotiation}
                   creatorPhone={creator.phone}
-                  onManualEmail={onManualEmail}
                   onAutoEmail={() => onAutoEmail(campaign.campaignId)}
                   onAgentCall={() => onAgentCall(campaign.campaignId)}
                 />
