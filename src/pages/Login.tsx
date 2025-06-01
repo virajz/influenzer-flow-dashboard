@@ -29,9 +29,9 @@ const Login = () => {
     if (formData.role && formData.brandName && formData.email) {
       toast({
         title: "Welcome to InfluencerFlow AI!",
-        description: "Your account has been created successfully.",
+        description: "Please complete your profile to continue.",
       });
-      navigate('/dashboard');
+      navigate('/onboarding');
     } else {
       toast({
         title: "Error",

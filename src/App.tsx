@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
+import Onboarding from "./pages/Onboarding";
 import Dashboard from "./pages/Dashboard";
 import CampaignCreate from "./pages/CampaignCreate";
 import CreatorDiscovery from "./pages/CreatorDiscovery";
@@ -26,6 +27,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
           <Route path="/campaigns/new" element={<Layout><CampaignCreate /></Layout>} />
           <Route path="/discovery" element={<Layout><CreatorDiscovery /></Layout>} />
