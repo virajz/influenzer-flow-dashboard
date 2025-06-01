@@ -8,20 +8,37 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { FcGoogle } from 'react-icons/fc';
 import { toast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Login = () => {
   const navigate = useNavigate();
+  const { loginWithGoogle } = useAuth();
   const [formData, setFormData] = useState({
     role: '',
     brandName: '',
     email: ''
   });
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
-  const handleGoogleLogin = () => {
-    toast({
-      title: "Google Login",
-      description: "Google authentication would be integrated here.",
-    });
+  const handleGoogleLogin = async () => {
+    setIsGoogleLoading(true);
+    try {
+      await loginWithGoogle();
+      toast({
+        title: "Welcome to InfluencerFlow AI!",
+        description: "Your Google account has been connected successfully.",
+      });
+      navigate('/onboarding');
+    } catch (error) {
+      console.error('Google login error:', error);
+      toast({
+        title: "Login Failed",
+        description: "There was an error signing in with Google. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGoogleLoading(false);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -55,9 +72,10 @@ const Login = () => {
             variant="outline" 
             className="w-full"
             onClick={handleGoogleLogin}
+            disabled={isGoogleLoading}
           >
             <FcGoogle className="mr-2 h-5 w-5" />
-            Continue with Google
+            {isGoogleLoading ? 'Signing in...' : 'Continue with Google'}
           </Button>
 
           <div className="relative">
