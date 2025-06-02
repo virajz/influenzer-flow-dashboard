@@ -1,3 +1,4 @@
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -19,20 +20,20 @@ export const TabbedCommunicationHistory = ({
 }: TabbedCommunicationHistoryProps) => {
   return (
     <Card className="rounded-2xl shadow-md flex flex-col h-full">
-      <CardContent className="flex-1 flex flex-col min-h-0 p-6">
+      <CardContent className="flex-1 flex flex-col p-6 overflow-hidden">
         <Tabs defaultValue="mail" className="flex flex-col h-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-2 flex-shrink-0">
             <TabsTrigger value="mail">Mail History</TabsTrigger>
             <TabsTrigger value="voice">Voice History</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="mail" className="flex-1 mt-4">
+          <TabsContent value="mail" className="flex-1 mt-4 overflow-hidden">
             <ScrollArea className="h-full">
               <MailHistoryTab communications={communications} />
             </ScrollArea>
           </TabsContent>
 
-          <TabsContent value="voice" className="flex-1 mt-4">
+          <TabsContent value="voice" className="flex-1 mt-4 overflow-hidden">
             <ScrollArea className="h-full">
               <VoiceHistoryTab voiceCommunications={voiceCommunications} creatorName={creatorName} />
             </ScrollArea>
