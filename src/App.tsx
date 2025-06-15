@@ -53,9 +53,7 @@ const App = () => (
                 <Layout><CampaignView /></Layout>
             } />
             <Route path="/campaigns/:campaignId/edit" element={
-              <ProtectedRoute>
                 <Layout><CampaignEdit /></Layout>
-              </ProtectedRoute>
             } />
             <Route path="/discovery" element={
               <ProtectedRoute>
