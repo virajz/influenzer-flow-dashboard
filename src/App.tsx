@@ -50,9 +50,7 @@ const App = () => (
               </ProtectedRoute>
             } />
             <Route path="/campaigns/:campaignId" element={
-              <ProtectedRoute>
                 <Layout><CampaignView /></Layout>
-              </ProtectedRoute>
             } />
             <Route path="/campaigns/:campaignId/edit" element={
               <ProtectedRoute>
