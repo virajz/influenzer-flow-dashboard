@@ -2,7 +2,6 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { useNavigate } from 'react-router-dom';
 import { 
   Target, 
@@ -18,99 +17,12 @@ import {
   X,
   MessageCircle
 } from 'lucide-react';
+import { Faqs } from './pages/LandingPage/Faqs';
+import { Features } from './pages/LandingPage/Features';
+import { Pricing } from './pages/LandingPage/Pricing';
 
 const LandingPage = () => {
   const navigate = useNavigate();
-
-  const features = [
-    {
-      icon: Target,
-      title: 'Campaign Management',
-      description: 'Create, manage, and track your influencer campaigns with powerful analytics and insights.'
-    },
-    {
-      icon: Users,
-      title: 'Creator Discovery',
-      description: 'Find the perfect influencers for your brand with our advanced search and filtering system.'
-    },
-    {
-      icon: MessageSquare,
-      title: 'Smart Communications',
-      description: 'AI-powered email outreach and voice calls to streamline creator negotiations.'
-    },
-    {
-      icon: BarChart3,
-      title: 'Performance Analytics',
-      description: 'Track ROI, engagement rates, and campaign performance with detailed reporting.'
-    },
-    {
-      icon: DollarSign,
-      title: 'Negotiation Tracker',
-      description: 'Manage contracts, payments, and negotiations all in one centralized platform.'
-    },
-    {
-      icon: Star,
-      title: 'Creator Profiles',
-      description: 'Detailed creator profiles with performance history and collaboration insights.'
-    }
-  ];
-
-  const pricingPlans = [
-    {
-      name: 'Starter',
-      price: '$99',
-      period: 'per month',
-      description: 'Perfect for small businesses starting with influencer marketing',
-      features: [
-        'Up to 5 campaigns',
-        '100 creator contacts',
-        'Basic analytics',
-        'Email support',
-        'Campaign templates'
-      ],
-      limitations: [
-        'No AI-powered outreach',
-        'Limited integrations'
-      ],
-      popular: false
-    },
-    {
-      name: 'Professional',
-      price: '$299',
-      period: 'per month',
-      description: 'Ideal for growing brands with serious influencer marketing needs',
-      features: [
-        'Unlimited campaigns',
-        '1,000 creator contacts',
-        'AI-powered outreach',
-        'Advanced analytics',
-        'Priority support',
-        'Custom integrations',
-        'Team collaboration',
-        'Performance tracking'
-      ],
-      limitations: [],
-      popular: true
-    },
-    {
-      name: 'Enterprise',
-      price: 'Custom',
-      period: 'pricing',
-      description: 'For large organizations with complex requirements',
-      features: [
-        'Everything in Professional',
-        'Unlimited creator contacts',
-        'Dedicated account manager',
-        'Custom integrations',
-        'White-label solution',
-        'Advanced security',
-        'API access',
-        'Custom reporting'
-      ],
-      limitations: [],
-      popular: false
-    }
-  ];
 
   const testimonials = [
     {
@@ -136,37 +48,14 @@ const LandingPage = () => {
     }
   ];
 
-  const faqs = [
-    {
-      question: 'How does the AI-powered outreach work?',
-      answer: 'Our AI analyzes creator profiles, past performance, and your brand requirements to craft personalized outreach messages that have a higher response rate than generic templates.'
-    },
-    {
-      question: 'Can I integrate with my existing tools?',
-      answer: 'Yes, we offer integrations with popular marketing tools, CRM systems, and social media platforms. Our API also allows for custom integrations.'
-    },
-    {
-      question: 'What kind of support do you provide?',
-      answer: 'We offer email support for all plans, priority support for Professional plans, and dedicated account managers for Enterprise clients.'
-    },
-    {
-      question: 'Is there a free trial?',
-      answer: 'Yes, we offer a 14-day free trial with full access to Professional features. No credit card required.'
-    },
-    {
-      question: 'How do you ensure creator authenticity?',
-      answer: 'We use advanced verification systems and analyze engagement patterns to identify authentic creators and flag potential fake accounts.'
-    }
-  ];
-
   const handleWhatsAppContact = () => {
     window.open('https://wa.me/your-number?text=Hi,%20I%27m%20interested%20in%20InfluencerFlow%20AI%20and%20would%20like%20to%20learn%20more%20about%20your%20services.', '_blank');
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 pt-10">
       {/* Header */}
-      <header className="container mx-auto px-4 py-6 animate-fade-in">
+      <header className="container mx-auto px-6 py-6 animate-fade-in sticky top-0 z-50 bg-white/60 rounded-2xl shadow-lg backdrop-blur-sm">
         <nav className="flex items-center justify-between">
           <div className="flex items-center space-x-2 hover-scale">
             <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
@@ -326,99 +215,10 @@ const LandingPage = () => {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="container mx-auto px-4 py-16">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 animate-fade-in">
-            Everything You Need to Scale
-          </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto animate-fade-in">
-            Comprehensive tools and AI-powered features to streamline your entire influencer marketing workflow.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {features.map((feature, index) => {
-            const Icon = feature.icon;
-            return (
-              <Card key={index} className="bg-white hover:shadow-xl transition-all duration-300 border-0 shadow-lg hover-scale animate-fade-in">
-                <CardHeader>
-                  <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-                    <Icon className="w-6 h-6 text-purple-600" />
-                  </div>
-                  <CardTitle className="text-xl mb-2">{feature.title}</CardTitle>
-                  <CardDescription className="text-gray-600 leading-relaxed">
-                    {feature.description}
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            );
-          })}
-        </div>
-
-        {/* Feature Image */}
-        <div className="mt-16 text-center animate-scale-in">
-          <img 
-            src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=500&fit=crop&crop=center"
-            alt="Advanced analytics dashboard"
-            className="mx-auto rounded-2xl shadow-xl max-w-4xl w-full hover-scale"
-          />
-        </div>
-      </section>
+      <Features />
 
       {/* Pricing Section */}
-      <section id="pricing" className="bg-white py-16">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 animate-fade-in">
-              Choose Your Plan
-            </h2>
-            <p className="text-xl text-gray-600 animate-fade-in">
-              Start free, scale as you grow
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {pricingPlans.map((plan, index) => (
-              <Card key={index} className={`relative hover-scale animate-fade-in ${plan.popular ? 'ring-2 ring-purple-600 scale-105' : ''}`}>
-                {plan.popular && (
-                  <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-purple-600">
-                    Most Popular
-                  </Badge>
-                )}
-                <CardHeader className="text-center">
-                  <CardTitle className="text-2xl">{plan.name}</CardTitle>
-                  <div className="text-4xl font-bold text-purple-600 my-4">
-                    {plan.price}
-                    <span className="text-lg text-gray-600 font-normal">/{plan.period}</span>
-                  </div>
-                  <CardDescription>{plan.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {plan.features.map((feature, featureIndex) => (
-                    <div key={featureIndex} className="flex items-center space-x-3">
-                      <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
-                      <span className="text-gray-700">{feature}</span>
-                    </div>
-                  ))}
-                  {plan.limitations.map((limitation, limitIndex) => (
-                    <div key={limitIndex} className="flex items-center space-x-3">
-                      <X className="w-5 h-5 text-red-400 flex-shrink-0" />
-                      <span className="text-gray-500">{limitation}</span>
-                    </div>
-                  ))}
-                  <Button 
-                    className="w-full mt-6 hover-scale" 
-                    variant={plan.popular ? "default" : "outline"}
-                    onClick={() => plan.price === 'Custom' ? handleWhatsAppContact() : navigate('/login')}
-                  >
-                    {plan.price === 'Custom' ? 'Contact Sales' : 'Start Free Trial'}
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
+      <Pricing handleWhatsAppContact={handleWhatsAppContact} />
 
       {/* Testimonials Section */}
       <section id="testimonials" className="container mx-auto px-4 py-16">
@@ -453,31 +253,7 @@ const LandingPage = () => {
       </section>
 
       {/* FAQ Section */}
-      <section id="faq" className="bg-white py-16">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 animate-fade-in">
-              Frequently Asked Questions
-            </h2>
-            <p className="text-xl text-gray-600 animate-fade-in">
-              Everything you need to know
-            </p>
-          </div>
-
-          <div className="max-w-3xl mx-auto animate-fade-in">
-            <Accordion type="single" collapsible>
-              {faqs.map((faq, index) => (
-                <AccordionItem key={index} value={`item-${index}`}>
-                  <AccordionTrigger className="text-left hover-scale">{faq.question}</AccordionTrigger>
-                  <AccordionContent className="text-gray-600">
-                    {faq.answer}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </div>
-        </div>
-      </section>
+      <Faqs />
 
       {/* Final CTA Section */}
       <section className="container mx-auto px-4 py-16 text-center">
