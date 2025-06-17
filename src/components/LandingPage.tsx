@@ -2,6 +2,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { useNavigate } from 'react-router-dom';
 import { 
   FiTarget, 
@@ -12,7 +13,10 @@ import {
   FiStar,
   FiArrowRight,
   FiPlay,
-  FiCheckCircle
+  FiCheckCircle,
+  FiCheck,
+  FiX,
+  FiMessageCircle
 } from 'react-icons/fi';
 
 const LandingPage = () => {
@@ -51,13 +55,108 @@ const LandingPage = () => {
     }
   ];
 
-  const benefits = [
-    'Save 80% time on creator outreach',
-    'Increase campaign ROI by 3x',
-    'Manage unlimited campaigns',
-    'AI-powered creator matching',
-    'Real-time performance tracking',
-    'Automated contract management'
+  const pricingPlans = [
+    {
+      name: 'Starter',
+      price: '$99',
+      period: 'per month',
+      description: 'Perfect for small businesses starting with influencer marketing',
+      features: [
+        'Up to 5 campaigns',
+        '100 creator contacts',
+        'Basic analytics',
+        'Email support',
+        'Campaign templates'
+      ],
+      limitations: [
+        'No AI-powered outreach',
+        'Limited integrations'
+      ],
+      popular: false
+    },
+    {
+      name: 'Professional',
+      price: '$299',
+      period: 'per month',
+      description: 'Ideal for growing brands with serious influencer marketing needs',
+      features: [
+        'Unlimited campaigns',
+        '1,000 creator contacts',
+        'AI-powered outreach',
+        'Advanced analytics',
+        'Priority support',
+        'Custom integrations',
+        'Team collaboration',
+        'Performance tracking'
+      ],
+      limitations: [],
+      popular: true
+    },
+    {
+      name: 'Enterprise',
+      price: 'Custom',
+      period: 'pricing',
+      description: 'For large organizations with complex requirements',
+      features: [
+        'Everything in Professional',
+        'Unlimited creator contacts',
+        'Dedicated account manager',
+        'Custom integrations',
+        'White-label solution',
+        'Advanced security',
+        'API access',
+        'Custom reporting'
+      ],
+      limitations: [],
+      popular: false
+    }
+  ];
+
+  const testimonials = [
+    {
+      name: 'Sarah Johnson',
+      role: 'Marketing Director',
+      company: 'Beauty Brand Co.',
+      content: 'InfluencerFlow AI transformed our influencer marketing. We saw a 300% increase in ROI within 3 months.',
+      avatar: 'SJ'
+    },
+    {
+      name: 'Michael Chen',
+      role: 'Founder',
+      company: 'Tech Startup',
+      content: 'The AI-powered outreach saved us countless hours. We closed deals 5x faster than before.',
+      avatar: 'MC'
+    },
+    {
+      name: 'Emily Rodriguez',
+      role: 'Brand Manager',
+      company: 'Fashion House',
+      content: 'The analytics and insights helped us make data-driven decisions that boosted our campaign performance.',
+      avatar: 'ER'
+    }
+  ];
+
+  const faqs = [
+    {
+      question: 'How does the AI-powered outreach work?',
+      answer: 'Our AI analyzes creator profiles, past performance, and your brand requirements to craft personalized outreach messages that have a higher response rate than generic templates.'
+    },
+    {
+      question: 'Can I integrate with my existing tools?',
+      answer: 'Yes, we offer integrations with popular marketing tools, CRM systems, and social media platforms. Our API also allows for custom integrations.'
+    },
+    {
+      question: 'What kind of support do you provide?',
+      answer: 'We offer email support for all plans, priority support for Professional plans, and dedicated account managers for Enterprise clients.'
+    },
+    {
+      question: 'Is there a free trial?',
+      answer: 'Yes, we offer a 14-day free trial with full access to Professional features. No credit card required.'
+    },
+    {
+      question: 'How do you ensure creator authenticity?',
+      answer: 'We use advanced verification systems and analyze engagement patterns to identify authentic creators and flag potential fake accounts.'
+    }
   ];
 
   return (
@@ -73,8 +172,9 @@ const LandingPage = () => {
           </div>
           <div className="hidden md:flex items-center space-x-8">
             <a href="#features" className="text-gray-600 hover:text-purple-600 transition-colors">Features</a>
-            <a href="#benefits" className="text-gray-600 hover:text-purple-600 transition-colors">Benefits</a>
             <a href="#pricing" className="text-gray-600 hover:text-purple-600 transition-colors">Pricing</a>
+            <a href="#testimonials" className="text-gray-600 hover:text-purple-600 transition-colors">Testimonials</a>
+            <a href="#faq" className="text-gray-600 hover:text-purple-600 transition-colors">FAQ</a>
             <Button variant="outline" onClick={() => navigate('/login')}>
               Sign In
             </Button>
@@ -116,7 +216,7 @@ const LandingPage = () => {
           </Button>
         </div>
 
-        {/* Hero Image/Stats */}
+        {/* Hero Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
           <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg">
             <CardContent className="pt-6 text-center">
@@ -136,6 +236,77 @@ const LandingPage = () => {
               <div className="text-gray-600">Success Rate</div>
             </CardContent>
           </Card>
+        </div>
+      </section>
+
+      {/* Problem Section */}
+      <section className="bg-white py-16">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-8">
+            The Influencer Marketing Challenge
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            <div className="p-6">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <FiX className="w-8 h-8 text-red-600" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Time-Consuming Outreach</h3>
+              <p className="text-gray-600">Manually finding and contacting creators takes weeks of work</p>
+            </div>
+            <div className="p-6">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <FiX className="w-8 h-8 text-red-600" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Poor Campaign Tracking</h3>
+              <p className="text-gray-600">Scattered data makes it impossible to measure true ROI</p>
+            </div>
+            <div className="p-6">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <FiX className="w-8 h-8 text-red-600" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Low Response Rates</h3>
+              <p className="text-gray-600">Generic outreach messages get ignored by top creators</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Transformation Section */}
+      <section className="bg-gradient-to-r from-purple-600 to-blue-600 py-16 text-white">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-8">
+            Transform Your Results with AI
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            <div className="text-center">
+              <div className="text-4xl font-bold mb-2">80%</div>
+              <div className="text-lg opacity-90">Time Saved</div>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl font-bold mb-2">3x</div>
+              <div className="text-lg opacity-90">Better ROI</div>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl font-bold mb-2">5x</div>
+              <div className="text-lg opacity-90">Faster Deals</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Social Proof Section */}
+      <section className="bg-white py-16">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold text-gray-900 mb-12">
+            Trusted by Leading Brands
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 items-center opacity-60">
+            {['Brand A', 'Brand B', 'Brand C', 'Brand D'].map((brand, index) => (
+              <div key={index} className="text-2xl font-bold text-gray-400">
+                {brand}
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -170,40 +341,121 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Benefits Section */}
-      <section id="benefits" className="bg-white py-16">
+      {/* Pricing Section */}
+      <section id="pricing" className="bg-white py-16">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-                Why Choose InfluencerFlow AI?
-              </h2>
-              <div className="space-y-4">
-                {benefits.map((benefit, index) => (
-                  <div key={index} className="flex items-center space-x-3">
-                    <FiCheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                    <span className="text-gray-700">{benefit}</span>
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Choose Your Plan
+            </h2>
+            <p className="text-xl text-gray-600">
+              Start free, scale as you grow
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {pricingPlans.map((plan, index) => (
+              <Card key={index} className={`relative ${plan.popular ? 'ring-2 ring-purple-600 scale-105' : ''}`}>
+                {plan.popular && (
+                  <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-purple-600">
+                    Most Popular
+                  </Badge>
+                )}
+                <CardHeader className="text-center">
+                  <CardTitle className="text-2xl">{plan.name}</CardTitle>
+                  <div className="text-4xl font-bold text-purple-600 my-4">
+                    {plan.price}
+                    <span className="text-lg text-gray-600 font-normal">/{plan.period}</span>
                   </div>
-                ))}
-              </div>
-              <Button size="lg" className="mt-8" onClick={() => navigate('/login')}>
-                Get Started Today
-                <FiArrowRight className="ml-2 w-5 h-5" />
-              </Button>
-            </div>
-            <div className="bg-gradient-to-br from-purple-100 to-blue-100 rounded-2xl p-8 text-center">
-              <div className="text-6xl font-bold text-purple-600 mb-4">3x</div>
-              <div className="text-xl font-semibold text-gray-900 mb-2">Better ROI</div>
-              <div className="text-gray-600">
-                Our AI-powered platform helps brands achieve 3x better return on investment 
-                compared to traditional influencer marketing methods.
-              </div>
-            </div>
+                  <CardDescription>{plan.description}</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {plan.features.map((feature, featureIndex) => (
+                    <div key={featureIndex} className="flex items-center space-x-3">
+                      <FiCheck className="w-5 h-5 text-green-500 flex-shrink-0" />
+                      <span className="text-gray-700">{feature}</span>
+                    </div>
+                  ))}
+                  {plan.limitations.map((limitation, limitIndex) => (
+                    <div key={limitIndex} className="flex items-center space-x-3">
+                      <FiX className="w-5 h-5 text-red-400 flex-shrink-0" />
+                      <span className="text-gray-500">{limitation}</span>
+                    </div>
+                  ))}
+                  <Button 
+                    className="w-full mt-6" 
+                    variant={plan.popular ? "default" : "outline"}
+                    onClick={() => navigate('/login')}
+                  >
+                    {plan.price === 'Custom' ? 'Contact Sales' : 'Start Free Trial'}
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* Testimonials Section */}
+      <section id="testimonials" className="container mx-auto px-4 py-16">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            What Our Customers Say
+          </h2>
+          <p className="text-xl text-gray-600">
+            Real results from real brands
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {testimonials.map((testimonial, index) => (
+            <Card key={index} className="bg-white shadow-lg">
+              <CardContent className="pt-6">
+                <div className="flex items-center mb-4">
+                  <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold mr-4">
+                    {testimonial.avatar}
+                  </div>
+                  <div>
+                    <div className="font-semibold">{testimonial.name}</div>
+                    <div className="text-sm text-gray-600">{testimonial.role}</div>
+                    <div className="text-sm text-purple-600">{testimonial.company}</div>
+                  </div>
+                </div>
+                <p className="text-gray-700 italic">"{testimonial.content}"</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section id="faq" className="bg-white py-16">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Frequently Asked Questions
+            </h2>
+            <p className="text-xl text-gray-600">
+              Everything you need to know
+            </p>
+          </div>
+
+          <div className="max-w-3xl mx-auto">
+            <Accordion type="single" collapsible>
+              {faqs.map((faq, index) => (
+                <AccordionItem key={index} value={`item-${index}`}>
+                  <AccordionTrigger className="text-left">{faq.question}</AccordionTrigger>
+                  <AccordionContent className="text-gray-600">
+                    {faq.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA Section */}
       <section className="container mx-auto px-4 py-16 text-center">
         <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-3xl p-12 text-white">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -241,8 +493,8 @@ const LandingPage = () => {
             <div>
               <h4 className="font-semibold mb-4">Platform</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">Features</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Pricing</a></li>
+                <li><a href="#features" className="hover:text-white transition-colors">Features</a></li>
+                <li><a href="#pricing" className="hover:text-white transition-colors">Pricing</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">API</a></li>
               </ul>
             </div>
@@ -268,6 +520,17 @@ const LandingPage = () => {
           </div>
         </div>
       </footer>
+
+      {/* Floating WhatsApp Button */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <Button
+          size="lg"
+          className="rounded-full w-16 h-16 bg-green-500 hover:bg-green-600 shadow-lg"
+          onClick={() => window.open('https://wa.me/your-number', '_blank')}
+        >
+          <FiMessageCircle className="w-6 h-6" />
+        </Button>
+      </div>
     </div>
   );
 };
