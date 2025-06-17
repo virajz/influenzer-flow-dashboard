@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import LandingPage from '@/components/LandingPage';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -17,8 +18,8 @@ const Index = () => {
       if (loading) return;
 
       if (!currentUser) {
-        console.log('Index: No user found, redirecting to login');
-        navigate('/login');
+        console.log('Index: No user found, showing landing page');
+        setIsChecking(false);
         return;
       }
 
@@ -62,7 +63,12 @@ const Index = () => {
     );
   }
 
-  return null; // This should never render as we always redirect
+  // Show landing page if no user is authenticated
+  if (!currentUser) {
+    return <LandingPage />;
+  }
+
+  return null; // This should never render as we always redirect authenticated users
 };
 
 export default Index;
