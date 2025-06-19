@@ -21,27 +21,37 @@ const CreatorProfile = () => {
   } = useCreatorProfile();
 
   if (creatorsLoading || negotiationsLoading) {
-    return <CreatorProfileLoading />;
+    return (
+      <div className="p-4 lg:p-8">
+        <CreatorProfileLoading />
+      </div>
+    );
   }
 
   if (!creator) {
-    return <CreatorNotFound />;
+    return (
+      <div className="p-4 lg:p-8">
+        <CreatorNotFound />
+      </div>
+    );
   }
 
   const { currentCampaigns, pastCampaigns } = filterCampaignsByStatus(allCampaigns, negotiations);
 
   return (
-    <CreatorProfileContent
-      creator={creator}
-      currentCampaigns={currentCampaigns}
-      pastCampaigns={pastCampaigns}
-      showAssignmentModal={showAssignmentModal}
-      onAssignmentModalChange={setShowAssignmentModal}
-      onAutoEmail={handleAutoEmail}
-      onAgentCall={handleAgentCall}
-      onAssignmentComplete={handleAssignmentComplete}
-      creatorId={creatorId || ''}
-    />
+    <div className="p-4 lg:p-8">
+      <CreatorProfileContent
+        creator={creator}
+        currentCampaigns={currentCampaigns}
+        pastCampaigns={pastCampaigns}
+        showAssignmentModal={showAssignmentModal}
+        onAssignmentModalChange={setShowAssignmentModal}
+        onAutoEmail={handleAutoEmail}
+        onAgentCall={handleAgentCall}
+        onAssignmentComplete={handleAssignmentComplete}
+        creatorId={creatorId || ''}
+      />
+    </div>
   );
 };
 
