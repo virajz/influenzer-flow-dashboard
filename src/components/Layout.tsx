@@ -25,7 +25,7 @@ const Layout = ({ children }: LayoutProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout, currentUser } = useAuth();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: FiHome },
@@ -69,7 +69,7 @@ const Layout = ({ children }: LayoutProps) => {
             >
               {sidebarOpen ? <FiX className="h-4 w-4" /> : <FiMenu className="h-4 w-4" />}
             </Button>
-            <h1 className="text-lg font-bold text-purple-600 lg:hidden">InfluencerFlow AI</h1>
+            <h1 className="text-lg font-bold text-purple-600">InfluencerFlow AI</h1>
           </div>
         </div>
       </div>
@@ -87,11 +87,6 @@ const Layout = ({ children }: LayoutProps) => {
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         <div className="flex h-full flex-col pt-16">
-          {/* Logo - hidden on mobile since it's in header */}
-          <div className="hidden lg:flex h-16 items-center px-6 border-b -mt-16">
-            <h1 className="text-lg lg:text-xl font-bold text-purple-600">InfluencerFlow AI</h1>
-          </div>
-
           {/* Navigation */}
           <nav className="flex-1 space-y-1 px-4 py-6">
             {navigation.map((item) => {
@@ -100,7 +95,7 @@ const Layout = ({ children }: LayoutProps) => {
                 <Link
                   key={item.name}
                   to={item.href}
-                  onClick={() => window.innerWidth < 1024 && setSidebarOpen(false)}
+                  onClick={() => setSidebarOpen(false)}
                   className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     isActive(item.href)
                       ? 'bg-purple-100 text-purple-700'
