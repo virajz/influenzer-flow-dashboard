@@ -70,11 +70,13 @@ export const ContactedCreatorsList = ({
   };
 
   return (
-    <Card className="rounded-2xl shadow-md flex flex-col h-full">
-      <CardHeader className="flex-shrink-0">
-        <CardTitle>Contacted Creators ({filteredCreators.length})</CardTitle>
+    <Card className="rounded-2xl shadow-md flex flex-col h-full min-h-[300px] lg:min-h-[500px]">
+      <CardHeader className="flex-shrink-0 pb-3">
+        <CardTitle className="text-base sm:text-lg">
+          Contacted Creators ({filteredCreators.length})
+        </CardTitle>
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col min-h-0">
+      <CardContent className="flex-1 flex flex-col min-h-0 px-3 sm:px-6">
         <div className="flex-shrink-0 mb-4">
           <CreatorFilters
             searchTerm={searchTerm}
@@ -86,7 +88,7 @@ export const ContactedCreatorsList = ({
         
         {filteredCreators.length === 0 ? (
           <div className="text-center py-8 flex-1 flex items-center justify-center">
-            <p className="text-gray-600">
+            <p className="text-gray-600 text-sm sm:text-base">
               {contactedCreators.length === 0 
                 ? "No creators contacted yet" 
                 : "No creators match your filters"}
@@ -94,11 +96,11 @@ export const ContactedCreatorsList = ({
           </div>
         ) : (
           <ScrollArea className="flex-1">
-            <div className="space-y-3 pr-4">
+            <div className="space-y-3 pr-2 sm:pr-4">
               {filteredCreators.map(({ creator, negotiation }) => (
                 <div
                   key={creator.creatorId}
-                  className={`p-4 rounded-lg cursor-pointer transition-all hover:shadow-sm ${
+                  className={`p-3 sm:p-4 rounded-lg cursor-pointer transition-all hover:shadow-sm ${
                     selectedCreatorId === creator.creatorId
                       ? 'bg-purple-50 border-2 border-purple-200'
                       : 'hover:bg-gray-50 border border-gray-200'
@@ -106,19 +108,21 @@ export const ContactedCreatorsList = ({
                   onClick={() => onCreatorSelect(creator.creatorId)}
                 >
                   <div className="flex items-start gap-3">
-                    <Avatar className="h-12 w-12">
+                    <Avatar className="h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0">
                       <AvatarImage 
                         src={creator.profileURL} 
                         alt={creator.displayName}
                       />
-                      <AvatarFallback className="bg-purple-100 text-purple-700 font-medium">
+                      <AvatarFallback className="bg-purple-100 text-purple-700 font-medium text-xs sm:text-sm">
                         {creator.displayName.split(' ').map(n => n[0]).join('').toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium text-sm text-gray-900">{creator.displayName}</div>
-                      <div className="text-xs text-gray-500 mt-1">
+                      <div className="font-medium text-sm text-gray-900 truncate">
+                        {creator.displayName}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1 truncate">
                         {creator.instagramHandle && `@${creator.instagramHandle}`}
                         {creator.instagramHandle && creator.email && ' • '}
                         {creator.email}

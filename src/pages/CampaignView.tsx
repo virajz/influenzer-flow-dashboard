@@ -32,7 +32,7 @@ const CampaignView = () => {
 
   if (isLoading) {
     return (
-      <div className="p-4 lg:p-8">
+      <div className="p-3 sm:p-4 lg:p-8">
         <div className="flex justify-center items-center min-h-[400px]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-4"></div>
@@ -45,7 +45,7 @@ const CampaignView = () => {
 
   if (!campaign) {
     return (
-      <div className="p-4 lg:p-8">
+      <div className="p-3 sm:p-4 lg:p-8">
         <div className="text-center">
           <h1 className="text-xl lg:text-2xl font-bold text-gray-900 mb-4">Campaign Not Found</h1>
           <p className="text-gray-600">The campaign you're looking for doesn't exist.</p>
@@ -55,7 +55,7 @@ const CampaignView = () => {
   }
 
   return (
-    <div className="p-4 lg:p-8 min-h-screen flex flex-col">
+    <div className="p-3 sm:p-4 lg:p-8 min-h-screen flex flex-col space-y-4 lg:space-y-6">
       <CampaignViewHeader
         campaign={campaign}
         onAddCreator={() => setShowCreatorSelectionModal(true)}
@@ -63,21 +63,23 @@ const CampaignView = () => {
 
       <CampaignMetrics campaign={campaign} />
 
-      <CampaignMainContent
-        campaignId={campaignId || ''}
-        contactedCreators={contactedCreators}
-        negotiations={negotiations}
-        creatorAssignments={creatorAssignments}
-        allContactedCreatorIds={allContactedCreatorIds}
-        existingCreatorIds={existingCreatorIds}
-        onAutoEmail={handleAutoEmail}
-        onAgentCall={handleAgentCall}
-        isEmailLoading={isEmailLoading}
-        isCallLoading={isCallLoading}
-        onCreatorAssigned={refetchAssignments}
-        showCreatorSelectionModal={showCreatorSelectionModal}
-        setShowCreatorSelectionModal={setShowCreatorSelectionModal}
-      />
+      <div className="flex-1 min-h-0">
+        <CampaignMainContent
+          campaignId={campaignId || ''}
+          contactedCreators={contactedCreators}
+          negotiations={negotiations}
+          creatorAssignments={creatorAssignments}
+          allContactedCreatorIds={allContactedCreatorIds}
+          existingCreatorIds={existingCreatorIds}
+          onAutoEmail={handleAutoEmail}
+          onAgentCall={handleAgentCall}
+          isEmailLoading={isEmailLoading}
+          isCallLoading={isCallLoading}
+          onCreatorAssigned={refetchAssignments}
+          showCreatorSelectionModal={showCreatorSelectionModal}
+          setShowCreatorSelectionModal={setShowCreatorSelectionModal}
+        />
+      </div>
     </div>
   );
 };
