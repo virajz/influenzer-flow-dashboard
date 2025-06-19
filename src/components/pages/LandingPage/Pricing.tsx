@@ -1,6 +1,7 @@
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
-import { Badge, Check, X } from "lucide-react"
+import { Check, X } from "lucide-react"
 import { useNavigate } from "react-router-dom";
 
 const pricingPlans = [
@@ -60,8 +61,12 @@ const pricingPlans = [
     }
 ];
 
-export const Pricing = (handleWhatsAppContact) => {
+export const Pricing = () => {
     const navigate = useNavigate();
+
+    const handleWhatsAppContact = () => {
+        window.open('https://wa.me/+15557772435?text=Start%20a%20new%20campaign', '_blank');
+    };
 
     return (
         <section id="pricing" className="bg-white py-16">

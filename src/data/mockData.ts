@@ -43,7 +43,7 @@ export interface Negotiation {
 export const mockCreators: Creator[] = [
   {
     id: '1',
-    name: 'Sarah Johnson',
+    name: 'Maya Mathur',
     handle: '@sarahjohnson',
     avatar: 'https://images.unsplash.com/photo-1516008161955-41230438b66f?w=400',
     followers: 250000,

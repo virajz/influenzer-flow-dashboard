@@ -64,15 +64,6 @@ export const Features = () => {
                     );
                 })}
             </div>
-
-            {/* Feature Image */}
-            <div className="mt-16 text-center animate-scale-in">
-                <img
-                    src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=500&fit=crop&crop=center"
-                    alt="Advanced analytics dashboard"
-                    className="mx-auto rounded-2xl shadow-xl max-w-4xl w-full hover-scale"
-                />
-            </div>
         </section>
     )
 };

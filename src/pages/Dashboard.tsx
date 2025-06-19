@@ -76,7 +76,7 @@ const Dashboard = () => {
   ];
 
   const upcomingDeadlines = [
-    { creator: 'Sarah Johnson', contentType: 'Instagram Reel', dueDate: 'Dec 15', status: 'pending' },
+    { creator: 'Maya Mathur', contentType: 'Instagram Reel', dueDate: 'Dec 15', status: 'pending' },
     { creator: 'Mike Chen', contentType: 'YouTube Review', dueDate: 'Dec 16', status: 'submitted' },
     { creator: 'Emma Rodriguez', contentType: 'TikTok Video', dueDate: 'Dec 18', status: 'late' },
     { creator: 'David Park', contentType: 'Instagram Post', dueDate: 'Dec 20', status: 'pending' }
