@@ -25,7 +25,7 @@ const Layout = ({ children }: LayoutProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout, currentUser } = useAuth();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: FiHome },
@@ -57,33 +57,38 @@ const Layout = ({ children }: LayoutProps) => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Mobile menu button */}
-      <div className="lg:hidden fixed top-4 left-4 z-50">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="bg-white shadow-lg"
-        >
-          {sidebarOpen ? <FiX className="h-4 w-4" /> : <FiMenu className="h-4 w-4" />}
-        </Button>
+      {/* Header with sidebar toggle */}
+      <div className="fixed top-0 left-0 right-0 z-50 bg-white border-b shadow-sm">
+        <div className="flex items-center justify-between h-16 px-4">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="bg-white shadow-sm"
+            >
+              {sidebarOpen ? <FiX className="h-4 w-4" /> : <FiMenu className="h-4 w-4" />}
+            </Button>
+            <h1 className="text-lg font-bold text-purple-600 lg:hidden">InfluencerFlow AI</h1>
+          </div>
+        </div>
       </div>
 
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div 
-          className="lg:hidden fixed inset-0 z-40 bg-black bg-opacity-50"
+          className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
-        <div className="flex h-full flex-col">
-          {/* Logo */}
-          <div className="flex h-16 items-center px-6 border-b">
+        <div className="flex h-full flex-col pt-16">
+          {/* Logo - hidden on mobile since it's in header */}
+          <div className="hidden lg:flex h-16 items-center px-6 border-b -mt-16">
             <h1 className="text-lg lg:text-xl font-bold text-purple-600">InfluencerFlow AI</h1>
           </div>
 
@@ -95,7 +100,7 @@ const Layout = ({ children }: LayoutProps) => {
                 <Link
                   key={item.name}
                   to={item.href}
-                  onClick={() => setSidebarOpen(false)}
+                  onClick={() => window.innerWidth < 1024 && setSidebarOpen(false)}
                   className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     isActive(item.href)
                       ? 'bg-purple-100 text-purple-700'
@@ -138,8 +143,10 @@ const Layout = ({ children }: LayoutProps) => {
       </div>
 
       {/* Main content */}
-      <div className="lg:ml-64">
-        <main className="flex-1 pt-16 lg:pt-0">{children}</main>
+      <div className={`transition-all duration-300 ease-in-out pt-16 ${
+        sidebarOpen ? 'lg:ml-64' : 'ml-0'
+      }`}>
+        <main className="flex-1">{children}</main>
       </div>
     </div>
   );
