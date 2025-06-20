@@ -33,12 +33,12 @@ export const TabbedCommunicationHistory = ({
     <Card className="rounded-2xl shadow-md flex flex-col h-full">
       <CardContent className="flex-1 flex flex-col p-6 overflow-hidden">
         <Tabs defaultValue="mail" className="flex flex-col h-full">
-          <div className="flex items-center justify-between flex-shrink-0 mb-4">
-            <TabsList className="grid grid-cols-2 w-auto">
+          <div className="flex flex-col md:flex-row items-center justify-between flex-shrink-0 mb-4">
+            <TabsList className="grid grid-cols-2 w-full md:w-auto">
               <TabsTrigger value="mail">Mail History</TabsTrigger>
               <TabsTrigger value="voice">Voice History</TabsTrigger>
             </TabsList>
-            
+
             {selectedCreatorId && onAgentCall && (
               <Button
                 onClick={() => onAgentCall(selectedCreatorId)}
