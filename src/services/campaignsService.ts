@@ -31,7 +31,7 @@ export interface Campaign {
   brandId: string;
   campaignName: string;
   description: string;
-  budget: number;
+  budgetPerCreator: number;
   targetAudience: string;
   requiredPlatforms: CampaignPlatformRequirement[];
   startDate: string;
@@ -104,48 +104,31 @@ export const campaignsService = {
 
   // Get a single campaign by ID
   async getCampaignById(campaignId: string): Promise<Campaign | null> {
-    try {
-      const docRef = doc(db, CAMPAIGNS_COLLECTION, campaignId);
-      const docSnap = await getDoc(docRef);
+    const docRef = doc(db, CAMPAIGNS_COLLECTION, campaignId);
+    const docSnap = await getDoc(docRef);
 
-      if (docSnap.exists()) {
-        return {
-          campaignId: docSnap.id,
-          ...docSnap.data()
-        } as Campaign;
-      }
-
-      return null;
-    } catch (error) {
-
-      throw error;
+    if (docSnap.exists()) {
+      return {
+        campaignId: docSnap.id,
+        ...docSnap.data()
+      } as Campaign;
     }
+
+    return null;
   },
 
   // Update a campaign
   async updateCampaign(campaignId: string, updates: Partial<Campaign>): Promise<void> {
-    try {
-      const docRef = doc(db, CAMPAIGNS_COLLECTION, campaignId);
-      await updateDoc(docRef, {
-        ...updates,
-        updatedAt: new Date().toISOString()
-      });
-
-    } catch (error) {
-
-      throw error;
-    }
+    const docRef = doc(db, CAMPAIGNS_COLLECTION, campaignId);
+    await updateDoc(docRef, {
+      ...updates,
+      updatedAt: new Date().toISOString()
+    });
   },
 
   // Delete a campaign
   async deleteCampaign(campaignId: string): Promise<void> {
-    try {
-      const docRef = doc(db, CAMPAIGNS_COLLECTION, campaignId);
-      await deleteDoc(docRef);
-
-    } catch (error) {
-
-      throw error;
-    }
+    const docRef = doc(db, CAMPAIGNS_COLLECTION, campaignId);
+    await deleteDoc(docRef);
   }
 };

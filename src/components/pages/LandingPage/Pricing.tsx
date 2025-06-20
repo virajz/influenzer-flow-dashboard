@@ -65,7 +65,7 @@ export const Pricing = () => {
     const navigate = useNavigate();
 
     const handleWhatsAppContact = () => {
-        window.open('https://wa.me/+15557772435?text=Start%20a%20new%20campaign', '_blank');
+        window.open('https://wa.me/+15557772435?text=Hi', '_blank');
     };
 
     return (

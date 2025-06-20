@@ -22,14 +22,14 @@ export const CampaignViewHeader = ({ campaign, onAddCreator }: CampaignViewHeade
           <p className="text-gray-600 mt-2 text-sm sm:text-base">{campaign.description}</p>
         </div>
         <div className="flex-shrink-0">
-          <Button 
+          {/* <Button 
             onClick={onAddCreator} 
             className="bg-purple-600 hover:bg-purple-700 w-full sm:w-auto"
             size="sm"
           >
             <Plus className="mr-2 h-4 w-4" />
             Add Creator
-          </Button>
+          </Button> */}
         </div>
       </div>
     </div>

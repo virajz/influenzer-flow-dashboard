@@ -28,7 +28,7 @@ const CampaignEdit = () => {
 
     const [formData, setFormData] = useState({
         name: '',
-        budget: '',
+        budgetPerCreator: '',
         targetAudience: '',
         description: '',
         status: 'draft' as Campaign['status'],
@@ -64,7 +64,7 @@ const CampaignEdit = () => {
         if (campaign) {
             setFormData({
                 name: campaign.campaignName,
-                budget: campaign.budget.toString(),
+                budgetPerCreator: campaign.budgetPerCreator.toString(),
                 targetAudience: campaign.targetAudience,
                 description: campaign.description,
                 status: campaign.status,
@@ -127,7 +127,7 @@ const CampaignEdit = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!formData.name || !formData.budget || !startDate || !endDate) {
+        if (!formData.name || !formData.budgetPerCreator || !startDate || !endDate) {
             toast({
                 title: "Error",
                 description: "Please fill in all required fields.",
@@ -142,7 +142,7 @@ const CampaignEdit = () => {
             const updateData = {
                 campaignName: formData.name,
                 description: formData.description,
-                budget: parseInt(formData.budget),
+                budgetPerCreator: parseInt(formData.budgetPerCreator),
                 targetAudience: formData.targetAudience,
                 requiredPlatforms: formData.platforms,
                 startDate: startDate.toISOString(),
@@ -236,8 +236,8 @@ const CampaignEdit = () => {
                                     <Input
                                         id="budget"
                                         type="number"
-                                        value={formData.budget}
-                                        onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
+                                        value={formData.budgetPerCreator}
+                                        onChange={(e) => setFormData({ ...formData, budgetPerCreator: e.target.value })}
                                         placeholder="25000"
                                     />
                                 </div>

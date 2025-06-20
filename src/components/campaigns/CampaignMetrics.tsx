@@ -2,7 +2,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 
 interface Campaign {
-  budget: number;
+  budgetPerCreator: number;
   startDate: string;
   endDate: string;
 }
@@ -16,8 +16,8 @@ export const CampaignMetrics = ({ campaign }: CampaignMetricsProps) => {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
       <Card>
         <CardContent className="p-4">
-          <div className="text-sm text-gray-500">Budget</div>
-          <div className="text-2xl font-bold">₹{campaign.budget.toLocaleString()}</div>
+          <div className="text-sm text-gray-500">Budget Per Creator</div>
+          <div className="text-2xl font-bold">₹{campaign.budgetPerCreator.toLocaleString()}</div>
         </CardContent>
       </Card>
       <Card>

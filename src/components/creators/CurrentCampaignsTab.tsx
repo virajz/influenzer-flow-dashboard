@@ -63,7 +63,7 @@ export const CurrentCampaignsTab = ({
                                         </div>
                                         <div className="flex items-center gap-1">
                                             <FiDollarSign className="h-4 w-4" />
-                                            ₹{campaign.budget.toLocaleString()}
+                                            ₹{campaign.budgetPerCreator.toLocaleString()}
                                         </div>
                                     </div>
                                 </div>

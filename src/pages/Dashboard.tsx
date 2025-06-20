@@ -12,7 +12,7 @@ const Dashboard = () => {
       id: '1',
       name: 'Summer Fashion Collection',
       status: 'active',
-      budget: 25000,
+      budgetPerCreator: 25000,
       spent: 18750,
       engagementRate: 4.2,
       spentPercentage: 75
@@ -21,7 +21,7 @@ const Dashboard = () => {
       id: '2',
       name: 'Tech Product Launch',
       status: 'negotiating',
-      budget: 40000,
+      budgetPerCreator: 40000,
       spent: 8000,
       engagementRate: 5.8,
       spentPercentage: 20
@@ -30,7 +30,7 @@ const Dashboard = () => {
       id: '3',
       name: 'Holiday Campaign',
       status: 'completed',
-      budget: 15000,
+      budgetPerCreator: 15000,
       spent: 14200,
       engagementRate: 3.9,
       spentPercentage: 95
@@ -135,7 +135,7 @@ const Dashboard = () => {
                     <div>
                       <div className="flex justify-between text-sm mb-1">
                         <span className="text-muted-foreground">Budget vs. Spent</span>
-                        <span className="font-medium">₹{campaign.spent.toLocaleString()} / ₹{campaign.budget.toLocaleString()}</span>
+                        <span className="font-medium">₹{campaign.spent.toLocaleString()} / ₹{campaign.budgetPerCreator.toLocaleString()}</span>
                       </div>
                       <Progress value={campaign.spentPercentage} className="h-2" />
                     </div>

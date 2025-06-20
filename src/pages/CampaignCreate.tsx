@@ -25,7 +25,7 @@ const CampaignCreate = () => {
 
     const [formData, setFormData] = useState({
         name: '',
-        budget: '',
+        budgetPerCreator: '',
         targetAudience: '',
         description: '',
         platforms: [] as CampaignPlatformRequirement[],
@@ -79,7 +79,7 @@ const CampaignCreate = () => {
             return;
         }
 
-        if (!formData.name || !formData.budget || !startDate || !endDate) {
+        if (!formData.name || !formData.budgetPerCreator || !startDate || !endDate) {
             toast({
                 title: "Error",
                 description: "Please fill in all required fields.",
@@ -95,7 +95,7 @@ const CampaignCreate = () => {
                 brandId: currentUser.uid,
                 campaignName: formData.name,
                 description: formData.description,
-                budget: parseInt(formData.budget),
+                budgetPerCreator: parseInt(formData.budgetPerCreator),
                 targetAudience: formData.targetAudience,
                 requiredPlatforms: formData.platforms,
                 startDate: startDate.toISOString(),
@@ -159,8 +159,8 @@ const CampaignCreate = () => {
                                     <Input
                                         id="budget"
                                         type="number"
-                                        value={formData.budget}
-                                        onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
+                                        value={formData.budgetPerCreator}
+                                        onChange={(e) => setFormData({ ...formData, budgetPerCreator: e.target.value })}
                                         placeholder="25000"
                                     />
                                 </div>

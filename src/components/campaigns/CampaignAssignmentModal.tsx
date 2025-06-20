@@ -164,7 +164,7 @@ export const CampaignAssignmentModal = ({
                                                     <div className="flex items-center gap-4 mt-2">
                                                         <div className="flex items-center gap-1 text-sm text-gray-500">
                                                             <DollarSign className="h-4 w-4" />
-                                                            ₹{campaign.budget.toLocaleString()}
+                                                            ₹{campaign.budgetPerCreator.toLocaleString()}
                                                         </div>
                                                         <div className="flex items-center gap-1 text-sm text-gray-500">
                                                             <Calendar className="h-4 w-4" />

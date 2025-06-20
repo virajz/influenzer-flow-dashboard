@@ -14,7 +14,7 @@ const LandingPage = () => {
 	const navigate = useNavigate();
 
 	const handleWhatsAppContact = () => {
-		window.open('https://wa.me/+15557772435?text=Start%20a%20new%20campaign', '_blank');
+		window.open('https://wa.me/+15557772435?text=Hi', '_blank');
 	};
 
 	return (
@@ -243,7 +243,7 @@ const LandingPage = () => {
 							<h4 className="font-semibold mb-4">Support</h4>
 							<ul className="space-y-2 text-gray-400">
 								<li><a href="#" className="hover:text-white transition-colors story-link">Help Center</a></li>
-								<li><a href={`https://wa.me/your-number`} className="hover:text-white transition-colors story-link">Contact</a></li>
+								<li><a href={`https://wa.me/+15557772435?text=Hi`} className="hover:text-white transition-colors story-link">Contact</a></li>
 								<li><a href="#" className="hover:text-white transition-colors story-link">Privacy</a></li>
 							</ul>
 						</div>

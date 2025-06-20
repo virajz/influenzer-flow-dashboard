@@ -62,7 +62,7 @@ export const CampaignTableRow = ({ campaign }: CampaignTableRowProps) => {
                     {campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1)}
                 </Badge>
             </TableCell>
-            <TableCell>₹{campaign.budget.toLocaleString()}</TableCell>
+            <TableCell>₹{campaign.budgetPerCreator.toLocaleString()}</TableCell>
             <TableCell>
                 <div className="text-sm">
                     <div>{formatDate(campaign.startDate)} - {formatDate(campaign.endDate)}</div>

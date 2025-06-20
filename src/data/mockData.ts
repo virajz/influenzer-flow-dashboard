@@ -16,7 +16,7 @@ export interface Creator {
 export interface Campaign {
   id: string;
   name: string;
-  budget: number;
+  budgetPerCreator: number;
   status: 'draft' | 'active' | 'completed';
   startDate: string;
   endDate: string;
@@ -112,7 +112,7 @@ export const mockCampaigns: Campaign[] = [
   {
     id: '1',
     name: 'Summer Fashion Collection',
-    budget: 25000,
+    budgetPerCreator: 25000,
     status: 'active',
     startDate: '2024-06-01',
     endDate: '2024-07-31',
@@ -132,7 +132,7 @@ export const mockCampaigns: Campaign[] = [
   {
     id: '2',
     name: 'Tech Product Launch',
-    budget: 40000,
+    budgetPerCreator: 40000,
     status: 'draft',
     startDate: '2024-07-15',
     endDate: '2024-08-30',
